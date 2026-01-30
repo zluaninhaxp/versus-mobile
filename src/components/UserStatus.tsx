@@ -2,35 +2,60 @@ import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { AddWaterModal } from './AddWaterModal';
 
-export function UserStatus({ ml, onAdd }: { ml: number; onAdd: (q: number) => void }) {
-  const meta = 3000;
+// Definimos a interface para o TypeScript não reclamar das novas props
+interface UserStatusProps {
+  ml: number;
+  onAdd: (q: number) => void;
+  userName: string;
+  meta: number;
+}
+
+export function UserStatus({ ml, onAdd, userName, meta }: UserStatusProps) {
+  // Lógica de cálculo baseada na meta dinâmica do App.tsx
   const porcentagemReal = (ml / meta) * 100;
   const porcentagemExibida = Math.min(porcentagemReal, 100);
   const bateuAMeta = ml >= meta;
+
+  // Foto fictícia para o layout
   const fotoPerfil = "https://i.pravatar.cc/300?img=32";
 
   return (
     <View style={styles.container}>
+      {/* HEADER DO STATUS (LAYOUT SOLTO) */}
       <View style={styles.topRow}>
         <View style={[styles.avatarContainer, bateuAMeta && styles.avatarGold]}>
-          <Image source={{ uri: fotoPerfil }} style={styles.avatarImage} />
+          <Image 
+            source={{ uri: fotoPerfil }} 
+            style={styles.avatarImage} 
+          />
           {bateuAMeta && <View style={styles.haloGold} />}
         </View>
 
         <View style={styles.nameContainer}>
-          <Text style={styles.userName}>LUANA CASTRO</Text>
+          <Text style={styles.userName}>{userName}</Text>
           <View style={styles.statsRow}>
-            <Text style={[styles.userStats, bateuAMeta && styles.textGold]}>{ml}ml</Text>
+            {/* O valor em destaque e a meta clarinha ao lado */}
+            <Text style={[styles.userStats, bateuAMeta && styles.textGold]}>
+              {ml}ml
+            </Text>
             <Text style={styles.metaText}> / {meta}ml</Text>
           </View>
         </View>
 
+        {/* Botão de Adicionar (passando o estado dourado) */}
         <AddWaterModal onAdd={onAdd} isGold={bateuAMeta} />
       </View>
 
+      {/* BARRA DE PROGRESSO (ESTILO DASHBOARD) */}
       <View style={styles.progressSection}>
         <View style={styles.progressBarBg}>
-          <View style={[styles.progressBarFill, { width: `${porcentagemExibida}%` }, bateuAMeta && styles.progressBarGold]} />
+          <View 
+            style={[
+              styles.progressBarFill, 
+              { width: `${porcentagemExibida}%` },
+              bateuAMeta && styles.progressBarGold
+            ]} 
+          />
         </View>
         <Text style={[styles.progressPercent, bateuAMeta && styles.percentGold]}>
           {Math.round(porcentagemExibida)}% CONCLUÍDO
