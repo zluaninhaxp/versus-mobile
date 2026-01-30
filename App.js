@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, ScrollView, Text, View } from "react-native";
+import { StyleSheet, ScrollView, Text } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Header } from "./src/components/Header";
 import { UserStatus } from "./src/components/UserStatus";
@@ -9,21 +9,14 @@ import { WaterSettingsModal } from "./src/components/WaterSettingsModal";
 
 export default function App() {
   const [mlConsumido, setMlConsumido] = useState(0);
-
-  const [nome, setNome] = useState("LUANA CASTRO");
-
+  const [nome, setNome] = useState("Luana Castro");
   const [meta, setMeta] = useState(3000);
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isWaterSettingsOpen, setIsWaterSettingsOpen] = useState(false);
 
-  const ranking = [
-    {
-      id: 1,
-      nome: "João Silva",
-      ml: 2500,
-      foto: "https://i.pravatar.cc/150?u=joao",
-    },
+  // Lista de usuários fictícios
+  const usuariosAmigos = [
     {
       id: 2,
       nome: "Ana Souza",
@@ -36,7 +29,23 @@ export default function App() {
       ml: 950,
       foto: "https://i.pravatar.cc/150?u=marcos",
     },
+    {
+      id: 4,
+      nome: "João Silva",
+      ml: 2500,
+      foto: "https://i.pravatar.cc/150?u=joao",
+    },
   ];
+
+  // Criamos o Ranking unindo os amigos com os seus dados atuais
+  // Isso faz com que você também apareça na lista!
+  const rankingCompleto = [
+    ...usuariosAmigos,
+    { id: 1, nome: nome, ml: mlConsumido, foto: "" }, // Você
+  ];
+
+  // A MÁGICA: Ordena o ranking do maior para o menor ML
+  const rankingOrdenado = rankingCompleto.sort((a, b) => b.ml - a.ml);
 
   return (
     <SafeAreaProvider>
@@ -59,10 +68,11 @@ export default function App() {
 
           <Text style={styles.rankingTitle}>Ranking da Galera</Text>
 
-          {ranking.map((item, index) => (
+          {/* O "For" (Map) percorrendo a lista já ordenada */}
+          {rankingOrdenado.map((item, index) => (
             <RankItem
               key={item.id}
-              posicao={index + 1}
+              position={index + 1} // Passando a posição correta (1, 2, 3...)
               nome={item.nome}
               ml={item.ml}
               foto={item.foto}
@@ -94,7 +104,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#2B5B8E",
-    marginTop: 20,
+    marginTop: 30, // Dei um pouco mais de respiro
     marginBottom: 15,
   },
 });
