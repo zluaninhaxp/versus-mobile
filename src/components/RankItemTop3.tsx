@@ -1,16 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ReactionSelector } from "./ReactionSelector";
-
-interface RankItemTop3Props {
-  position: number;
-  name: string;
-  ml: number;
-  goal: number;
-  photo?: string;
-  reactions?: { emoji: string; count: number }[];
-}
 
 export function RankItemTop3({
   position,
@@ -19,26 +10,47 @@ export function RankItemTop3({
   goal,
   photo,
   reactions: initialReactions = [],
-}: RankItemTop3Props) {
-  const [notificationEnabled, setNotificationEnabled] = useState(false);
+}) {
   const [myReaction, setMyReaction] = useState<string | null>(null);
   const [localReactions, setLocalReactions] = useState(initialReactions);
+  const [cooldown, setCooldown] = useState(0); // Tempo em segundos
 
   const metaAlcancada = ml >= goal;
 
+  // Timer para o Countdown
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (cooldown > 0) {
+      timer = setInterval(() => {
+        setCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
+  // Formatação MM:SS (Ex: 59:59)
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
+  };
+
+  const handleNotify = () => {
+    if (cooldown === 0) {
+      setCooldown(3600); // 1 hora (3600 segundos)
+    }
+  };
+
   const handleReactionChange = (newEmoji: string) => {
     let updatedReactions = [...localReactions];
-
     if (newEmoji === myReaction) {
-      // REMOVER REAÇÃO (Toggle OFF)
       updatedReactions = updatedReactions
         .map((r) =>
           r.emoji === newEmoji ? { ...r, count: Math.max(0, r.count - 1) } : r,
         )
         .filter((r) => r.count > 0);
-      setMyReaction(null); // Botão volta para carinha feliz
+      setMyReaction(null);
     } else {
-      // SE JÁ TINHA UMA DIFERENTE, TIRA ELA PRIMEIRO
       if (myReaction) {
         updatedReactions = updatedReactions
           .map((r) =>
@@ -48,7 +60,6 @@ export function RankItemTop3({
           )
           .filter((r) => r.count > 0);
       }
-      // ADICIONA A NOVA
       const existingIndex = updatedReactions.findIndex(
         (r) => r.emoji === newEmoji,
       );
@@ -60,7 +71,7 @@ export function RankItemTop3({
       } else {
         updatedReactions.push({ emoji: newEmoji, count: 1 });
       }
-      setMyReaction(newEmoji); // Botão vira o emoji
+      setMyReaction(newEmoji);
     }
     setLocalReactions(updatedReactions);
   };
@@ -76,7 +87,7 @@ export function RankItemTop3({
     <View style={[styles.card, { backgroundColor: config.bg }]}>
       <View style={styles.topRow}>
         <View style={[styles.positionBadge, { backgroundColor: config.badge }]}>
-          <Text style={styles.medalEmoji}>
+          <Text style={styles.medal}>
             {position === 1 ? "🥇" : position === 2 ? "🥈" : "🥉"}
           </Text>
           <Text style={styles.positionText}>{position}º Lugar</Text>
@@ -97,18 +108,27 @@ export function RankItemTop3({
 
           {!metaAlcancada && (
             <TouchableOpacity
-              style={styles.iconButton}
-              onPress={() => setNotificationEnabled(!notificationEnabled)}
+              style={[
+                styles.iconButton,
+                cooldown > 0 && styles.iconButtonDisabled,
+              ]}
+              onPress={handleNotify}
+              disabled={cooldown > 0}
             >
-              <Ionicons
-                name={
-                  notificationEnabled
-                    ? "notifications"
-                    : "notifications-outline"
-                }
-                size={20}
-                color="white"
-              />
+              {cooldown > 0 ? (
+                <View style={styles.cooldownContainer}>
+                  <Ionicons name="time-outline" size={16} color="white" />
+                  <Text style={styles.cooldownText}>
+                    {formatTime(cooldown)}
+                  </Text>
+                </View>
+              ) : (
+                <Ionicons
+                  name="notifications-outline"
+                  size={20}
+                  color="white"
+                />
+              )}
             </TouchableOpacity>
           )}
         </View>
@@ -116,36 +136,17 @@ export function RankItemTop3({
 
       <View style={styles.mainContent}>
         <View style={styles.photoContainer}>
-          {photo ? (
-            <Image
-              source={{ uri: photo }}
-              style={[
-                styles.photo,
-                {
-                  width: config.photoSize,
-                  height: config.photoSize,
-                  borderRadius: config.photoSize / 2,
-                },
-              ]}
-            />
-          ) : (
-            <View
-              style={[
-                styles.photoPlaceholder,
-                {
-                  width: config.photoSize,
-                  height: config.photoSize,
-                  borderRadius: config.photoSize / 2,
-                },
-              ]}
-            >
-              <Ionicons
-                name="person"
-                size={config.photoSize * 0.5}
-                color="#888"
-              />
-            </View>
-          )}
+          <Image
+            source={{ uri: photo || "https://i.pravatar.cc/150" }}
+            style={[
+              styles.photo,
+              {
+                width: config.photoSize,
+                height: config.photoSize,
+                borderRadius: config.photoSize / 2,
+              },
+            ]}
+          />
         </View>
         <View style={styles.infoContainer}>
           <Text style={styles.userName}>{name}</Text>
@@ -199,23 +200,19 @@ const styles = StyleSheet.create({
   },
   metaText: { color: "white", fontSize: 11, fontWeight: "bold" },
   iconButton: {
-    width: 38,
+    width: 50,
     height: 38,
     borderRadius: 19,
     backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
   },
+  iconButtonDisabled: { backgroundColor: "#1A1A1A", width: 65 }, // Fica escuro e um pouco mais largo para o tempo
+  cooldownContainer: { alignItems: "center", justifyContent: "center" },
+  cooldownText: { color: "white", fontSize: 10, fontWeight: "bold" },
   mainContent: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
   photoContainer: { marginRight: 16 },
   photo: { borderWidth: 3, borderColor: "white" },
-  photoPlaceholder: {
-    backgroundColor: "rgba(255,255,255,0.3)",
-    borderWidth: 3,
-    borderColor: "white",
-    justifyContent: "center",
-    alignItems: "center",
-  },
   infoContainer: { flex: 1 },
   userName: { fontSize: 18, fontWeight: "bold", color: "white" },
   statsRow: { flexDirection: "row", alignItems: "baseline" },
@@ -238,5 +235,5 @@ const styles = StyleSheet.create({
   },
   reactionEmoji: { fontSize: 16 },
   reactionCount: { color: "white", fontSize: 14, fontWeight: "bold" },
-  medalEmoji: { fontSize: 16 },
+  medal: { fontSize: 16 },
 });
