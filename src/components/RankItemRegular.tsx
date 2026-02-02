@@ -9,6 +9,7 @@ interface RankItemRegularProps {
   goal: number;
   photo?: string;
   reactions?: { emoji: string; count: number }[];
+  onReactionAdd?: (emoji: string) => void; // ADICIONE ISSO
 }
 
 export function RankItemRegular({

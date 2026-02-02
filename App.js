@@ -1,3 +1,4 @@
+// src/App.js - Removendo tipagens manuais para evitar erro de .js
 import React, { useState } from "react";
 import { StyleSheet, ScrollView, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
@@ -15,7 +16,6 @@ export default function App() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isWaterSettingsOpen, setIsWaterSettingsOpen] = useState(false);
 
-  // Estado com reações para cada usuário
   const [usuarios, setUsuarios] = useState([
     {
       id: 1,
@@ -77,40 +77,28 @@ export default function App() {
     },
   ]);
 
-  // Função para adicionar reação a um usuário
-  const handleAddReaction = (userId: number, emoji: string) => {
+  const handleAddReaction = (userId, emoji) => {
     setUsuarios((prevUsuarios) =>
       prevUsuarios.map((usuario) => {
         if (usuario.id === userId) {
           const reactions = [...usuario.reactions];
           const existingReaction = reactions.find((r) => r.emoji === emoji);
-
           if (existingReaction) {
-            // Incrementa o contador se a reação já existe
             existingReaction.count += 1;
           } else {
-            // Adiciona nova reação
             reactions.push({ emoji, count: 1 });
           }
-
           return { ...usuario, reactions };
         }
         return usuario;
-      })
+      }),
     );
   };
 
-  // Atualiza o ml do usuário principal
-  const handleAddWater = (quantidade: number) => {
+  const handleAddWater = (quantidade) => {
     const novoMl = mlConsumido + quantidade;
     setMlConsumido(novoMl);
-
-    // Atualiza também no array de usuários
-    setUsuarios((prevUsuarios) =>
-      prevUsuarios.map((usuario) =>
-        usuario.id === 1 ? { ...usuario, ml: novoMl } : usuario
-      )
-    );
+    setUsuarios((p) => p.map((u) => (u.id === 1 ? { ...u, ml: novoMl } : u)));
   };
 
   const rankingOrdenado = [...usuarios].sort((a, b) => b.ml - a.ml);
@@ -122,7 +110,6 @@ export default function App() {
           onOpenMenu={() => setIsProfileOpen(true)}
           onOpenSettings={() => setIsWaterSettingsOpen(true)}
         />
-
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
@@ -133,16 +120,12 @@ export default function App() {
             meta={meta}
             onAdd={handleAddWater}
           />
-
-          {/* Header do Ranking */}
           <View style={styles.rankingHeader}>
             <Text style={styles.rankingTitle}>💧 Ranking de Hidratação</Text>
             <Text style={styles.rankingSubtitle}>
               Reaja e incentive seus amigos!
             </Text>
           </View>
-
-          {/* Lista de Ranking */}
           <View style={styles.rankingWrapper}>
             {rankingOrdenado.map((item, index) => (
               <RankItem
@@ -158,13 +141,11 @@ export default function App() {
             ))}
           </View>
         </ScrollView>
-
         <ProfileDrawer
           visible={isProfileOpen}
           onClose={() => setIsProfileOpen(false)}
           userName={nome}
         />
-
         <WaterSettingsModal
           visible={isWaterSettingsOpen}
           onClose={() => setIsWaterSettingsOpen(false)}
@@ -179,23 +160,13 @@ export default function App() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F5F9FF" },
   scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
-  rankingHeader: {
-    marginTop: 30,
-    marginBottom: 20,
-    paddingHorizontal: 4,
-  },
+  rankingHeader: { marginTop: 30, marginBottom: 20, paddingHorizontal: 4 },
   rankingTitle: {
     fontSize: 20,
     fontWeight: "900",
     color: "#2B5B8E",
     marginBottom: 4,
   },
-  rankingSubtitle: {
-    fontSize: 13,
-    color: "#7B8FA3",
-    fontWeight: "500",
-  },
-  rankingWrapper: {
-    width: "100%",
-  },
+  rankingSubtitle: { fontSize: 13, color: "#7B8FA3", fontWeight: "500" },
+  rankingWrapper: { width: "100%" },
 });

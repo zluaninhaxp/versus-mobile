@@ -9,6 +9,7 @@ interface RankItemTop3Props {
   goal: number;
   photo?: string;
   reactions?: { emoji: string; count: number }[];
+  onReactionAdd?: (emoji: string) => void; // ADICIONE ISSO
 }
 
 export function RankItemTop3({
