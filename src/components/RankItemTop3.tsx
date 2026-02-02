@@ -1,7 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { ReactionSelector } from "./ReactionSelector";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, Image } from "react-native";
+import { RankingActions } from "./RankingActions";
+
+interface RankItemTop3Props {
+  position: number;
+  name: string;
+  ml: number;
+  goal: number;
+  photo?: string;
+  reactions?: { emoji: string; count: number }[];
+}
 
 export function RankItemTop3({
   position,
@@ -10,71 +18,9 @@ export function RankItemTop3({
   goal,
   photo,
   reactions: initialReactions = [],
-}) {
-  const [myReaction, setMyReaction] = useState<string | null>(null);
+}: RankItemTop3Props) {
   const [localReactions, setLocalReactions] = useState(initialReactions);
-  const [cooldown, setCooldown] = useState(0); // Tempo em segundos
-
   const metaAlcancada = ml >= goal;
-
-  // Timer para o Countdown
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (cooldown > 0) {
-      timer = setInterval(() => {
-        setCooldown((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [cooldown]);
-
-  // Formatação MM:SS (Ex: 59:59)
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s < 10 ? "0" : ""}${s}`;
-  };
-
-  const handleNotify = () => {
-    if (cooldown === 0) {
-      setCooldown(3600); // 1 hora (3600 segundos)
-    }
-  };
-
-  const handleReactionChange = (newEmoji: string) => {
-    let updatedReactions = [...localReactions];
-    if (newEmoji === myReaction) {
-      updatedReactions = updatedReactions
-        .map((r) =>
-          r.emoji === newEmoji ? { ...r, count: Math.max(0, r.count - 1) } : r,
-        )
-        .filter((r) => r.count > 0);
-      setMyReaction(null);
-    } else {
-      if (myReaction) {
-        updatedReactions = updatedReactions
-          .map((r) =>
-            r.emoji === myReaction
-              ? { ...r, count: Math.max(0, r.count - 1) }
-              : r,
-          )
-          .filter((r) => r.count > 0);
-      }
-      const existingIndex = updatedReactions.findIndex(
-        (r) => r.emoji === newEmoji,
-      );
-      if (existingIndex > -1) {
-        updatedReactions[existingIndex] = {
-          ...updatedReactions[existingIndex],
-          count: updatedReactions[existingIndex].count + 1,
-        };
-      } else {
-        updatedReactions.push({ emoji: newEmoji, count: 1 });
-      }
-      setMyReaction(newEmoji);
-    }
-    setLocalReactions(updatedReactions);
-  };
 
   const config =
     position === 1
@@ -87,7 +33,7 @@ export function RankItemTop3({
     <View style={[styles.card, { backgroundColor: config.bg }]}>
       <View style={styles.topRow}>
         <View style={[styles.positionBadge, { backgroundColor: config.badge }]}>
-          <Text style={styles.medal}>
+          <Text style={styles.medalIcon}>
             {position === 1 ? "🥇" : position === 2 ? "🥈" : "🥉"}
           </Text>
           <Text style={styles.positionText}>{position}º Lugar</Text>
@@ -96,41 +42,17 @@ export function RankItemTop3({
         <View style={styles.rightIcons}>
           {metaAlcancada && (
             <View style={styles.metaBadge}>
-              <Ionicons name="checkmark-circle" size={14} color="white" />
-              <Text style={styles.metaText}>Meta alcançada!</Text>
+              <Text style={styles.metaText}>Meta!</Text>
             </View>
           )}
 
-          <ReactionSelector
-            currentReaction={myReaction}
-            onReactionSelect={handleReactionChange}
+          {/* Componente Unificado de Ações */}
+          <RankingActions
+            isTop3={true}
+            metaAlcancada={metaAlcancada}
+            initialReactions={initialReactions}
+            onReactionUpdate={(newReactions) => setLocalReactions(newReactions)}
           />
-
-          {!metaAlcancada && (
-            <TouchableOpacity
-              style={[
-                styles.iconButton,
-                cooldown > 0 && styles.iconButtonDisabled,
-              ]}
-              onPress={handleNotify}
-              disabled={cooldown > 0}
-            >
-              {cooldown > 0 ? (
-                <View style={styles.cooldownContainer}>
-                  <Ionicons name="time-outline" size={16} color="white" />
-                  <Text style={styles.cooldownText}>
-                    {formatTime(cooldown)}
-                  </Text>
-                </View>
-              ) : (
-                <Ionicons
-                  name="notifications-outline"
-                  size={20}
-                  color="white"
-                />
-              )}
-            </TouchableOpacity>
-          )}
         </View>
       </View>
 
@@ -172,7 +94,7 @@ export function RankItemTop3({
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 20, padding: 16, marginBottom: 12 },
+  card: { borderRadius: 20, padding: 16, marginBottom: 15 },
   topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -187,29 +109,16 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     gap: 4,
   },
+  medalIcon: { fontSize: 16 },
   positionText: { fontSize: 13, fontWeight: "bold", color: "#333" },
   rightIcons: { flexDirection: "row", alignItems: "center", gap: 8 },
   metaBadge: {
-    flexDirection: "row",
-    alignItems: "center",
     backgroundColor: "#2ECC71",
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 20,
-    gap: 4,
   },
   metaText: { color: "white", fontSize: 11, fontWeight: "bold" },
-  iconButton: {
-    width: 50,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  iconButtonDisabled: { backgroundColor: "#1A1A1A", width: 65 }, // Fica escuro e um pouco mais largo para o tempo
-  cooldownContainer: { alignItems: "center", justifyContent: "center" },
-  cooldownText: { color: "white", fontSize: 10, fontWeight: "bold" },
   mainContent: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
   photoContainer: { marginRight: 16 },
   photo: { borderWidth: 3, borderColor: "white" },
@@ -235,5 +144,4 @@ const styles = StyleSheet.create({
   },
   reactionEmoji: { fontSize: 16 },
   reactionCount: { color: "white", fontSize: 14, fontWeight: "bold" },
-  medal: { fontSize: 16 },
 });

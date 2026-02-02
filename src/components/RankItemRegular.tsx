@@ -1,7 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { ReactionSelector } from "./ReactionSelector";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, Image } from "react-native";
+import { RankingActions } from "./RankingActions";
+
+interface RankItemRegularProps {
+  position: number;
+  name: string;
+  ml: number;
+  goal: number;
+  photo?: string;
+  reactions?: { emoji: string; count: number }[];
+}
 
 export function RankItemRegular({
   position,
@@ -10,61 +18,9 @@ export function RankItemRegular({
   goal,
   photo,
   reactions: initialReactions = [],
-}) {
-  const [myReaction, setMyReaction] = useState<string | null>(null);
+}: RankItemRegularProps) {
   const [localReactions, setLocalReactions] = useState(initialReactions);
-  const [cooldown, setCooldown] = useState(0);
-
   const metaAlcancada = ml >= goal;
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (cooldown > 0) {
-      timer = setInterval(() => setCooldown((prev) => prev - 1), 1000);
-    }
-    return () => clearInterval(timer);
-  }, [cooldown]);
-
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s < 10 ? "0" : ""}${s}`;
-  };
-
-  const handleReactionChange = (newEmoji: string) => {
-    let updatedReactions = [...localReactions];
-    if (newEmoji === myReaction) {
-      updatedReactions = updatedReactions
-        .map((r) =>
-          r.emoji === newEmoji ? { ...r, count: Math.max(0, r.count - 1) } : r,
-        )
-        .filter((r) => r.count > 0);
-      setMyReaction(null);
-    } else {
-      if (myReaction) {
-        updatedReactions = updatedReactions
-          .map((r) =>
-            r.emoji === myReaction
-              ? { ...r, count: Math.max(0, r.count - 1) }
-              : r,
-          )
-          .filter((r) => r.count > 0);
-      }
-      const existingIndex = updatedReactions.findIndex(
-        (r) => r.emoji === newEmoji,
-      );
-      if (existingIndex > -1) {
-        updatedReactions[existingIndex] = {
-          ...updatedReactions[existingIndex],
-          count: updatedReactions[existingIndex].count + 1,
-        };
-      } else {
-        updatedReactions.push({ emoji: newEmoji, count: 1 });
-      }
-      setMyReaction(newEmoji);
-    }
-    setLocalReactions(updatedReactions);
-  };
 
   return (
     <View style={styles.card}>
@@ -72,12 +28,14 @@ export function RankItemRegular({
         <View style={styles.positionCircle}>
           <Text style={styles.positionNumber}>{position}</Text>
         </View>
+
         <View style={styles.photoContainer}>
           <Image
             source={{ uri: photo || "https://i.pravatar.cc/150" }}
             style={styles.photo}
           />
         </View>
+
         <View style={styles.infoContainer}>
           <Text style={styles.userName}>{name}</Text>
           <View style={styles.statsRow}>
@@ -85,38 +43,16 @@ export function RankItemRegular({
             <Text style={styles.mlGoal}> / {goal}ml</Text>
           </View>
         </View>
-        <View style={styles.actionsContainer}>
-          <ReactionSelector
-            currentReaction={myReaction}
-            onReactionSelect={handleReactionChange}
-          />
-          {!metaAlcancada && (
-            <View style={styles.notifyWrapper}>
-              <TouchableOpacity
-                style={[
-                  styles.actionButton,
-                  cooldown > 0 && styles.buttonDisabled,
-                ]}
-                onPress={() => setCooldown(3600)}
-                disabled={cooldown > 0}
-              >
-                <Ionicons
-                  name={
-                    cooldown > 0 ? "notifications" : "notifications-outline"
-                  }
-                  size={20}
-                  color={cooldown > 0 ? "white" : "#6B7D8F"}
-                />
-              </TouchableOpacity>
-              {cooldown > 0 && (
-                <Text style={styles.absoluteCooldown}>
-                  {formatTime(cooldown)}
-                </Text>
-              )}
-            </View>
-          )}
-        </View>
+
+        {/* Componente Unificado de Ações */}
+        <RankingActions
+          isTop3={false}
+          metaAlcancada={metaAlcancada}
+          initialReactions={initialReactions}
+          onReactionUpdate={(newReactions) => setLocalReactions(newReactions)}
+        />
       </View>
+
       {localReactions.length > 0 && (
         <View style={styles.reactionsContainer}>
           {localReactions.map((r, i) => (
@@ -163,33 +99,6 @@ const styles = StyleSheet.create({
   statsRow: { flexDirection: "row", alignItems: "baseline" },
   mlValue: { fontSize: 18, fontWeight: "900", color: "#14B8D4" },
   mlGoal: { fontSize: 13, color: "#9BA8B5", fontWeight: "600" },
-  actionsContainer: { flexDirection: "row", gap: 6 },
-  notifyWrapper: {
-    width: 38,
-    height: 38,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  actionButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: "#F8FBFF",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#E8EEF4",
-  },
-  buttonDisabled: { backgroundColor: "#475569", borderColor: "#475569" },
-  absoluteCooldown: {
-    position: "absolute",
-    bottom: -16,
-    fontSize: 10,
-    fontWeight: "bold",
-    color: "#475569",
-    width: 50,
-    textAlign: "center",
-  },
   reactionsContainer: {
     flexDirection: "row",
     gap: 8,
