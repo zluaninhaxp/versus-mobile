@@ -1,0 +1,158 @@
+import React, { useState, useRef } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Animated,
+  Modal,
+  TouchableWithoutFeedback,
+} from "react-native";
+
+const REACTIONS = ["❤️", "👏", "🔥", "💪", "🎉", "👍"];
+
+interface ReactionSelectorProps {
+  onReactionSelect?: (reaction: string) => void;
+  initialReaction?: string;
+}
+
+export function ReactionSelector({
+  onReactionSelect,
+  initialReaction,
+}: ReactionSelectorProps) {
+  const [selectedReaction, setSelectedReaction] = useState(
+    initialReaction || "❤️",
+  );
+  const [modalVisible, setModalVisible] = useState(false);
+  const slideAnim = useRef(new Animated.Value(-200)).current;
+
+  const openModal = () => {
+    setModalVisible(true);
+    Animated.spring(slideAnim, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 50,
+      friction: 8,
+    }).start();
+  };
+
+  const closeModal = () => {
+    Animated.timing(slideAnim, {
+      toValue: -200,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => {
+      setModalVisible(false);
+    });
+  };
+
+  const handleReactionSelect = (reaction: string) => {
+    setSelectedReaction(reaction);
+    onReactionSelect?.(reaction);
+    closeModal();
+  };
+
+  return (
+    <>
+      <TouchableOpacity style={styles.actionButton} onPress={openModal}>
+        <Text style={styles.emoji}>{selectedReaction}</Text>
+      </TouchableOpacity>
+
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="none"
+        onRequestClose={closeModal}
+      >
+        <TouchableWithoutFeedback onPress={closeModal}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <Animated.View
+                style={[
+                  styles.reactionModal,
+                  {
+                    transform: [{ translateX: slideAnim }],
+                  },
+                ]}
+              >
+                <View style={styles.reactionGrid}>
+                  {REACTIONS.map((reaction) => (
+                    <TouchableOpacity
+                      key={reaction}
+                      style={[
+                        styles.reactionOption,
+                        selectedReaction === reaction &&
+                          styles.reactionOptionSelected,
+                      ]}
+                      onPress={() => handleReactionSelect(reaction)}
+                    >
+                      <Text style={styles.reactionEmoji}>{reaction}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </Animated.View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  actionButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "#F8FBFF",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E1EFFF",
+  },
+  emoji: {
+    fontSize: 20,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  reactionModal: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 12,
+    elevation: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    borderWidth: 2,
+    borderColor: "#E1EFFF",
+  },
+  reactionGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    width: 180,
+    gap: 8,
+  },
+  reactionOption: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#F8FBFF",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#E1EFFF",
+  },
+  reactionOptionSelected: {
+    backgroundColor: "#E1EFFF",
+    borderColor: "#4A90E2",
+    borderWidth: 2,
+  },
+  reactionEmoji: {
+    fontSize: 24,
+  },
+});

@@ -1,12 +1,47 @@
 import React from "react";
-import { RankItemTop } from "./RankItemTop"; // Verifique se o caminho está correto
+import { RankItemTop3 } from "./RankItemTop3";
 import { RankItemRegular } from "./RankItemRegular";
 
-export function RankItem({ position, nome, ml, foto }) {
-  // Use 'nome' para bater com o App.js
-  if (position === 1) {
-    return <RankItemTop name={nome} ml={ml} />;
+interface RankItemProps {
+  position: number;
+  nome: string;
+  ml: number;
+  meta: number;
+  foto?: string;
+  reactions?: { emoji: string; count: number }[];
+}
+
+export function RankItem({
+  position,
+  nome,
+  ml,
+  meta,
+  foto,
+  reactions,
+}: RankItemProps) {
+  // Top 3 recebem o card colorido e grande
+  if (position <= 3) {
+    return (
+      <RankItemTop3
+        position={position}
+        name={nome}
+        ml={ml}
+        goal={meta}
+        photo={foto}
+        reactions={reactions}
+      />
+    );
   }
 
-  return <RankItemRegular position={position} name={nome} ml={ml} />;
+  // 4º em diante recebem o card simples
+  return (
+    <RankItemRegular
+      position={position}
+      name={nome}
+      ml={ml}
+      goal={meta}
+      photo={foto}
+      reactions={reactions}
+    />
+  );
 }
