@@ -15,8 +15,20 @@ export default function App() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isWaterSettingsOpen, setIsWaterSettingsOpen] = useState(false);
 
-  // Usuários com fotos de exemplo e reações
-  const usuariosAmigos = [
+  // Estado com reações para cada usuário
+  const [usuarios, setUsuarios] = useState([
+    {
+      id: 1,
+      nome: "Ana Silva",
+      ml: 2850,
+      meta: 2500,
+      foto: "https://i.pravatar.cc/300?img=32",
+      reactions: [
+        { emoji: "❤️", count: 5 },
+        { emoji: "👏", count: 3 },
+        { emoji: "👍", count: 2 },
+      ],
+    },
     {
       id: 2,
       nome: "Carlos Mendes",
@@ -63,25 +75,45 @@ export default function App() {
       foto: "https://i.pravatar.cc/300?img=15",
       reactions: [],
     },
-  ];
+  ]);
 
-  const rankingCompleto = [
-    ...usuariosAmigos,
-    {
-      id: 1,
-      nome: nome,
-      ml: mlConsumido,
-      meta: meta,
-      foto: "https://i.pravatar.cc/300?img=32",
-      reactions: [
-        { emoji: "❤️", count: 5 },
-        { emoji: "👏", count: 3 },
-        { emoji: "👍", count: 2 },
-      ],
-    },
-  ];
+  // Função para adicionar reação a um usuário
+  const handleAddReaction = (userId: number, emoji: string) => {
+    setUsuarios((prevUsuarios) =>
+      prevUsuarios.map((usuario) => {
+        if (usuario.id === userId) {
+          const reactions = [...usuario.reactions];
+          const existingReaction = reactions.find((r) => r.emoji === emoji);
 
-  const rankingOrdenado = rankingCompleto.sort((a, b) => b.ml - a.ml);
+          if (existingReaction) {
+            // Incrementa o contador se a reação já existe
+            existingReaction.count += 1;
+          } else {
+            // Adiciona nova reação
+            reactions.push({ emoji, count: 1 });
+          }
+
+          return { ...usuario, reactions };
+        }
+        return usuario;
+      })
+    );
+  };
+
+  // Atualiza o ml do usuário principal
+  const handleAddWater = (quantidade: number) => {
+    const novoMl = mlConsumido + quantidade;
+    setMlConsumido(novoMl);
+
+    // Atualiza também no array de usuários
+    setUsuarios((prevUsuarios) =>
+      prevUsuarios.map((usuario) =>
+        usuario.id === 1 ? { ...usuario, ml: novoMl } : usuario
+      )
+    );
+  };
+
+  const rankingOrdenado = [...usuarios].sort((a, b) => b.ml - a.ml);
 
   return (
     <SafeAreaProvider>
@@ -99,7 +131,7 @@ export default function App() {
             userName={nome}
             ml={mlConsumido}
             meta={meta}
-            onAdd={(q) => setMlConsumido((prev) => prev + q)}
+            onAdd={handleAddWater}
           />
 
           {/* Header do Ranking */}
@@ -121,6 +153,7 @@ export default function App() {
                 meta={item.meta}
                 foto={item.foto}
                 reactions={item.reactions}
+                onReactionAdd={(emoji) => handleAddReaction(item.id, emoji)}
               />
             ))}
           </View>

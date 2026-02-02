@@ -8,21 +8,19 @@ import {
   Modal,
   TouchableWithoutFeedback,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 const REACTIONS = ["❤️", "👏", "🔥", "💪", "🎉", "👍"];
 
 interface ReactionSelectorProps {
   onReactionSelect?: (reaction: string) => void;
-  initialReaction?: string;
+  currentReaction?: string | null;
 }
 
 export function ReactionSelector({
   onReactionSelect,
-  initialReaction,
+  currentReaction,
 }: ReactionSelectorProps) {
-  const [selectedReaction, setSelectedReaction] = useState(
-    initialReaction || "❤️",
-  );
   const [modalVisible, setModalVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-200)).current;
 
@@ -47,15 +45,36 @@ export function ReactionSelector({
   };
 
   const handleReactionSelect = (reaction: string) => {
-    setSelectedReaction(reaction);
     onReactionSelect?.(reaction);
     closeModal();
   };
 
   return (
-    <>
-      <TouchableOpacity style={styles.actionButton} onPress={openModal}>
-        <Text style={styles.emoji}>{selectedReaction}</Text>
+    <View>
+      <TouchableOpacity
+        style={[
+          styles.actionButton,
+          currentReaction ? styles.actionButtonActive : null,
+        ]}
+        onPress={() => {
+          if (currentReaction) {
+            onReactionSelect?.(currentReaction);
+          } else {
+            openModal();
+          }
+        }}
+      >
+        {currentReaction ? (
+          <View style={styles.reactionActiveWrapper}>
+            <Text style={styles.emojiText}>{currentReaction}</Text>
+            {/* O "xizinho" indicando que pode cancelar */}
+            <View style={styles.closeBadge}>
+              <Ionicons name="close" size={10} color="white" />
+            </View>
+          </View>
+        ) : (
+          <Ionicons name="happy-outline" size={20} color="#6B7D8F" />
+        )}
       </TouchableOpacity>
 
       <Modal
@@ -70,9 +89,7 @@ export function ReactionSelector({
               <Animated.View
                 style={[
                   styles.reactionModal,
-                  {
-                    transform: [{ translateX: slideAnim }],
-                  },
+                  { transform: [{ translateX: slideAnim }] },
                 ]}
               >
                 <View style={styles.reactionGrid}>
@@ -81,7 +98,7 @@ export function ReactionSelector({
                       key={reaction}
                       style={[
                         styles.reactionOption,
-                        selectedReaction === reaction &&
+                        currentReaction === reaction &&
                           styles.reactionOptionSelected,
                       ]}
                       onPress={() => handleReactionSelect(reaction)}
@@ -95,7 +112,7 @@ export function ReactionSelector({
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-    </>
+    </View>
   );
 }
 
@@ -110,9 +127,28 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E1EFFF",
   },
-  emoji: {
-    fontSize: 20,
+  actionButtonActive: {
+    backgroundColor: "#E1EFFF",
+    borderColor: "#4A90E2",
   },
+  reactionActiveWrapper: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  closeBadge: {
+    position: "absolute",
+    top: -8,
+    right: -8,
+    backgroundColor: "#FF4D4D", // Vermelho para indicar cancelamento
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "white",
+  },
+  emojiText: { fontSize: 20 },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.3)",
@@ -131,12 +167,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#E1EFFF",
   },
-  reactionGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    width: 180,
-    gap: 8,
-  },
+  reactionGrid: { flexDirection: "row", flexWrap: "wrap", width: 180, gap: 8 },
   reactionOption: {
     width: 50,
     height: 50,
@@ -150,9 +181,6 @@ const styles = StyleSheet.create({
   reactionOptionSelected: {
     backgroundColor: "#E1EFFF",
     borderColor: "#4A90E2",
-    borderWidth: 2,
   },
-  reactionEmoji: {
-    fontSize: 24,
-  },
+  reactionEmoji: { fontSize: 24 },
 });

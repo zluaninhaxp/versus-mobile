@@ -9,6 +9,7 @@ interface RankItemProps {
   meta: number;
   foto?: string;
   reactions?: { emoji: string; count: number }[];
+  onReactionAdd?: (emoji: string) => void;
 }
 
 export function RankItem({
@@ -18,6 +19,7 @@ export function RankItem({
   meta,
   foto,
   reactions,
+  onReactionAdd,
 }: RankItemProps) {
   // Top 3 recebem o card colorido e grande
   if (position <= 3) {
@@ -29,6 +31,7 @@ export function RankItem({
         goal={meta}
         photo={foto}
         reactions={reactions}
+        onReactionAdd={onReactionAdd}
       />
     );
   }
@@ -42,6 +45,7 @@ export function RankItem({
       goal={meta}
       photo={foto}
       reactions={reactions}
+      onReactionAdd={onReactionAdd}
     />
   );
 }

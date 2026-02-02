@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { ReactionSelector } from "./ReactionSelector";
 
 interface RankItemTop3Props {
   position: number;
@@ -17,65 +18,68 @@ export function RankItemTop3({
   ml,
   goal,
   photo,
-  reactions = [],
+  reactions: initialReactions = [],
 }: RankItemTop3Props) {
   const [notificationEnabled, setNotificationEnabled] = useState(false);
+  const [myReaction, setMyReaction] = useState<string | null>(null);
+  const [localReactions, setLocalReactions] = useState(initialReactions);
+
   const metaAlcancada = ml >= goal;
 
-  // Cores por posição
-  const getPositionColors = () => {
-    switch (position) {
-      case 1:
-        return {
-          bg: "#14B8D4",
-          badge: "#FDB813",
-          badgeText: "#8B6914",
+  const handleReactionChange = (newEmoji: string) => {
+    let updatedReactions = [...localReactions];
+
+    if (newEmoji === myReaction) {
+      // REMOVER REAÇÃO (Toggle OFF)
+      updatedReactions = updatedReactions
+        .map((r) =>
+          r.emoji === newEmoji ? { ...r, count: Math.max(0, r.count - 1) } : r,
+        )
+        .filter((r) => r.count > 0);
+      setMyReaction(null); // Botão volta para carinha feliz
+    } else {
+      // SE JÁ TINHA UMA DIFERENTE, TIRA ELA PRIMEIRO
+      if (myReaction) {
+        updatedReactions = updatedReactions
+          .map((r) =>
+            r.emoji === myReaction
+              ? { ...r, count: Math.max(0, r.count - 1) }
+              : r,
+          )
+          .filter((r) => r.count > 0);
+      }
+      // ADICIONA A NOVA
+      const existingIndex = updatedReactions.findIndex(
+        (r) => r.emoji === newEmoji,
+      );
+      if (existingIndex > -1) {
+        updatedReactions[existingIndex] = {
+          ...updatedReactions[existingIndex],
+          count: updatedReactions[existingIndex].count + 1,
         };
-      case 2:
-        return {
-          bg: "#6B7D8F",
-          badge: "#E8E8E8",
-          badgeText: "#5A6B7A",
-        };
-      case 3:
-        return {
-          bg: "#E67E22",
-          badge: "#FFD89B",
-          badgeText: "#A65D1F",
-        };
-      default:
-        return {
-          bg: "#14B8D4",
-          badge: "#FDB813",
-          badgeText: "#8B6914",
-        };
+      } else {
+        updatedReactions.push({ emoji: newEmoji, count: 1 });
+      }
+      setMyReaction(newEmoji); // Botão vira o emoji
     }
+    setLocalReactions(updatedReactions);
   };
 
-  const colors = getPositionColors();
-
-  const getMedalEmoji = () => {
-    switch (position) {
-      case 1:
-        return "🥇";
-      case 2:
-        return "🥈";
-      case 3:
-        return "🥉";
-      default:
-        return "";
-    }
-  };
+  const config =
+    position === 1
+      ? { bg: "#14B8D4", badge: "#FDB813", photoSize: 80 }
+      : position === 2
+        ? { bg: "#6B7D8F", badge: "#E8E8E8", photoSize: 64 }
+        : { bg: "#E67E22", badge: "#FFD89B", photoSize: 64 };
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.bg }]}>
-      {/* Linha superior: Badge de posição + Meta alcançada + Botão notificação */}
+    <View style={[styles.card, { backgroundColor: config.bg }]}>
       <View style={styles.topRow}>
-        <View style={[styles.positionBadge, { backgroundColor: colors.badge }]}>
-          <Text style={styles.medalEmoji}>{getMedalEmoji()}</Text>
-          <Text style={[styles.positionText, { color: colors.badgeText }]}>
-            {position}º Lugar
+        <View style={[styles.positionBadge, { backgroundColor: config.badge }]}>
+          <Text style={styles.medalEmoji}>
+            {position === 1 ? "🥇" : position === 2 ? "🥈" : "🥉"}
           </Text>
+          <Text style={styles.positionText}>{position}º Lugar</Text>
         </View>
 
         <View style={styles.rightIcons}>
@@ -86,41 +90,63 @@ export function RankItemTop3({
             </View>
           )}
 
-          <TouchableOpacity style={styles.notificationButton}>
-            <Ionicons
-              name="happy-outline"
-              size={20}
-              color="rgba(255,255,255,0.8)"
-            />
-          </TouchableOpacity>
+          <ReactionSelector
+            currentReaction={myReaction}
+            onReactionSelect={handleReactionChange}
+          />
 
-          <TouchableOpacity
-            style={styles.notificationButton}
-            onPress={() => setNotificationEnabled(!notificationEnabled)}
-          >
-            <Ionicons
-              name={
-                notificationEnabled ? "notifications" : "notifications-outline"
-              }
-              size={20}
-              color="rgba(255,255,255,0.8)"
-            />
-          </TouchableOpacity>
+          {!metaAlcancada && (
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => setNotificationEnabled(!notificationEnabled)}
+            >
+              <Ionicons
+                name={
+                  notificationEnabled
+                    ? "notifications"
+                    : "notifications-outline"
+                }
+                size={20}
+                color="white"
+              />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
-      {/* Conteúdo principal: Foto + Informações */}
       <View style={styles.mainContent}>
         <View style={styles.photoContainer}>
           {photo ? (
-            <Image source={{ uri: photo }} style={styles.photo} />
+            <Image
+              source={{ uri: photo }}
+              style={[
+                styles.photo,
+                {
+                  width: config.photoSize,
+                  height: config.photoSize,
+                  borderRadius: config.photoSize / 2,
+                },
+              ]}
+            />
           ) : (
-            <View style={styles.photoPlaceholder}>
-              <Ionicons name="person" size={40} color="#888" />
+            <View
+              style={[
+                styles.photoPlaceholder,
+                {
+                  width: config.photoSize,
+                  height: config.photoSize,
+                  borderRadius: config.photoSize / 2,
+                },
+              ]}
+            >
+              <Ionicons
+                name="person"
+                size={config.photoSize * 0.5}
+                color="#888"
+              />
             </View>
           )}
         </View>
-
         <View style={styles.infoContainer}>
           <Text style={styles.userName}>{name}</Text>
           <View style={styles.statsRow}>
@@ -130,13 +156,12 @@ export function RankItemTop3({
         </View>
       </View>
 
-      {/* Reações */}
-      {reactions.length > 0 && (
+      {localReactions.length > 0 && (
         <View style={styles.reactionsContainer}>
-          {reactions.map((reaction, index) => (
-            <View key={index} style={styles.reactionBadge}>
-              <Text style={styles.reactionEmoji}>{reaction.emoji}</Text>
-              <Text style={styles.reactionCount}>{reaction.count}</Text>
+          {localReactions.map((r, i) => (
+            <View key={i} style={styles.reactionBadge}>
+              <Text style={styles.reactionEmoji}>{r.emoji}</Text>
+              <Text style={styles.reactionCount}>{r.count}</Text>
             </View>
           ))}
         </View>
@@ -146,16 +171,7 @@ export function RankItemTop3({
 }
 
 const styles = StyleSheet.create({
-  card: {
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 12,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-  },
+  card: { borderRadius: 20, padding: 16, marginBottom: 12 },
   topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -170,18 +186,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     gap: 4,
   },
-  medalEmoji: {
-    fontSize: 16,
-  },
-  positionText: {
-    fontSize: 13,
-    fontWeight: "bold",
-  },
-  rightIcons: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
+  positionText: { fontSize: 13, fontWeight: "bold", color: "#333" },
+  rightIcons: { flexDirection: "row", alignItems: "center", gap: 8 },
   metaBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -191,71 +197,35 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     gap: 4,
   },
-  metaText: {
-    color: "white",
-    fontSize: 11,
-    fontWeight: "bold",
-  },
-  notificationButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  metaText: { color: "white", fontSize: 11, fontWeight: "bold" },
+  iconButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
   },
-  mainContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  photoContainer: {
-    marginRight: 16,
-  },
-  photo: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 3,
-    borderColor: "white",
-  },
+  mainContent: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
+  photoContainer: { marginRight: 16 },
+  photo: { borderWidth: 3, borderColor: "white" },
   photoPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
     backgroundColor: "rgba(255,255,255,0.3)",
     borderWidth: 3,
     borderColor: "white",
     justifyContent: "center",
     alignItems: "center",
   },
-  infoContainer: {
-    flex: 1,
-  },
-  userName: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "white",
-    marginBottom: 4,
-  },
-  statsRow: {
-    flexDirection: "row",
-    alignItems: "baseline",
-  },
-  mlValue: {
-    fontSize: 24,
-    fontWeight: "900",
-    color: "white",
-  },
-  mlGoal: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.7)",
-    fontWeight: "600",
-  },
+  infoContainer: { flex: 1 },
+  userName: { fontSize: 18, fontWeight: "bold", color: "white" },
+  statsRow: { flexDirection: "row", alignItems: "baseline" },
+  mlValue: { fontSize: 24, fontWeight: "900", color: "white" },
+  mlGoal: { fontSize: 14, color: "rgba(255,255,255,0.7)", fontWeight: "600" },
   reactionsContainer: {
     flexDirection: "row",
     gap: 8,
     flexWrap: "wrap",
+    marginTop: 8,
   },
   reactionBadge: {
     flexDirection: "row",
@@ -266,12 +236,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     gap: 4,
   },
-  reactionEmoji: {
-    fontSize: 16,
-  },
-  reactionCount: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
+  reactionEmoji: { fontSize: 16 },
+  reactionCount: { color: "white", fontSize: 14, fontWeight: "bold" },
+  medalEmoji: { fontSize: 16 },
 });

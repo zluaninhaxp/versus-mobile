@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { ReactionSelector } from "./ReactionSelector";
 
 interface RankItemRegularProps {
   position: number;
@@ -17,20 +18,58 @@ export function RankItemRegular({
   ml,
   goal,
   photo,
-  reactions = [],
+  reactions: initialReactions = [],
 }: RankItemRegularProps) {
   const [notificationEnabled, setNotificationEnabled] = useState(false);
+  const [myReaction, setMyReaction] = useState<string | null>(null);
+  const [localReactions, setLocalReactions] = useState(initialReactions);
+
+  const metaAlcancada = ml >= goal;
+
+  const handleReactionChange = (newEmoji: string) => {
+    let updatedReactions = [...localReactions];
+
+    if (newEmoji === myReaction) {
+      // TOGGLE OFF: Tira a reação atual
+      updatedReactions = updatedReactions
+        .map((r) =>
+          r.emoji === newEmoji ? { ...r, count: Math.max(0, r.count - 1) } : r,
+        )
+        .filter((r) => r.count > 0);
+      setMyReaction(null);
+    } else {
+      // TROCA OU ADICIONA
+      if (myReaction) {
+        updatedReactions = updatedReactions
+          .map((r) =>
+            r.emoji === myReaction
+              ? { ...r, count: Math.max(0, r.count - 1) }
+              : r,
+          )
+          .filter((r) => r.count > 0);
+      }
+      const existingIndex = updatedReactions.findIndex(
+        (r) => r.emoji === newEmoji,
+      );
+      if (existingIndex > -1) {
+        updatedReactions[existingIndex] = {
+          ...updatedReactions[existingIndex],
+          count: updatedReactions[existingIndex].count + 1,
+        };
+      } else {
+        updatedReactions.push({ emoji: newEmoji, count: 1 });
+      }
+      setMyReaction(newEmoji);
+    }
+    setLocalReactions(updatedReactions);
+  };
 
   return (
     <View style={styles.card}>
-      {/* Container principal */}
       <View style={styles.mainRow}>
-        {/* Número da posição */}
         <View style={styles.positionCircle}>
           <Text style={styles.positionNumber}>{position}</Text>
         </View>
-
-        {/* Foto */}
         <View style={styles.photoContainer}>
           {photo ? (
             <Image source={{ uri: photo }} style={styles.photo} />
@@ -40,8 +79,6 @@ export function RankItemRegular({
             </View>
           )}
         </View>
-
-        {/* Informações */}
         <View style={styles.infoContainer}>
           <Text style={styles.userName}>{name}</Text>
           <View style={styles.statsRow}>
@@ -49,35 +86,35 @@ export function RankItemRegular({
             <Text style={styles.mlGoal}> / {goal}ml</Text>
           </View>
         </View>
-
-        {/* Botões de ação */}
         <View style={styles.actionsContainer}>
-          <TouchableOpacity style={styles.actionButton}>
-            <Ionicons name="happy-outline" size={20} color="#6B7D8F" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => setNotificationEnabled(!notificationEnabled)}
-          >
-            <Ionicons
-              name={
-                notificationEnabled ? "notifications" : "notifications-outline"
-              }
-              size={20}
-              color="#6B7D8F"
-            />
-          </TouchableOpacity>
+          <ReactionSelector
+            currentReaction={myReaction}
+            onReactionSelect={handleReactionChange}
+          />
+          {!metaAlcancada && (
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => setNotificationEnabled(!notificationEnabled)}
+            >
+              <Ionicons
+                name={
+                  notificationEnabled
+                    ? "notifications"
+                    : "notifications-outline"
+                }
+                size={20}
+                color="#6B7D8F"
+              />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
-
-      {/* Reações (se houver) */}
-      {reactions.length > 0 && (
+      {localReactions.length > 0 && (
         <View style={styles.reactionsContainer}>
-          {reactions.map((reaction, index) => (
-            <View key={index} style={styles.reactionBadge}>
-              <Text style={styles.reactionEmoji}>{reaction.emoji}</Text>
-              <Text style={styles.reactionCount}>{reaction.count}</Text>
+          {localReactions.map((r, i) => (
+            <View key={i} style={styles.reactionBadge}>
+              <Text style={styles.reactionEmoji}>{r.emoji}</Text>
+              <Text style={styles.reactionCount}>{r.count}</Text>
             </View>
           ))}
         </View>
@@ -93,15 +130,8 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 10,
     elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
   },
-  mainRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
+  mainRow: { flexDirection: "row", alignItems: "center" },
   positionCircle: {
     width: 36,
     height: 36,
@@ -111,14 +141,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 12,
   },
-  positionNumber: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#6B7D8F",
-  },
-  photoContainer: {
-    marginRight: 12,
-  },
+  positionNumber: { fontSize: 16, fontWeight: "bold", color: "#6B7D8F" },
+  photoContainer: { marginRight: 12 },
   photo: {
     width: 56,
     height: 56,
@@ -131,43 +155,20 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 28,
     backgroundColor: "#F0F4F8",
-    borderWidth: 2,
-    borderColor: "#E8EEF4",
     justifyContent: "center",
     alignItems: "center",
   },
-  infoContainer: {
-    flex: 1,
-  },
-  userName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#2B3E50",
-    marginBottom: 2,
-  },
-  statsRow: {
-    flexDirection: "row",
-    alignItems: "baseline",
-  },
-  mlValue: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: "#14B8D4",
-  },
-  mlGoal: {
-    fontSize: 13,
-    color: "#9BA8B5",
-    fontWeight: "600",
-  },
-  actionsContainer: {
-    flexDirection: "row",
-    gap: 6,
-  },
+  infoContainer: { flex: 1 },
+  userName: { fontSize: 16, fontWeight: "bold", color: "#2B3E50" },
+  statsRow: { flexDirection: "row", alignItems: "baseline" },
+  mlValue: { fontSize: 18, fontWeight: "900", color: "#14B8D4" },
+  mlGoal: { fontSize: 13, color: "#9BA8B5", fontWeight: "600" },
+  actionsContainer: { flexDirection: "row", gap: 6 },
   actionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#F8FAFC",
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "#F8FBFF",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
@@ -193,12 +194,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E8EEF4",
   },
-  reactionEmoji: {
-    fontSize: 14,
-  },
-  reactionCount: {
-    color: "#6B7D8F",
-    fontSize: 13,
-    fontWeight: "bold",
-  },
+  reactionEmoji: { fontSize: 14 },
+  reactionCount: { color: "#6B7D8F", fontSize: 13, fontWeight: "bold" },
 });
