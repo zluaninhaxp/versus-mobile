@@ -32,7 +32,7 @@ function daysAgoAt(days, h, m) {
 
 export default function App() {
   const [mlConsumido, setMlConsumido] = useState(2850);
-  const [nome, setNome] = useState("Ana Silva");
+  const [nome, setNome] = useState("Luana Castro");
   const [meta, setMeta] = useState(2500);
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -50,7 +50,7 @@ export default function App() {
   const [usuarios, setUsuarios] = useState([
     {
       id: 1,
-      nome: "Ana Silva",
+      nome: "Luana Castro",
       ml: 2850,
       meta: 2500,
       foto: "https://i.pravatar.cc/300?img=32",

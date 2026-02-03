@@ -29,6 +29,9 @@ export function RankItemRegular({
   const metaAlcancada = ml >= goal;
   const myId = `reg-${position}`;
 
+  // Lógica para identificar se este item pertence à Luana Castro
+  const isMe = name === "Luana Castro";
+
   return (
     <View style={styles.card}>
       <View style={styles.mainRow}>
@@ -61,7 +64,9 @@ export function RankItemRegular({
               <Text style={styles.metaText}>Meta!</Text>
             </View>
           )}
+
           <RankingActions
+            isMe={isMe} // Repassa a trava para o seletor
             id={myId}
             activeReactionId={activeReactionId}
             onOpenReaction={onOpenReaction}
@@ -120,7 +125,7 @@ const styles = StyleSheet.create({
   statsRow: { flexDirection: "row", alignItems: "baseline" },
   mlValue: { fontSize: 17, fontWeight: "900", color: "#14B8D4" },
   mlGoal: { fontSize: 12, color: "#9BA8B5", fontWeight: "600" },
-  rightBlock: { flexDirection: "row", alignItems: "center", gap: 8 }, // Alinha Meta ao lado das ações
+  rightBlock: { flexDirection: "row", alignItems: "center", gap: 8 },
   metaBadge: {
     backgroundColor: "#2ECC71",
     paddingHorizontal: 8,

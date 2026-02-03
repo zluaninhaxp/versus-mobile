@@ -7,6 +7,7 @@ interface RankingActionsProps {
   initialReactions: { emoji: string; count: number }[];
   isTop3: boolean;
   metaAlcancada: boolean;
+  isMe?: boolean; // Propriedade para identificar o usuário logado
   onReactionUpdate: (
     updatedReactions: { emoji: string; count: number }[],
   ) => void;
@@ -16,11 +17,17 @@ export function RankingActions({
   initialReactions,
   isTop3,
   metaAlcancada,
+  isMe = false, // Padrão falso para permitir interação com outros
   onReactionUpdate,
 }: RankingActionsProps) {
   const [myReaction, setMyReaction] = useState<string | null>(null);
   const [localReactions, setLocalReactions] = useState(initialReactions);
   const [cooldown, setCooldown] = useState(0);
+
+  // Regra de negócio: Se for o item da Luana Castro, não exibe botões de ação
+  if (isMe) {
+    return null;
+  }
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -40,7 +47,7 @@ export function RankingActions({
     let updated = [...localReactions];
 
     if (newEmoji === myReaction) {
-      // Toggle OFF
+      // Remover reação (Toggle OFF)
       updated = updated
         .map((r) =>
           r.emoji === newEmoji ? { ...r, count: Math.max(0, r.count - 1) } : r,
@@ -48,7 +55,7 @@ export function RankingActions({
         .filter((r) => r.count > 0);
       setMyReaction(null);
     } else {
-      // Remove antiga se existir
+      // Substituir reação antiga se existir
       if (myReaction) {
         updated = updated
           .map((r) =>
@@ -58,7 +65,8 @@ export function RankingActions({
           )
           .filter((r) => r.count > 0);
       }
-      // Adiciona nova
+
+      // Adicionar nova reação
       const idx = updated.findIndex((r) => r.emoji === newEmoji);
       if (idx > -1) {
         updated[idx] = { ...updated[idx], count: updated[idx].count + 1 };
@@ -87,15 +95,16 @@ export function RankingActions({
               isTop3 ? styles.btnTop3 : styles.btnRegular,
               cooldown > 0 && styles.btnDisabled,
             ]}
-            onPress={() => setCooldown(3600)}
+            onPress={() => setCooldown(7200)} // Cooldown de 2 horas
             disabled={cooldown > 0}
           >
             <Ionicons
               name={cooldown > 0 ? "notifications" : "notifications-outline"}
-              size={20}
+              size={18}
               color={isTop3 || cooldown > 0 ? "white" : "#6B7D8F"}
             />
           </TouchableOpacity>
+
           {cooldown > 0 && (
             <Text
               style={[styles.timer, { color: isTop3 ? "white" : "#475569" }]}
@@ -119,9 +128,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   actionButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
@@ -141,7 +150,7 @@ const styles = StyleSheet.create({
   timer: {
     position: "absolute",
     bottom: -16,
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: "bold",
     width: 50,
     textAlign: "center",

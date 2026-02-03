@@ -13,7 +13,6 @@ import { Ionicons } from "@expo/vector-icons";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-// Sistema global "só um aberto por vez"
 let _nextId = 0;
 const _listeners: Set<(openedId: number | null) => void> = new Set();
 function _broadcast(openedId: number | null) {
@@ -38,7 +37,6 @@ export function ReactionSelector({
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
-  // Fecha se outro abrir
   useEffect(() => {
     const listener = (openedId: number | null) => {
       if (openedId !== myId) setIsOpen(false);
@@ -53,7 +51,7 @@ export function ReactionSelector({
         Animated.spring(scaleAnim, {
           toValue: 1,
           useNativeDriver: true,
-          tension: 100,
+          tension: 80,
           friction: 8,
         }),
         Animated.timing(opacityAnim, {
@@ -79,12 +77,8 @@ export function ReactionSelector({
   const close = useCallback(() => setIsOpen(false), []);
 
   const handlePress = useCallback(() => {
-    if (currentReaction) {
-      open(); // Abre para permitir trocar ou remover
-    } else {
-      open();
-    }
-  }, [currentReaction, open]);
+    open();
+  }, [open]);
 
   const pick = useCallback(
     (emoji: string) => {
@@ -94,12 +88,13 @@ export function ReactionSelector({
     [onReactionSelect, close],
   );
 
-  const bubbleWidth = 280;
+  // --- AJUSTES DE DELICADEZA ---
+  const bubbleWidth = 230; // Largura reduzida
   const bubbleLeft = Math.max(
     10,
     Math.min(popoverPos.x - bubbleWidth / 2, SCREEN_WIDTH - bubbleWidth - 10),
   );
-  const tailLeft = popoverPos.x - bubbleLeft - 10;
+  const tailLeft = popoverPos.x - bubbleLeft - 8; // Ajuste fino da cauda
 
   return (
     <View ref={buttonRef} collapsable={false}>
@@ -116,7 +111,7 @@ export function ReactionSelector({
         ) : (
           <Ionicons
             name="happy-outline"
-            size={20}
+            size={18} // Ícone ligeiramente menor
             color={isTop3 ? "rgba(255,255,255,0.85)" : "#6B7D8F"}
           />
         )}
@@ -167,9 +162,9 @@ export function ReactionSelector({
 
 const styles = StyleSheet.create({
   btn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 34, // Reduzido de 38
+    height: 34,
+    borderRadius: 17,
     backgroundColor: "#F8FBFF",
     borderWidth: 1,
     borderColor: "#E1EFFF",
@@ -181,27 +176,27 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   btnActive: { backgroundColor: "#E8F4FF", borderColor: "#4CAFFF" },
-  emojiActive: { fontSize: 20 },
+  emojiActive: { fontSize: 18 },
   overlay: { flex: 1, backgroundColor: "transparent" },
   bubble: { position: "absolute", alignItems: "flex-start" },
   emojiRow: {
     flexDirection: "row",
     backgroundColor: "white",
-    borderRadius: 30,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    elevation: 10,
+    borderRadius: 24, // Mais arredondado e delicado
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    elevation: 8,
     shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
   },
   tail: {
     width: 0,
     height: 0,
-    borderLeftWidth: 10,
-    borderRightWidth: 10,
-    borderBottomWidth: 10,
+    borderLeftWidth: 8, // Cauda menor
+    borderRightWidth: 8,
+    borderBottomWidth: 8,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
     borderBottomColor: "white",
@@ -209,12 +204,12 @@ const styles = StyleSheet.create({
     zIndex: 11,
   },
   emojiBtn: {
-    width: 52,
-    height: 48,
+    flex: 1, // Distribui igualmente no espaço menor
+    height: 40,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 24,
+    borderRadius: 20,
   },
   emojiBtnSelected: { backgroundColor: "#E8F4FF" },
-  emojiText: { fontSize: 28 },
+  emojiText: { fontSize: 22 }, // Reduzido de 28 para maior delicadeza
 });

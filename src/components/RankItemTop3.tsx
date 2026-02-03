@@ -29,6 +29,9 @@ export function RankItemTop3({
   const metaAlcancada = ml >= goal;
   const myId = `top3-${position}`;
 
+  // Identifica se este item pertence à Luana Castro
+  const isMe = name === "Luana Castro";
+
   const config =
     position === 1
       ? { bg: "#14B8D4", badge: "#FDB813", photoSize: 80 }
@@ -46,7 +49,6 @@ export function RankItemTop3({
           <Text style={styles.positionText}>{position}º Lugar</Text>
         </View>
 
-        {/* Grupo da Direita: Meta + Ações */}
         <View style={styles.rightGroup}>
           {metaAlcancada && (
             <View style={styles.metaBadge}>
@@ -55,6 +57,7 @@ export function RankItemTop3({
           )}
 
           <RankingActions
+            isMe={isMe} // Repassa a trava para o seletor
             id={myId}
             activeReactionId={activeReactionId}
             onOpenReaction={onOpenReaction}
@@ -122,11 +125,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     gap: 4,
   },
-  rightGroup: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
+  rightGroup: { flexDirection: "row", alignItems: "center", gap: 8 },
   medalIcon: { fontSize: 16 },
   positionText: { fontSize: 13, fontWeight: "bold", color: "#333" },
   mainContentClickable: {
