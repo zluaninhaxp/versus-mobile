@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { RankItemTop3 } from "./RankItemTop3";
 import { RankItemRegular } from "./RankItemRegular";
 
@@ -14,43 +14,37 @@ interface RankItemProps {
   onPress?: () => void;
 }
 
-export function RankItem({
-  position,
-  nome,
-  ml,
-  meta,
-  foto,
-  reactions,
-  activeReactionId,
-  onOpenReaction,
-  onPress,
-}: RankItemProps) {
-  if (position <= 3) {
-    return (
-      <RankItemTop3
-        position={position}
-        name={nome}
-        ml={ml}
-        goal={meta}
-        photo={foto}
-        reactions={reactions}
-        activeReactionId={activeReactionId}
-        onOpenReaction={onOpenReaction}
-        onPress={onPress}
-      />
-    );
+export function RankItem(props: RankItemProps) {
+  // Centralização do Estado de Reações
+  const [localReactions, setLocalReactions] = useState(props.reactions || []);
+
+  // Regras de Negócio centralizadas
+  const metaAlcancada = props.ml >= props.meta;
+  const isMe = props.nome === "Luana Castro";
+  const myId =
+    props.position <= 3 ? `top3-${props.position}` : `reg-${props.position}`;
+
+  // Props unificadas para os filhos
+  const dataProps = {
+    position: props.position,
+    name: props.nome,
+    ml: props.ml,
+    goal: props.meta,
+    photo: props.foto,
+    localReactions,
+    activeReactionId: props.activeReactionId,
+    onOpenReaction: props.onOpenReaction,
+    onPress: props.onPress,
+    myId,
+    isMe,
+    metaAlcancada,
+    onReactionUpdate: (newReactions: { emoji: string; count: number }[]) =>
+      setLocalReactions(newReactions),
+  };
+
+  if (props.position <= 3) {
+    return <RankItemTop3 {...dataProps} />;
   }
-  return (
-    <RankItemRegular
-      position={position}
-      name={nome}
-      ml={ml}
-      goal={meta}
-      photo={foto}
-      reactions={reactions}
-      activeReactionId={activeReactionId}
-      onOpenReaction={onOpenReaction}
-      onPress={onPress}
-    />
-  );
+
+  return <RankItemRegular {...dataProps} />;
 }

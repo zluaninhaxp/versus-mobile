@@ -1,18 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { RankingActions } from "./RankingActions";
-
-interface RankItemTop3Props {
-  position: number;
-  name: string;
-  ml: number;
-  goal: number;
-  photo?: string;
-  reactions?: { emoji: string; count: number }[];
-  activeReactionId: string | null;
-  onOpenReaction: (id: string | null) => void;
-  onPress?: () => void;
-}
 
 export function RankItemTop3({
   position,
@@ -20,18 +8,15 @@ export function RankItemTop3({
   ml,
   goal,
   photo,
-  reactions: initialReactions = [],
+  localReactions,
   activeReactionId,
   onOpenReaction,
   onPress,
-}: RankItemTop3Props) {
-  const [localReactions, setLocalReactions] = useState(initialReactions);
-  const metaAlcancada = ml >= goal;
-  const myId = `top3-${position}`;
-
-  // Identifica se este item pertence à Luana Castro
-  const isMe = name === "Luana Castro";
-
+  myId,
+  isMe,
+  metaAlcancada,
+  onReactionUpdate,
+}: any) {
   const config =
     position === 1
       ? { bg: "#14B8D4", badge: "#FDB813", photoSize: 80 }
@@ -55,16 +40,15 @@ export function RankItemTop3({
               <Text style={styles.metaText}>Meta!</Text>
             </View>
           )}
-
           <RankingActions
-            isMe={isMe} // Repassa a trava para o seletor
+            isMe={isMe}
             id={myId}
             activeReactionId={activeReactionId}
             onOpenReaction={onOpenReaction}
             isTop3={true}
             metaAlcancada={metaAlcancada}
-            initialReactions={initialReactions}
-            onReactionUpdate={(nr) => setLocalReactions(nr)}
+            initialReactions={localReactions}
+            onReactionUpdate={onReactionUpdate}
           />
         </View>
       </View>
@@ -97,7 +81,7 @@ export function RankItemTop3({
 
       {localReactions.length > 0 && (
         <View style={styles.reactionsContainer}>
-          {localReactions.map((r, i) => (
+          {localReactions.map((r: any, i: number) => (
             <View key={i} style={styles.reactionBadge}>
               <Text style={styles.reactionEmoji}>{r.emoji}</Text>
               <Text style={styles.reactionCount}>{r.count}</Text>

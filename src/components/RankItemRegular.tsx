@@ -1,18 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { RankingActions } from "./RankingActions";
-
-interface RankItemRegularProps {
-  position: number;
-  name: string;
-  ml: number;
-  goal: number;
-  photo?: string;
-  reactions?: { emoji: string; count: number }[];
-  activeReactionId: string | null;
-  onOpenReaction: (id: string | null) => void;
-  onPress?: () => void;
-}
 
 export function RankItemRegular({
   position,
@@ -20,18 +8,15 @@ export function RankItemRegular({
   ml,
   goal,
   photo,
-  reactions: initialReactions = [],
+  localReactions,
   activeReactionId,
   onOpenReaction,
   onPress,
-}: RankItemRegularProps) {
-  const [localReactions, setLocalReactions] = useState(initialReactions);
-  const metaAlcancada = ml >= goal;
-  const myId = `reg-${position}`;
-
-  // Lógica para identificar se este item pertence à Luana Castro
-  const isMe = name === "Luana Castro";
-
+  myId,
+  isMe,
+  metaAlcancada,
+  onReactionUpdate,
+}: any) {
   return (
     <View style={styles.card}>
       <View style={styles.mainRow}>
@@ -64,23 +49,22 @@ export function RankItemRegular({
               <Text style={styles.metaText}>Meta!</Text>
             </View>
           )}
-
           <RankingActions
-            isMe={isMe} // Repassa a trava para o seletor
+            isMe={isMe}
             id={myId}
             activeReactionId={activeReactionId}
             onOpenReaction={onOpenReaction}
             isTop3={false}
             metaAlcancada={metaAlcancada}
-            initialReactions={initialReactions}
-            onReactionUpdate={(nr) => setLocalReactions(nr)}
+            initialReactions={localReactions}
+            onReactionUpdate={onReactionUpdate}
           />
         </View>
       </View>
 
       {localReactions.length > 0 && (
         <View style={styles.reactionsContainer}>
-          {localReactions.map((r, i) => (
+          {localReactions.map((r: any, i: number) => (
             <View key={i} style={styles.reactionBadge}>
               <Text style={styles.reactionEmoji}>{r.emoji}</Text>
               <Text style={styles.reactionCount}>{r.count}</Text>
