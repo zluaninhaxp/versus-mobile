@@ -21,11 +21,17 @@ function _broadcast(openedId: number | null) {
 
 const REACTIONS = ["🤩", "😂", "😳", "🥺", "😡"];
 
+interface ReactionSelectorProps {
+  onReactionSelect?: (emoji: string) => void;
+  currentReaction?: string | null;
+  isTop3?: boolean;
+}
+
 export function ReactionSelector({
   onReactionSelect,
   currentReaction,
   isTop3 = false,
-}) {
+}: ReactionSelectorProps) {
   const myIdRef = useRef<number | null>(null);
   if (myIdRef.current === null) myIdRef.current = _nextId++;
   const myId = myIdRef.current;
@@ -42,7 +48,11 @@ export function ReactionSelector({
       if (openedId !== myId) setIsOpen(false);
     };
     _listeners.add(listener);
-    return () => _listeners.delete(listener);
+
+    // FIX: Envolver o delete em chaves para garantir que o retorno seja void
+    return () => {
+      _listeners.delete(listener);
+    };
   }, [myId]);
 
   useEffect(() => {
@@ -88,13 +98,12 @@ export function ReactionSelector({
     [onReactionSelect, close],
   );
 
-  // --- AJUSTES DE DELICADEZA ---
-  const bubbleWidth = 230; // Largura reduzida
+  const bubbleWidth = 230;
   const bubbleLeft = Math.max(
     10,
     Math.min(popoverPos.x - bubbleWidth / 2, SCREEN_WIDTH - bubbleWidth - 10),
   );
-  const tailLeft = popoverPos.x - bubbleLeft - 8; // Ajuste fino da cauda
+  const tailLeft = popoverPos.x - bubbleLeft - 8;
 
   return (
     <View ref={buttonRef} collapsable={false}>
@@ -111,7 +120,7 @@ export function ReactionSelector({
         ) : (
           <Ionicons
             name="happy-outline"
-            size={18} // Ícone ligeiramente menor
+            size={18}
             color={isTop3 ? "rgba(255,255,255,0.85)" : "#6B7D8F"}
           />
         )}
@@ -162,7 +171,7 @@ export function ReactionSelector({
 
 const styles = StyleSheet.create({
   btn: {
-    width: 34, // Reduzido de 38
+    width: 34,
     height: 34,
     borderRadius: 17,
     backgroundColor: "#F8FBFF",
@@ -182,7 +191,7 @@ const styles = StyleSheet.create({
   emojiRow: {
     flexDirection: "row",
     backgroundColor: "white",
-    borderRadius: 24, // Mais arredondado e delicado
+    borderRadius: 24,
     paddingHorizontal: 6,
     paddingVertical: 4,
     elevation: 8,
@@ -194,7 +203,7 @@ const styles = StyleSheet.create({
   tail: {
     width: 0,
     height: 0,
-    borderLeftWidth: 8, // Cauda menor
+    borderLeftWidth: 8,
     borderRightWidth: 8,
     borderBottomWidth: 8,
     borderLeftColor: "transparent",
@@ -204,12 +213,12 @@ const styles = StyleSheet.create({
     zIndex: 11,
   },
   emojiBtn: {
-    flex: 1, // Distribui igualmente no espaço menor
+    flex: 1,
     height: 40,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 20,
   },
   emojiBtnSelected: { backgroundColor: "#E8F4FF" },
-  emojiText: { fontSize: 22 }, // Reduzido de 28 para maior delicadeza
+  emojiText: { fontSize: 22 },
 });

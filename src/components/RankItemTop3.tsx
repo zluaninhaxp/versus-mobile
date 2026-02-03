@@ -9,10 +9,7 @@ export function RankItemTop3({
   goal,
   photo,
   localReactions,
-  activeReactionId,
-  onOpenReaction,
   onPress,
-  myId,
   isMe,
   metaAlcancada,
   onReactionUpdate,
@@ -40,11 +37,9 @@ export function RankItemTop3({
               <Text style={styles.metaText}>Meta!</Text>
             </View>
           )}
+          {/* Removidas as props problemáticas */}
           <RankingActions
             isMe={isMe}
-            id={myId}
-            activeReactionId={activeReactionId}
-            onOpenReaction={onOpenReaction}
             isTop3={true}
             metaAlcancada={metaAlcancada}
             initialReactions={localReactions}

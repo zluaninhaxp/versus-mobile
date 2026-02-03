@@ -1,142 +1,220 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  Animated,
+  Modal,
+  Dimensions,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { ReactionSelector } from "./ReactionSelector";
 
-interface RankingActionsProps {
-  id: string;
-  activeReactionId: string | null;
-  onOpenReaction: (id: string | null) => void;
-  initialReactions: { emoji: string; count: number }[];
-  isTop3: boolean;
-  metaAlcancada: boolean;
-  onReactionUpdate: (
-    updatedReactions: { emoji: string; count: number }[],
-  ) => void;
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+// Sistema global "só um aberto por vez"
+let _nextId = 0;
+const _listeners: Set<(openedId: number | null) => void> = new Set();
+function _broadcast(openedId: number | null) {
+  _listeners.forEach((fn) => fn(openedId));
 }
 
-export function RankingActions({
-  id,
-  activeReactionId,
-  onOpenReaction,
-  initialReactions,
-  isTop3,
-  metaAlcancada,
-  onReactionUpdate,
-}: RankingActionsProps) {
-  const [myReaction, setMyReaction] = useState<string | null>(null);
-  const [localReactions, setLocalReactions] = useState(initialReactions);
-  const [cooldown, setCooldown] = useState(0);
+const REACTIONS = ["🤩", "😂", "😳", "🥺", "😡"];
+
+export function ReactionSelector({
+  onReactionSelect,
+  currentReaction,
+  isTop3 = false,
+}: any) {
+  const myIdRef = useRef<number | null>(null);
+  if (myIdRef.current === null) myIdRef.current = _nextId++;
+  const myId = myIdRef.current;
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [popoverPos, setPopoverPos] = useState({ x: 0, y: 0 });
+  const buttonRef = useRef<View>(null);
+
+  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  // CORREÇÃO DO ERRO TS2345: O retorno do delete é booleano, o React exige void
+  useEffect(() => {
+    const listener = (openedId: number | null) => {
+      if (openedId !== myId) setIsOpen(false);
+    };
+    _listeners.add(listener);
+
+    return () => {
+      _listeners.delete(listener); // Chaves garantem retorno void
+    };
+  }, [myId]);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (cooldown > 0) {
-      timer = setInterval(() => setCooldown((prev) => prev - 1), 1000);
-    }
-    return () => clearInterval(timer);
-  }, [cooldown]);
-
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s < 10 ? "0" : ""}${s}`;
-  };
-
-  const handleReactionChange = (newEmoji: string) => {
-    let updated = [...localReactions];
-    if (newEmoji === myReaction) {
-      updated = updated
-        .map((r) =>
-          r.emoji === newEmoji ? { ...r, count: Math.max(0, r.count - 1) } : r,
-        )
-        .filter((r) => r.count > 0);
-      setMyReaction(null);
+    if (isOpen) {
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          useNativeDriver: true,
+          tension: 80,
+          friction: 8,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start();
     } else {
-      if (myReaction) {
-        updated = updated
-          .map((r) =>
-            r.emoji === myReaction
-              ? { ...r, count: Math.max(0, r.count - 1) }
-              : r,
-          )
-          .filter((r) => r.count > 0);
-      }
-      const idx = updated.findIndex((r) => r.emoji === newEmoji);
-      if (idx > -1) {
-        updated[idx] = { ...updated[idx], count: updated[idx].count + 1 };
-      } else {
-        updated.push({ emoji: newEmoji, count: 1 });
-      }
-      setMyReaction(newEmoji);
+      scaleAnim.setValue(0);
+      opacityAnim.setValue(0);
     }
-    setLocalReactions(updated);
-    onReactionUpdate(updated);
-  };
+  }, [isOpen]);
+
+  const open = useCallback(() => {
+    buttonRef.current?.measureInWindow((x, y, width, height) => {
+      setPopoverPos({ x: x + width / 2, y: y + height + 2 });
+      setIsOpen(true);
+      _broadcast(myId);
+    });
+  }, [myId]);
+
+  const close = useCallback(() => setIsOpen(false), []);
+
+  const handlePress = useCallback(() => {
+    open();
+  }, [open]);
+
+  const pick = useCallback(
+    (emoji: string) => {
+      onReactionSelect?.(emoji);
+      close();
+    },
+    [onReactionSelect, close],
+  );
+
+  // --- AJUSTES DE DELICADEZA ---
+  const bubbleWidth = 230;
+  const bubbleLeft = Math.max(
+    10,
+    Math.min(popoverPos.x - bubbleWidth / 2, SCREEN_WIDTH - bubbleWidth - 10),
+  );
+  const tailLeft = popoverPos.x - bubbleLeft - 8;
 
   return (
-    <View style={styles.container}>
-      <ReactionSelector
-        id={id}
-        activeReactionId={activeReactionId}
-        onOpenReaction={onOpenReaction}
-        currentReaction={myReaction}
-        onReactionSelect={handleReactionChange}
-        isTop3={isTop3}
-      />
+    <View ref={buttonRef} collapsable={false}>
+      <TouchableOpacity
+        style={[
+          styles.btn,
+          isTop3 && styles.btnTop3,
+          currentReaction && styles.btnActive,
+        ]}
+        onPress={handlePress}
+      >
+        {currentReaction ? (
+          <Text style={styles.emojiActive}>{currentReaction}</Text>
+        ) : (
+          <Ionicons
+            name="happy-outline"
+            size={18}
+            color={isTop3 ? "rgba(255,255,255,0.85)" : "#6B7D8F"}
+          />
+        )}
+      </TouchableOpacity>
 
-      {!metaAlcancada && (
-        <View style={styles.notifyContainer}>
-          <TouchableOpacity
-            style={[
-              styles.actionButton,
-              isTop3 ? styles.btnTop3 : styles.btnRegular,
-              cooldown > 0 && styles.btnDisabled,
-            ]}
-            onPress={() => setCooldown(3600)}
-            disabled={cooldown > 0}
-          >
-            <Ionicons
-              name={cooldown > 0 ? "notifications" : "notifications-outline"}
-              size={20}
-              color={isTop3 || cooldown > 0 ? "white" : "#6B7D8F"}
-            />
-          </TouchableOpacity>
-          {cooldown > 0 && (
-            <Text
-              style={[styles.timer, { color: isTop3 ? "white" : "#475569" }]}
-            >
-              {formatTime(cooldown)}
-            </Text>
-          )}
-        </View>
-      )}
+      <Modal
+        visible={isOpen}
+        transparent
+        animationType="none"
+        onRequestClose={close}
+      >
+        <TouchableWithoutFeedback onPress={close}>
+          <View style={styles.overlay} />
+        </TouchableWithoutFeedback>
+
+        <Animated.View
+          style={[
+            styles.bubble,
+            {
+              top: popoverPos.y,
+              left: bubbleLeft,
+              width: bubbleWidth,
+              opacity: opacityAnim,
+              transform: [{ scale: scaleAnim }],
+            },
+          ]}
+        >
+          <View style={[styles.tail, { left: tailLeft }]} />
+          <View style={styles.emojiRow}>
+            {REACTIONS.map((emoji) => (
+              <TouchableOpacity
+                key={emoji}
+                onPress={() => pick(emoji)}
+                style={[
+                  styles.emojiBtn,
+                  currentReaction === emoji && styles.emojiBtnSelected,
+                ]}
+              >
+                <Text style={styles.emojiText}>{emoji}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Animated.View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flexDirection: "row", gap: 8, alignItems: "flex-start" },
-  notifyContainer: { alignItems: "center" },
-  actionButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+  btn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "#F8FBFF",
+    borderWidth: 1,
+    borderColor: "#E1EFFF",
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 1,
   },
-  btnRegular: { backgroundColor: "#F8FBFF", borderColor: "#E8EEF4" },
   btnTop3: {
     backgroundColor: "rgba(255,255,255,0.2)",
     borderColor: "transparent",
   },
-  btnDisabled: { backgroundColor: "#1A1A1A", borderColor: "#1A1A1A" },
-  timer: {
-    position: "absolute",
-    bottom: -16,
-    fontSize: 10,
-    fontWeight: "bold",
-    width: 50,
-    textAlign: "center",
+  btnActive: { backgroundColor: "#E8F4FF", borderColor: "#4CAFFF" },
+  emojiActive: { fontSize: 18 },
+  overlay: { flex: 1, backgroundColor: "transparent" },
+  bubble: { position: "absolute", alignItems: "flex-start" },
+  emojiRow: {
+    flexDirection: "row",
+    backgroundColor: "white",
+    borderRadius: 24,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
   },
+  tail: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 8,
+    borderRightWidth: 8,
+    borderBottomWidth: 8,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderBottomColor: "white",
+    marginBottom: -1,
+    zIndex: 11,
+  },
+  emojiBtn: {
+    flex: 1,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 20,
+  },
+  emojiBtnSelected: { backgroundColor: "#E8F4FF" },
+  emojiText: { fontSize: 22 },
 });

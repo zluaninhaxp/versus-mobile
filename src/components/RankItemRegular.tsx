@@ -9,10 +9,7 @@ export function RankItemRegular({
   goal,
   photo,
   localReactions,
-  activeReactionId,
-  onOpenReaction,
   onPress,
-  myId,
   isMe,
   metaAlcancada,
   onReactionUpdate,
@@ -49,11 +46,9 @@ export function RankItemRegular({
               <Text style={styles.metaText}>Meta!</Text>
             </View>
           )}
+          {/* Removidas as props problemáticas */}
           <RankingActions
             isMe={isMe}
-            id={myId}
-            activeReactionId={activeReactionId}
-            onOpenReaction={onOpenReaction}
             isTop3={false}
             metaAlcancada={metaAlcancada}
             initialReactions={localReactions}
