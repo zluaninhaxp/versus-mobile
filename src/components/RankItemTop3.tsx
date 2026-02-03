@@ -46,18 +46,26 @@ export function RankItemTop3({
           <Text style={styles.positionText}>{position}º Lugar</Text>
         </View>
 
-        <RankingActions
-          id={myId}
-          activeReactionId={activeReactionId}
-          onOpenReaction={onOpenReaction}
-          isTop3={true}
-          metaAlcancada={metaAlcancada}
-          initialReactions={initialReactions}
-          onReactionUpdate={(nr) => setLocalReactions(nr)}
-        />
+        {/* Grupo da Direita: Meta + Ações */}
+        <View style={styles.rightGroup}>
+          {metaAlcancada && (
+            <View style={styles.metaBadge}>
+              <Text style={styles.metaText}>Meta!</Text>
+            </View>
+          )}
+
+          <RankingActions
+            id={myId}
+            activeReactionId={activeReactionId}
+            onOpenReaction={onOpenReaction}
+            isTop3={true}
+            metaAlcancada={metaAlcancada}
+            initialReactions={initialReactions}
+            onReactionUpdate={(nr) => setLocalReactions(nr)}
+          />
+        </View>
       </View>
 
-      {/* ÁREA DE CLIQUE: Foto + Nome */}
       <TouchableOpacity
         style={styles.mainContentClickable}
         onPress={onPress}
@@ -82,11 +90,6 @@ export function RankItemTop3({
             <Text style={styles.mlGoal}> / {goal}ml</Text>
           </View>
         </View>
-        {metaAlcancada && (
-          <View style={styles.metaBadge}>
-            <Text style={styles.metaText}>Meta!</Text>
-          </View>
-        )}
       </TouchableOpacity>
 
       {localReactions.length > 0 && (
@@ -119,6 +122,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     gap: 4,
   },
+  rightGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   medalIcon: { fontSize: 16 },
   positionText: { fontSize: 13, fontWeight: "bold", color: "#333" },
   mainContentClickable: {
@@ -137,7 +145,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 20,
-    marginLeft: "auto",
   },
   metaText: { color: "white", fontSize: 11, fontWeight: "bold" },
   reactionsContainer: {

@@ -32,23 +32,20 @@ export function RankItemRegular({
   return (
     <View style={styles.card}>
       <View style={styles.mainRow}>
-        {/* Posição fixa à esquerda */}
         <View style={styles.positionCircle}>
           <Text style={styles.positionNumber}>{position}</Text>
         </View>
 
-        {/* ÁREA DE CLIQUE RESTRITA: Foto + Nome */}
         <TouchableOpacity
           style={styles.userClickArea}
           onPress={onPress}
           activeOpacity={0.7}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} // Aumenta precisão sem mudar layout
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Image
             source={{ uri: photo || "https://i.pravatar.cc/150" }}
             style={styles.photo}
           />
-
           <View style={styles.infoContainer}>
             <Text style={styles.userName}>{name}</Text>
             <View style={styles.statsRow}>
@@ -58,7 +55,6 @@ export function RankItemRegular({
           </View>
         </TouchableOpacity>
 
-        {/* Bloco direito: Ações e Status */}
         <View style={styles.rightBlock}>
           {metaAlcancada && (
             <View style={styles.metaBadge}>
@@ -110,11 +106,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   positionNumber: { fontSize: 16, fontWeight: "bold", color: "#6B7D8F" },
-  userClickArea: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1, // Ocupa o espaço central
-  },
+  userClickArea: { flexDirection: "row", alignItems: "center", flex: 1 },
   photo: {
     width: 56,
     height: 56,
@@ -128,11 +120,11 @@ const styles = StyleSheet.create({
   statsRow: { flexDirection: "row", alignItems: "baseline" },
   mlValue: { fontSize: 17, fontWeight: "900", color: "#14B8D4" },
   mlGoal: { fontSize: 12, color: "#9BA8B5", fontWeight: "600" },
-  rightBlock: { alignItems: "flex-end", gap: 4 },
+  rightBlock: { flexDirection: "row", alignItems: "center", gap: 8 }, // Alinha Meta ao lado das ações
   metaBadge: {
     backgroundColor: "#2ECC71",
     paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingVertical: 4,
     borderRadius: 12,
   },
   metaText: { color: "white", fontSize: 10, fontWeight: "bold" },
