@@ -244,6 +244,7 @@ export default function App() {
       <SafeAreaView style={styles.container}>
         <Header
           onOpenMenu={() => setIsProfileOpen(true)}
+          onOpenHistory={() => setIsMyHistoryOpen(true)} // Nova prop adicionada
           onOpenSettings={() => setIsWaterSettingsOpen(true)}
         />
         <ScrollView

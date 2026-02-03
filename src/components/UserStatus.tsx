@@ -1,6 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, Text, StyleSheet, Image } from "react-native";
 import { AddWaterModal } from "./AddWaterModal";
 
 interface UserStatusProps {
@@ -8,16 +7,9 @@ interface UserStatusProps {
   onAdd: (q: number) => void;
   userName: string;
   meta: number;
-  onOpenMyHistory: () => void;
 }
 
-export function UserStatus({
-  ml,
-  onAdd,
-  userName,
-  meta,
-  onOpenMyHistory,
-}: UserStatusProps) {
+export function UserStatus({ ml, onAdd, userName, meta }: UserStatusProps) {
   const porcentagemReal = (ml / meta) * 100;
   const porcentagemExibida = Math.min(porcentagemReal, 100);
   const bateuAMeta = ml >= meta;
@@ -26,7 +18,6 @@ export function UserStatus({
 
   return (
     <View style={styles.container}>
-      {/* HEADER */}
       <View style={styles.topRow}>
         <View style={[styles.avatarContainer, bateuAMeta && styles.avatarGold]}>
           <Image source={{ uri: fotoPerfil }} style={styles.avatarImage} />
@@ -43,23 +34,10 @@ export function UserStatus({
           </View>
         </View>
 
-        {/* Botão histórico + botão adicionar água lado a lado */}
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={[styles.historyBtn, bateuAMeta && styles.historyBtnGold]}
-            onPress={onOpenMyHistory}
-          >
-            <Ionicons
-              name="water"
-              size={20}
-              color={bateuAMeta ? "#DAA520" : "#14B8D4"}
-            />
-          </TouchableOpacity>
-          <AddWaterModal onAdd={onAdd} isGold={bateuAMeta} />
-        </View>
+        {/* Mantido apenas o botão de adicionar água à direita */}
+        <AddWaterModal onAdd={onAdd} isGold={bateuAMeta} />
       </View>
 
-      {/* BARRA DE PROGRESSO */}
       <View style={styles.progressSection}>
         <View style={styles.progressBarBg}>
           <View
@@ -127,25 +105,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginLeft: 4,
   },
-
-  /* botões à direita empilhados horizontalmente */
-  actionButtons: { flexDirection: "row", alignItems: "center", gap: 8 },
-  historyBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: "#EBF7FF",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: "#C8E6F5",
-  },
-  historyBtnGold: {
-    backgroundColor: "#FFF8E1",
-    borderColor: "#FFD700",
-  },
-
-  /* progresso */
   progressSection: { width: "100%", paddingHorizontal: 5 },
   progressBarBg: {
     height: 14,

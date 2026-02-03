@@ -12,7 +12,7 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 const { height: screenHeight } = Dimensions.get("screen");
 const SHEET_HEIGHT = screenHeight * 0.75;
@@ -72,15 +72,31 @@ export function UserProfileModal({
     });
   };
 
-  // PanResponder focado apenas no gesto de fechar
+  // Padronização de ícones com AddWaterModal
+  const getWaterIcon = (quantidade: number) => {
+    if (quantidade < 500)
+      return (
+        <MaterialCommunityIcons name="cup-water" size={24} color="#4CAFFF" />
+      );
+    if (quantidade < 1000)
+      return (
+        <MaterialCommunityIcons
+          name="bottle-tonic-plus"
+          size={24}
+          color="#4CAFFF"
+        />
+      );
+    return (
+      <MaterialCommunityIcons name="bottle-wine" size={24} color="#4CAFFF" />
+    );
+  };
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: (_, gestureState) => gestureState.dy > 5,
       onPanResponderMove: (_, gestureState) => {
-        if (gestureState.dy > 0) {
-          slideAnim.setValue(gestureState.dy);
-        }
+        if (gestureState.dy > 0) slideAnim.setValue(gestureState.dy);
       },
       onPanResponderRelease: (_, gestureState) => {
         if (gestureState.dy > 120 || gestureState.vy > 0.5) {
@@ -119,15 +135,19 @@ export function UserProfileModal({
           : `${position}º`;
 
   const today = new Date();
-  const todayHistory = waterHistory.filter((e) => {
-    const d = new Date(e.time);
-    return (
-      d.getDate() === today.getDate() &&
-      d.getMonth() === today.getMonth() &&
-      d.getFullYear() === today.getFullYear()
-    );
-  });
+  // Filtra histórico de hoje e ordena do mais recente para o mais antigo
+  const todayHistory = waterHistory
+    .filter((e) => {
+      const d = new Date(e.time);
+      return (
+        d.getDate() === today.getDate() &&
+        d.getMonth() === today.getMonth() &&
+        d.getFullYear() === today.getFullYear()
+      );
+    })
+    .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
+  // Dados para o gráfico semanal
   const weekData: { label: string; ml: number }[] = [];
   for (let i = 6; i >= 0; i--) {
     const day = new Date(today);
@@ -149,7 +169,6 @@ export function UserProfileModal({
     const d = new Date(iso);
     return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
   };
-  const getWaterIcon = (q: number) => (q < 300 ? "🥤" : q < 600 ? "🥛" : "🍶");
 
   return (
     <Modal
@@ -167,12 +186,10 @@ export function UserProfileModal({
         <Animated.View
           style={[styles.sheet, { transform: [{ translateY: slideAnim }] }]}
         >
-          {/* ÁREA INVISÍVEL DE ARRASTO: Cobre o topo sem mudar o visual */}
           <View
             {...panResponder.panHandlers}
             style={styles.invisibleDragShield}
           />
-
           <View style={styles.handle} />
 
           <ScrollView
@@ -275,7 +292,7 @@ export function UserProfileModal({
               </View>
             </View>
 
-            {/* HISTÓRICO DE HOJE */}
+            {/* HISTÓRICO DE HOJE (ORDENADO) */}
             <View style={styles.sectionHeader}>
               <Ionicons name="water" size={18} color="#14B8D4" />
               <Text style={styles.sectionTitle}>Hoje</Text>
@@ -288,9 +305,7 @@ export function UserProfileModal({
               todayHistory.map((entry, i) => (
                 <View key={i} style={styles.historyItem}>
                   <View style={styles.historyIcon}>
-                    <Text style={styles.historyIconEmoji}>
-                      {getWaterIcon(entry.ml)}
-                    </Text>
+                    {getWaterIcon(entry.ml)}
                   </View>
                   <View style={styles.historyInfo}>
                     <Text style={styles.historyMl}>{entry.ml} ml</Text>
@@ -303,7 +318,7 @@ export function UserProfileModal({
               ))
             )}
 
-            {/* CONQUISTAS placeholder */}
+            {/* CONQUISTAS */}
             <View style={[styles.sectionHeader, { marginTop: 20 }]}>
               <Ionicons name="trophy" size={18} color="#FFD700" />
               <Text style={styles.sectionTitle}>Conquistas</Text>
@@ -315,6 +330,9 @@ export function UserProfileModal({
               </Text>
             </View>
           </ScrollView>
+
+          {/* FIX: Sangria para cobrir o bounce no fundo */}
+          <View style={styles.bottomFill} />
         </Animated.View>
       </View>
     </Modal>
@@ -343,9 +361,17 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 100, // Área de toque invisível
+    height: 100,
     backgroundColor: "transparent",
     zIndex: 9999,
+  },
+  bottomFill: {
+    position: "absolute",
+    bottom: -100,
+    left: 0,
+    right: 0,
+    height: 100,
+    backgroundColor: "#F5F9FF",
   },
   handle: {
     width: 44,
@@ -356,7 +382,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 4,
   },
-  scrollContent: { paddingHorizontal: 22, paddingBottom: 40 },
+  scrollContent: { paddingHorizontal: 22, paddingBottom: 60 },
   profileCard: {
     alignItems: "center",
     backgroundColor: "white",
@@ -365,10 +391,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 20,
     elevation: 3,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
   },
   avatarWrapper: { position: "relative", marginBottom: 12 },
   medalRing: {
@@ -450,11 +472,6 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 16,
     marginBottom: 22,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
   },
   chartBars: {
     flexDirection: "row",
@@ -501,10 +518,6 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 8,
     elevation: 1,
-    shadowColor: "#000",
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
   },
   historyIcon: {
     width: 42,
@@ -515,7 +528,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 12,
   },
-  historyIconEmoji: { fontSize: 20 },
   historyInfo: { flex: 1 },
   historyMl: { fontSize: 15, fontWeight: "bold", color: "#2B3E50" },
   historyTime: { fontSize: 12, color: "#9BA8B5" },
