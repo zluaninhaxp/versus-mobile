@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { AddWaterModal } from "./AddWaterModal";
 
 interface UserStatusProps {
@@ -7,20 +8,25 @@ interface UserStatusProps {
   onAdd: (q: number) => void;
   userName: string;
   meta: number;
+  onOpenMyHistory: () => void;
 }
 
-export function UserStatus({ ml, onAdd, userName, meta }: UserStatusProps) {
-  // Lógica de cálculo baseada na meta dinâmica do App.tsx
+export function UserStatus({
+  ml,
+  onAdd,
+  userName,
+  meta,
+  onOpenMyHistory,
+}: UserStatusProps) {
   const porcentagemReal = (ml / meta) * 100;
   const porcentagemExibida = Math.min(porcentagemReal, 100);
   const bateuAMeta = ml >= meta;
 
-  // Foto fictícia para o layout
   const fotoPerfil = "https://i.pravatar.cc/300?img=32";
 
   return (
     <View style={styles.container}>
-      {/* HEADER DO STATUS (LAYOUT SOLTO) */}
+      {/* HEADER */}
       <View style={styles.topRow}>
         <View style={[styles.avatarContainer, bateuAMeta && styles.avatarGold]}>
           <Image source={{ uri: fotoPerfil }} style={styles.avatarImage} />
@@ -30,7 +36,6 @@ export function UserStatus({ ml, onAdd, userName, meta }: UserStatusProps) {
         <View style={styles.nameContainer}>
           <Text style={styles.userName}>{userName}</Text>
           <View style={styles.statsRow}>
-            {/* O valor em destaque e a meta clarinha ao lado */}
             <Text style={[styles.userStats, bateuAMeta && styles.textGold]}>
               {ml}ml
             </Text>
@@ -38,11 +43,23 @@ export function UserStatus({ ml, onAdd, userName, meta }: UserStatusProps) {
           </View>
         </View>
 
-        {/* Botão de Adicionar (passando o estado dourado) */}
-        <AddWaterModal onAdd={onAdd} isGold={bateuAMeta} />
+        {/* Botão histórico + botão adicionar água lado a lado */}
+        <View style={styles.actionButtons}>
+          <TouchableOpacity
+            style={[styles.historyBtn, bateuAMeta && styles.historyBtnGold]}
+            onPress={onOpenMyHistory}
+          >
+            <Ionicons
+              name="water"
+              size={20}
+              color={bateuAMeta ? "#DAA520" : "#14B8D4"}
+            />
+          </TouchableOpacity>
+          <AddWaterModal onAdd={onAdd} isGold={bateuAMeta} />
+        </View>
       </View>
 
-      {/* BARRA DE PROGRESSO (ESTILO DASHBOARD) */}
+      {/* BARRA DE PROGRESSO */}
       <View style={styles.progressSection}>
         <View style={styles.progressBarBg}>
           <View
@@ -110,6 +127,25 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginLeft: 4,
   },
+
+  /* botões à direita empilhados horizontalmente */
+  actionButtons: { flexDirection: "row", alignItems: "center", gap: 8 },
+  historyBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "#EBF7FF",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: "#C8E6F5",
+  },
+  historyBtnGold: {
+    backgroundColor: "#FFF8E1",
+    borderColor: "#FFD700",
+  },
+
+  /* progresso */
   progressSection: { width: "100%", paddingHorizontal: 5 },
   progressBarBg: {
     height: 14,

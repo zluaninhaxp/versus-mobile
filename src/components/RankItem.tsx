@@ -9,7 +9,8 @@ interface RankItemProps {
   meta: number;
   foto?: string;
   reactions?: { emoji: string; count: number }[];
-  onReactionAdd?: (emoji: string) => void;
+  activeReactionId: string | null;
+  onOpenReaction: (id: string | null) => void;
   onPress?: () => void;
 }
 
@@ -20,7 +21,8 @@ export function RankItem({
   meta,
   foto,
   reactions,
-  onReactionAdd,
+  activeReactionId,
+  onOpenReaction,
   onPress,
 }: RankItemProps) {
   if (position <= 3) {
@@ -32,12 +34,12 @@ export function RankItem({
         goal={meta}
         photo={foto}
         reactions={reactions}
-        onReactionAdd={onReactionAdd}
+        activeReactionId={activeReactionId}
+        onOpenReaction={onOpenReaction}
         onPress={onPress}
       />
     );
   }
-
   return (
     <RankItemRegular
       position={position}
@@ -46,7 +48,8 @@ export function RankItem({
       goal={meta}
       photo={foto}
       reactions={reactions}
-      onReactionAdd={onReactionAdd}
+      activeReactionId={activeReactionId}
+      onOpenReaction={onOpenReaction}
       onPress={onPress}
     />
   );

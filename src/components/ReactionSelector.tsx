@@ -1,87 +1,118 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Animated,
   TouchableWithoutFeedback,
+  Animated,
+  Modal,
+  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-const REACTIONS = ["🤩", "😂", "😳", "🥺", "😡"];
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-interface ReactionSelectorProps {
-  currentReaction: string | null;
-  onReactionSelect: (reaction: string) => void;
-  isTop3?: boolean;
+// Sistema global "só um aberto por vez"
+let _nextId = 0;
+const _listeners: Set<(openedId: number | null) => void> = new Set();
+function _broadcast(openedId: number | null) {
+  _listeners.forEach((fn) => fn(openedId));
 }
 
+const REACTIONS = ["🤩", "😂", "😳", "🥺", "😡"];
+
 export function ReactionSelector({
-  currentReaction,
   onReactionSelect,
+  currentReaction,
   isTop3 = false,
-}: ReactionSelectorProps) {
-  const [open, setOpen] = useState(false);
-  const scaleAnim = useRef(new Animated.Value(0.6)).current;
+}) {
+  const myIdRef = useRef<number | null>(null);
+  if (myIdRef.current === null) myIdRef.current = _nextId++;
+  const myId = myIdRef.current;
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [popoverPos, setPopoverPos] = useState({ x: 0, y: 0 });
+  const buttonRef = useRef<View>(null);
+
+  const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
-  const show = () => {
-    setOpen(true);
-    Animated.parallel([
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        useNativeDriver: true,
-        tension: 100,
-        friction: 7,
-      }),
-      Animated.timing(opacityAnim, {
-        toValue: 1,
-        duration: 160,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
+  // Fecha se outro abrir
+  useEffect(() => {
+    const listener = (openedId: number | null) => {
+      if (openedId !== myId) setIsOpen(false);
+    };
+    _listeners.add(listener);
+    return () => _listeners.delete(listener);
+  }, [myId]);
 
-  const hide = () => {
-    Animated.parallel([
-      Animated.timing(scaleAnim, {
-        toValue: 0.6,
-        duration: 140,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacityAnim, {
-        toValue: 0,
-        duration: 140,
-        useNativeDriver: true,
-      }),
-    ]).start(() => setOpen(false));
-  };
+  useEffect(() => {
+    if (isOpen) {
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          useNativeDriver: true,
+          tension: 100,
+          friction: 8,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      scaleAnim.setValue(0);
+      opacityAnim.setValue(0);
+    }
+  }, [isOpen]);
 
-  const pick = (emoji: string) => {
-    onReactionSelect(emoji);
-    hide();
-  };
+  const open = useCallback(() => {
+    buttonRef.current?.measureInWindow((x, y, width, height) => {
+      setPopoverPos({ x: x + width / 2, y: y + height + 2 });
+      setIsOpen(true);
+      _broadcast(myId);
+    });
+  }, [myId]);
+
+  const close = useCallback(() => setIsOpen(false), []);
+
+  const handlePress = useCallback(() => {
+    if (currentReaction) {
+      open(); // Abre para permitir trocar ou remover
+    } else {
+      open();
+    }
+  }, [currentReaction, open]);
+
+  const pick = useCallback(
+    (emoji: string) => {
+      onReactionSelect?.(emoji);
+      close();
+    },
+    [onReactionSelect, close],
+  );
+
+  const bubbleWidth = 280;
+  const bubbleLeft = Math.max(
+    10,
+    Math.min(popoverPos.x - bubbleWidth / 2, SCREEN_WIDTH - bubbleWidth - 10),
+  );
+  const tailLeft = popoverPos.x - bubbleLeft - 10;
 
   return (
-    <View style={styles.wrapper}>
-      {/* Botão que abre/fecha */}
+    <View ref={buttonRef} collapsable={false}>
       <TouchableOpacity
         style={[
           styles.btn,
           isTop3 && styles.btnTop3,
           currentReaction && styles.btnActive,
         ]}
-        onPress={() => (open ? hide() : show())}
-        zIndex={11}
+        onPress={handlePress}
       >
         {currentReaction ? (
-          <View>
-            <Text style={styles.emojiActive}>{currentReaction}</Text>
-            <View style={styles.xBadge}>
-              <Ionicons name="close" size={9} color="white" />
-            </View>
-          </View>
+          <Text style={styles.emojiActive}>{currentReaction}</Text>
         ) : (
           <Ionicons
             name="happy-outline"
@@ -91,47 +122,50 @@ export function ReactionSelector({
         )}
       </TouchableOpacity>
 
-      {/* Bolha de reações — posicionada acima do botão */}
-      {open && (
-        <>
-          {/* Camada transparente para captar toque fora */}
-          <TouchableWithoutFeedback onPress={hide}>
-            <View style={styles.outsideTouchLayer} />
-          </TouchableWithoutFeedback>
+      <Modal
+        visible={isOpen}
+        transparent
+        animationType="none"
+        onRequestClose={close}
+      >
+        <TouchableWithoutFeedback onPress={close}>
+          <View style={styles.overlay} />
+        </TouchableWithoutFeedback>
 
-          <Animated.View
-            style={[
-              styles.bubble,
-              { opacity: opacityAnim, transform: [{ scale: scaleAnim }] },
-            ]}
-          >
-            <View style={styles.emojiRow}>
-              {REACTIONS.map((emoji) => (
-                <TouchableOpacity
-                  key={emoji}
-                  onPress={() => pick(emoji)}
-                  style={[
-                    styles.emojiBtn,
-                    currentReaction === emoji && styles.emojiBtnSelected,
-                  ]}
-                >
-                  <Text style={styles.emojiText}>{emoji}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            {/* Cauda da bolha */}
-            <View style={styles.tail} />
-          </Animated.View>
-        </>
-      )}
+        <Animated.View
+          style={[
+            styles.bubble,
+            {
+              top: popoverPos.y,
+              left: bubbleLeft,
+              width: bubbleWidth,
+              opacity: opacityAnim,
+              transform: [{ scale: scaleAnim }],
+            },
+          ]}
+        >
+          <View style={[styles.tail, { left: tailLeft }]} />
+          <View style={styles.emojiRow}>
+            {REACTIONS.map((emoji) => (
+              <TouchableOpacity
+                key={emoji}
+                onPress={() => pick(emoji)}
+                style={[
+                  styles.emojiBtn,
+                  currentReaction === emoji && styles.emojiBtnSelected,
+                ]}
+              >
+                <Text style={styles.emojiText}>{emoji}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Animated.View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    position: "relative",
-  },
   btn: {
     width: 38,
     height: 38,
@@ -141,77 +175,46 @@ const styles = StyleSheet.create({
     borderColor: "#E1EFFF",
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 11,
   },
   btnTop3: {
     backgroundColor: "rgba(255,255,255,0.2)",
     borderColor: "transparent",
   },
-  btnActive: {
-    backgroundColor: "#E8F4FF",
-    borderColor: "#4CAFFF",
-  },
+  btnActive: { backgroundColor: "#E8F4FF", borderColor: "#4CAFFF" },
   emojiActive: { fontSize: 20 },
-  xBadge: {
-    position: "absolute",
-    top: -6,
-    right: -6,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: "#FF4D4D",
-    borderWidth: 1,
-    borderColor: "white",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  outsideTouchLayer: {
-    position: "absolute",
-    top: -600,
-    left: -600,
-    width: 1400,
-    height: 1400,
-    zIndex: 9,
-  },
-  bubble: {
-    position: "absolute",
-    bottom: 46,
-    right: -10,
-    zIndex: 10,
-    alignItems: "center",
-  },
+  overlay: { flex: 1, backgroundColor: "transparent" },
+  bubble: { position: "absolute", alignItems: "flex-start" },
   emojiRow: {
     flexDirection: "row",
-    gap: 4,
     backgroundColor: "white",
-    borderRadius: 26,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    elevation: 14,
+    borderRadius: 30,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    elevation: 10,
     shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
   },
-  emojiBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emojiBtnSelected: {
-    backgroundColor: "#E8F4FF",
-  },
-  emojiText: { fontSize: 28 },
   tail: {
     width: 0,
     height: 0,
-    borderLeftWidth: 11,
-    borderRightWidth: 11,
-    borderTopWidth: 11,
+    borderLeftWidth: 10,
+    borderRightWidth: 10,
+    borderBottomWidth: 10,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
-    borderTopColor: "white",
+    borderBottomColor: "white",
+    marginBottom: -1,
+    zIndex: 11,
   },
+  emojiBtn: {
+    width: 52,
+    height: 48,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 24,
+  },
+  emojiBtnSelected: { backgroundColor: "#E8F4FF" },
+  emojiText: { fontSize: 28 },
 });

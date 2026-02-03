@@ -7,9 +7,10 @@ import { RankItem } from "./src/components/RankItem";
 import { ProfileDrawer } from "./src/components/ProfileDrawer";
 import { WaterSettingsModal } from "./src/components/WaterSettingsModal";
 import { UserProfileModal } from "./src/components/UserProfileModal";
+import { MyHistoryModal } from "./src/components/MyHistoryModal";
 
 // ---------------------------------------------------------------------------
-// Gera timestamps de exemplo para hoje com horários espalhados
+// Helpers para gerar timestamps de exemplo
 // ---------------------------------------------------------------------------
 function todayAt(h, m) {
   const d = new Date();
@@ -22,6 +23,12 @@ function yesterdayAt(h, m) {
   d.setHours(h, m, 0, 0);
   return d.toISOString();
 }
+function daysAgoAt(days, h, m) {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  d.setHours(h, m, 0, 0);
+  return d.toISOString();
+}
 
 export default function App() {
   const [mlConsumido, setMlConsumido] = useState(2850);
@@ -31,8 +38,14 @@ export default function App() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isWaterSettingsOpen, setIsWaterSettingsOpen] = useState(false);
 
-  // ---- usuário selecionado para o modal de perfil ----
+  // ---- reação: só um dropdown aberto por vez ----
+  const [activeReactionId, setActiveReactionId] = useState(null);
+
+  // ---- modal de perfil de outro usuário ----
   const [selectedUserId, setSelectedUserId] = useState(null);
+
+  // ---- modal de histórico próprio ----
+  const [isMyHistoryOpen, setIsMyHistoryOpen] = useState(false);
 
   const [usuarios, setUsuarios] = useState([
     {
@@ -47,15 +60,25 @@ export default function App() {
         { emoji: "👍", count: 2 },
       ],
       waterHistory: [
-        { ml: 500, time: yesterdayAt(7, 30) },
-        { ml: 250, time: yesterdayAt(10, 15) },
-        { ml: 1000, time: yesterdayAt(12, 0) },
-        { ml: 500, time: yesterdayAt(15, 45) },
+        { ml: 500, time: daysAgoAt(5, 7, 30) },
+        { ml: 750, time: daysAgoAt(5, 12, 0) },
+        { ml: 500, time: daysAgoAt(4, 8, 15) },
+        { ml: 1000, time: daysAgoAt(4, 13, 0) },
+        { ml: 250, time: daysAgoAt(4, 18, 30) },
+        { ml: 600, time: daysAgoAt(3, 7, 0) },
+        { ml: 800, time: daysAgoAt(3, 12, 45) },
+        { ml: 500, time: daysAgoAt(3, 19, 0) },
+        { ml: 500, time: daysAgoAt(2, 6, 30) },
+        { ml: 1000, time: daysAgoAt(2, 11, 50) },
+        { ml: 400, time: daysAgoAt(2, 16, 20) },
+        { ml: 750, time: yesterdayAt(7, 30) },
+        { ml: 500, time: yesterdayAt(12, 0) },
+        { ml: 1000, time: yesterdayAt(18, 15) },
         { ml: 500, time: todayAt(7, 0) },
         { ml: 250, time: todayAt(9, 30) },
         { ml: 1000, time: todayAt(12, 10) },
-        { ml: 500, time: todayAt(14, 20) },
-        { ml: 600, time: todayAt(17, 5) },
+        { ml: 600, time: todayAt(15, 45) },
+        { ml: 500, time: todayAt(17, 5) },
       ],
     },
     {
@@ -69,6 +92,12 @@ export default function App() {
         { emoji: "🎉", count: 2 },
       ],
       waterHistory: [
+        { ml: 500, time: daysAgoAt(4, 9, 0) },
+        { ml: 750, time: daysAgoAt(4, 14, 30) },
+        { ml: 600, time: daysAgoAt(3, 8, 0) },
+        { ml: 500, time: daysAgoAt(3, 13, 15) },
+        { ml: 800, time: daysAgoAt(2, 7, 45) },
+        { ml: 500, time: daysAgoAt(2, 12, 0) },
         { ml: 500, time: yesterdayAt(8, 0) },
         { ml: 750, time: yesterdayAt(13, 0) },
         { ml: 500, time: yesterdayAt(18, 30) },
@@ -86,6 +115,10 @@ export default function App() {
       foto: "https://i.pravatar.cc/300?img=45",
       reactions: [{ emoji: "💖", count: 6 }],
       waterHistory: [
+        { ml: 500, time: daysAgoAt(3, 10, 0) },
+        { ml: 400, time: daysAgoAt(3, 15, 30) },
+        { ml: 750, time: daysAgoAt(2, 7, 20) },
+        { ml: 500, time: daysAgoAt(2, 14, 0) },
         { ml: 250, time: yesterdayAt(6, 45) },
         { ml: 500, time: yesterdayAt(12, 20) },
         { ml: 750, time: yesterdayAt(19, 0) },
@@ -93,6 +126,7 @@ export default function App() {
         { ml: 400, time: todayAt(10, 55) },
         { ml: 1000, time: todayAt(13, 0) },
         { ml: 250, time: todayAt(15, 30) },
+        { ml: 250, time: todayAt(18, 0) },
       ],
     },
     {
@@ -106,11 +140,14 @@ export default function App() {
         { emoji: "👏", count: 1 },
       ],
       waterHistory: [
+        { ml: 500, time: daysAgoAt(2, 9, 0) },
+        { ml: 500, time: daysAgoAt(2, 14, 30) },
         { ml: 500, time: yesterdayAt(9, 0) },
         { ml: 500, time: yesterdayAt(14, 30) },
         { ml: 500, time: todayAt(7, 45) },
         { ml: 700, time: todayAt(12, 0) },
         { ml: 500, time: todayAt(16, 10) },
+        { ml: 500, time: todayAt(19, 30) },
       ],
     },
     {
@@ -121,12 +158,17 @@ export default function App() {
       foto: "https://i.pravatar.cc/300?img=28",
       reactions: [{ emoji: "🔥", count: 3 }],
       waterHistory: [
+        { ml: 300, time: daysAgoAt(3, 7, 20) },
+        { ml: 500, time: daysAgoAt(3, 11, 50) },
+        { ml: 500, time: daysAgoAt(2, 8, 0) },
+        { ml: 750, time: daysAgoAt(2, 14, 30) },
         { ml: 300, time: yesterdayAt(7, 20) },
         { ml: 500, time: yesterdayAt(11, 50) },
         { ml: 500, time: yesterdayAt(18, 0) },
         { ml: 500, time: todayAt(8, 0) },
         { ml: 800, time: todayAt(12, 30) },
         { ml: 500, time: todayAt(17, 45) },
+        { ml: 300, time: todayAt(20, 0) },
       ],
     },
     {
@@ -137,10 +179,13 @@ export default function App() {
       foto: "https://i.pravatar.cc/300?img=15",
       reactions: [],
       waterHistory: [
+        { ml: 500, time: daysAgoAt(2, 10, 0) },
+        { ml: 250, time: daysAgoAt(2, 16, 0) },
         { ml: 500, time: yesterdayAt(10, 0) },
         { ml: 250, time: yesterdayAt(16, 0) },
         { ml: 500, time: todayAt(7, 30) },
         { ml: 450, time: todayAt(13, 15) },
+        { ml: 750, time: todayAt(18, 0) },
       ],
     },
   ]);
@@ -152,11 +197,8 @@ export default function App() {
         if (u.id === userId) {
           const reactions = [...u.reactions];
           const existing = reactions.find((r) => r.emoji === emoji);
-          if (existing) {
-            existing.count += 1;
-          } else {
-            reactions.push({ emoji, count: 1 });
-          }
+          if (existing) existing.count += 1;
+          else reactions.push({ emoji, count: 1 });
           return { ...u, reactions };
         }
         return u;
@@ -185,15 +227,17 @@ export default function App() {
     );
   };
 
-  // ---- ranking: ordena a cada render ----
+  // ---- ranking ordenado (recomputa a cada render) ----
   const rankingOrdenado = [...usuarios].sort((a, b) => b.ml - a.ml);
 
-  // ---- dados do usuário selecionado para o modal ----
+  // ---- dados do usuário selecionado para o modal de perfil ----
   const selectedUser = usuarios.find((u) => u.id === selectedUserId) || null;
-  // posição do usuário selecionado no ranking ordenado
   const selectedPosition = selectedUser
     ? rankingOrdenado.findIndex((u) => u.id === selectedUserId) + 1
     : 1;
+
+  // ---- dados do próprio usuário para MyHistoryModal ----
+  const myUser = usuarios.find((u) => u.id === 1);
 
   return (
     <SafeAreaProvider>
@@ -211,6 +255,7 @@ export default function App() {
             ml={mlConsumido}
             meta={meta}
             onAdd={handleAddWater}
+            onOpenMyHistory={() => setIsMyHistoryOpen(true)}
           />
           <View style={styles.rankingHeader}>
             <Text style={styles.rankingTitle}>💧 Ranking de Hidratação</Text>
@@ -228,7 +273,8 @@ export default function App() {
                 meta={item.meta}
                 foto={item.foto}
                 reactions={item.reactions}
-                onReactionAdd={(emoji) => handleAddReaction(item.id, emoji)}
+                activeReactionId={activeReactionId}
+                onOpenReaction={setActiveReactionId}
                 onPress={() => setSelectedUserId(item.id)}
               />
             ))}
@@ -248,7 +294,7 @@ export default function App() {
           onSave={(newMeta) => setMeta(newMeta)}
         />
 
-        {/* Modal de perfil do usuário do ranking */}
+        {/* Modal de perfil de outro usuário no ranking */}
         <UserProfileModal
           visible={selectedUserId !== null}
           onClose={() => setSelectedUserId(null)}
@@ -258,6 +304,15 @@ export default function App() {
           meta={selectedUser?.meta || 0}
           position={selectedPosition}
           waterHistory={selectedUser?.waterHistory || []}
+        />
+
+        {/* Modal de histórico próprio */}
+        <MyHistoryModal
+          visible={isMyHistoryOpen}
+          onClose={() => setIsMyHistoryOpen(false)}
+          waterHistory={myUser?.waterHistory || []}
+          totalMl={mlConsumido}
+          meta={meta}
         />
       </SafeAreaView>
     </SafeAreaProvider>

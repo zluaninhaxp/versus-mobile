@@ -9,7 +9,8 @@ interface RankItemTop3Props {
   goal: number;
   photo?: string;
   reactions?: { emoji: string; count: number }[];
-  onReactionAdd?: (emoji: string) => void;
+  activeReactionId: string | null;
+  onOpenReaction: (id: string | null) => void;
   onPress?: () => void;
 }
 
@@ -20,10 +21,13 @@ export function RankItemTop3({
   goal,
   photo,
   reactions: initialReactions = [],
+  activeReactionId,
+  onOpenReaction,
   onPress,
 }: RankItemTop3Props) {
   const [localReactions, setLocalReactions] = useState(initialReactions);
   const metaAlcancada = ml >= goal;
+  const myId = `top3-${position}`;
 
   const config =
     position === 1
@@ -33,11 +37,7 @@ export function RankItemTop3({
         : { bg: "#E67E22", badge: "#FFD89B", photoSize: 64 };
 
   return (
-    <TouchableOpacity
-      style={[styles.card, { backgroundColor: config.bg }]}
-      onPress={onPress}
-      activeOpacity={0.88}
-    >
+    <View style={[styles.card, { backgroundColor: config.bg }]}>
       <View style={styles.topRow}>
         <View style={[styles.positionBadge, { backgroundColor: config.badge }]}>
           <Text style={styles.medalIcon}>
@@ -46,35 +46,35 @@ export function RankItemTop3({
           <Text style={styles.positionText}>{position}º Lugar</Text>
         </View>
 
-        <View style={styles.rightIcons}>
-          {metaAlcancada && (
-            <View style={styles.metaBadge}>
-              <Text style={styles.metaText}>Meta!</Text>
-            </View>
-          )}
-          <RankingActions
-            isTop3={true}
-            metaAlcancada={metaAlcancada}
-            initialReactions={initialReactions}
-            onReactionUpdate={(newReactions) => setLocalReactions(newReactions)}
-          />
-        </View>
+        <RankingActions
+          id={myId}
+          activeReactionId={activeReactionId}
+          onOpenReaction={onOpenReaction}
+          isTop3={true}
+          metaAlcancada={metaAlcancada}
+          initialReactions={initialReactions}
+          onReactionUpdate={(nr) => setLocalReactions(nr)}
+        />
       </View>
 
-      <View style={styles.mainContent}>
-        <View style={styles.photoContainer}>
-          <Image
-            source={{ uri: photo || "https://i.pravatar.cc/150" }}
-            style={[
-              styles.photo,
-              {
-                width: config.photoSize,
-                height: config.photoSize,
-                borderRadius: config.photoSize / 2,
-              },
-            ]}
-          />
-        </View>
+      {/* ÁREA DE CLIQUE: Foto + Nome */}
+      <TouchableOpacity
+        style={styles.mainContentClickable}
+        onPress={onPress}
+        activeOpacity={0.8}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <Image
+          source={{ uri: photo || "https://i.pravatar.cc/150" }}
+          style={[
+            styles.photo,
+            {
+              width: config.photoSize,
+              height: config.photoSize,
+              borderRadius: config.photoSize / 2,
+            },
+          ]}
+        />
         <View style={styles.infoContainer}>
           <Text style={styles.userName}>{name}</Text>
           <View style={styles.statsRow}>
@@ -82,7 +82,12 @@ export function RankItemTop3({
             <Text style={styles.mlGoal}> / {goal}ml</Text>
           </View>
         </View>
-      </View>
+        {metaAlcancada && (
+          <View style={styles.metaBadge}>
+            <Text style={styles.metaText}>Meta!</Text>
+          </View>
+        )}
+      </TouchableOpacity>
 
       {localReactions.length > 0 && (
         <View style={styles.reactionsContainer}>
@@ -94,7 +99,7 @@ export function RankItemTop3({
           ))}
         </View>
       )}
-    </TouchableOpacity>
+    </View>
   );
 }
 
@@ -116,22 +121,25 @@ const styles = StyleSheet.create({
   },
   medalIcon: { fontSize: 16 },
   positionText: { fontSize: 13, fontWeight: "bold", color: "#333" },
-  rightIcons: { flexDirection: "row", alignItems: "center", gap: 8 },
-  metaBadge: {
-    backgroundColor: "#2ECC71",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 20,
+  mainContentClickable: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
   },
-  metaText: { color: "white", fontSize: 11, fontWeight: "bold" },
-  mainContent: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
-  photoContainer: { marginRight: 16 },
-  photo: { borderWidth: 3, borderColor: "white" },
+  photo: { borderWidth: 3, borderColor: "white", marginRight: 16 },
   infoContainer: { flex: 1 },
   userName: { fontSize: 18, fontWeight: "bold", color: "white" },
   statsRow: { flexDirection: "row", alignItems: "baseline" },
   mlValue: { fontSize: 24, fontWeight: "900", color: "white" },
   mlGoal: { fontSize: 14, color: "rgba(255,255,255,0.7)", fontWeight: "600" },
+  metaBadge: {
+    backgroundColor: "#2ECC71",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginLeft: "auto",
+  },
+  metaText: { color: "white", fontSize: 11, fontWeight: "bold" },
   reactionsContainer: {
     flexDirection: "row",
     gap: 8,

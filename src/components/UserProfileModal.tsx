@@ -5,20 +5,21 @@ import {
   StyleSheet,
   Modal,
   Image,
-  TouchableOpacity,
   ScrollView,
   Animated,
   Easing,
-  StatusBar,
+  PanResponder,
   Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 const { height: screenHeight } = Dimensions.get("screen");
+const SHEET_HEIGHT = screenHeight * 0.88;
+const DRAG_THRESHOLD = 60;
 
 interface WaterEntry {
   ml: number;
-  time: string; // ISO string
+  time: string;
 }
 
 interface UserProfileModalProps {
@@ -42,12 +43,14 @@ export function UserProfileModal({
   position,
   waterHistory,
 }: UserProfileModalProps) {
-  const slideAnim = useRef(new Animated.Value(screenHeight)).current;
+  const slideAnim = useRef(new Animated.Value(SHEET_HEIGHT)).current;
+  const dragOffset = useRef(new Animated.Value(0)).current;
   const [showModal, setShowModal] = React.useState(visible);
 
   useEffect(() => {
     if (visible) {
       setShowModal(true);
+      dragOffset.setValue(0);
       Animated.timing(slideAnim, {
         toValue: 0,
         duration: 380,
@@ -56,7 +59,7 @@ export function UserProfileModal({
       }).start();
     } else {
       Animated.timing(slideAnim, {
-        toValue: screenHeight,
+        toValue: SHEET_HEIGHT,
         duration: 300,
         easing: Easing.in(Easing.ease),
         useNativeDriver: true,
@@ -64,12 +67,33 @@ export function UserProfileModal({
     }
   }, [visible]);
 
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: (_, g) => g.dy > 0,
+      onMoveShouldSetPanResponder: (_, g) => g.dy > 8,
+      onPanResponderMove: (_, g) => {
+        if (g.dy > 0) dragOffset.setValue(g.dy);
+      },
+      onPanResponderReleaseOrTerminate: (_, g) => {
+        if (g.dy > DRAG_THRESHOLD) {
+          onClose();
+        } else {
+          Animated.spring(dragOffset, {
+            toValue: 0,
+            useNativeDriver: true,
+            tension: 60,
+            friction: 10,
+          }).start();
+        }
+      },
+    }),
+  ).current;
+
   if (!showModal) return null;
 
   const porcentagem = Math.min((ml / meta) * 100, 100);
   const metaAlcancada = ml >= meta;
 
-  /* ---- cor da medalha por posição ---- */
   const medalColor =
     position === 1
       ? "#FFD700"
@@ -87,47 +111,40 @@ export function UserProfileModal({
           ? "🥉"
           : `${position}º`;
 
-  /* ---- formatar timestamp para exibição ---- */
-  const formatTime = (iso: string) => {
-    const d = new Date(iso);
-    const h = d.getHours().toString().padStart(2, "0");
-    const m = d.getMinutes().toString().padStart(2, "0");
-    return `${h}:${m}`;
-  };
-
-  const formatDate = (iso: string) => {
-    const d = new Date(iso);
-    const today = new Date();
-    if (
+  // histórico só hoje
+  const today = new Date();
+  const todayHistory = waterHistory.filter((e) => {
+    const d = new Date(e.time);
+    return (
       d.getDate() === today.getDate() &&
       d.getMonth() === today.getMonth() &&
       d.getFullYear() === today.getFullYear()
-    )
-      return "Hoje";
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-    if (
-      d.getDate() === yesterday.getDate() &&
-      d.getMonth() === yesterday.getMonth()
-    )
-      return "Ontem";
-    return `${d.getDate()}/${d.getMonth() + 1}`;
-  };
-
-  /* ---- agrupa histórico por data ---- */
-  const groupedHistory: { [key: string]: WaterEntry[] } = {};
-  waterHistory.forEach((entry) => {
-    const key = formatDate(entry.time);
-    if (!groupedHistory[key]) groupedHistory[key] = [];
-    groupedHistory[key].push(entry);
+    );
   });
 
-  /* ---- ícone por quantidade ---- */
-  const getWaterIcon = (quantidade: number) => {
-    if (quantidade < 300) return "🥤";
-    if (quantidade < 600) return "🥛";
-    return "🍶";
+  // gráfico: últimos 7 dias
+  const weekData: { label: string; ml: number }[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const day = new Date(today);
+    day.setDate(today.getDate() - i);
+    const dayMl = waterHistory.reduce((acc, e) => {
+      const d = new Date(e.time);
+      return d.getDate() === day.getDate() &&
+        d.getMonth() === day.getMonth() &&
+        d.getFullYear() === day.getFullYear()
+        ? acc + e.ml
+        : acc;
+    }, 0);
+    const labels = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+    weekData.push({ label: labels[day.getDay()], ml: dayMl });
+  }
+  const maxMl = Math.max(...weekData.map((d) => d.ml), 1);
+
+  const formatTime = (iso: string) => {
+    const d = new Date(iso);
+    return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
   };
+  const getWaterIcon = (q: number) => (q < 300 ? "🥤" : q < 600 ? "🥛" : "🍶");
 
   return (
     <Modal
@@ -135,34 +152,25 @@ export function UserProfileModal({
       visible={showModal}
       onRequestClose={onClose}
       animationType="none"
-      statusBarTranslucent={true}
+      statusBarTranslucent
     >
-      {/* Overlay escuro */}
-      <TouchableOpacity
-        style={styles.overlay}
-        onPress={onClose}
-        activeOpacity={1}
-      />
+      <View style={styles.overlay} />
 
-      {/* Sheet que desliza de baixo */}
       <Animated.View
-        style={[styles.sheet, { transform: [{ translateY: slideAnim }] }]}
+        style={[
+          styles.sheet,
+          { transform: [{ translateY: Animated.add(slideAnim, dragOffset) }] },
+        ]}
+        {...panResponder.panHandlers}
       >
-        {/* Alça de arraste (indicador visual) */}
         <View style={styles.handle} />
-
-        {/* Botão fechar */}
-        <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-          <Ionicons name="close" size={26} color="#6B7D8F" />
-        </TouchableOpacity>
 
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* ---- SEÇÃO DO PERFIL ---- */}
+          {/* PERFIL */}
           <View style={styles.profileCard}>
-            {/* Foto + medalha */}
             <View style={styles.avatarWrapper}>
               <View style={[styles.medalRing, { borderColor: medalColor }]}>
                 <Image
@@ -176,10 +184,7 @@ export function UserProfileModal({
                 <Text style={styles.medalText}>{medalEmoji}</Text>
               </View>
             </View>
-
             <Text style={styles.profileName}>{nome}</Text>
-
-            {/* ml / meta */}
             <View style={styles.statsRow}>
               <Text
                 style={[
@@ -192,15 +197,12 @@ export function UserProfileModal({
               <Text style={styles.statSep}>/</Text>
               <Text style={styles.statMeta}>{meta} ml</Text>
             </View>
-
             {metaAlcancada && (
               <View style={styles.metaAchievedBadge}>
                 <Ionicons name="checkmark-circle" size={16} color="white" />
                 <Text style={styles.metaAchievedText}>Meta alcançada!</Text>
               </View>
             )}
-
-            {/* Barra de progresso */}
             <View style={styles.progressBg}>
               <View
                 style={[
@@ -220,48 +222,82 @@ export function UserProfileModal({
             </Text>
           </View>
 
-          {/* ---- HISTÓRICO DE ÁGUA ---- */}
+          {/* GRÁFICO SEMANAL */}
           <View style={styles.sectionHeader}>
-            <Ionicons name="water" size={18} color="#14B8D4" />
-            <Text style={styles.sectionTitle}>Histórico de Água</Text>
+            <Ionicons name="bar-chart" size={18} color="#14B8D4" />
+            <Text style={styles.sectionTitle}>Última semana</Text>
+          </View>
+          <View style={styles.chartCard}>
+            <View style={styles.chartBars}>
+              {weekData.map((d, i) => {
+                const isToday = i === 6;
+                const barH = Math.max((d.ml / maxMl) * 100, d.ml > 0 ? 8 : 4);
+                return (
+                  <View key={i} style={styles.chartCol}>
+                    <Text
+                      style={[
+                        styles.chartMlLabel,
+                        isToday && styles.chartMlLabelToday,
+                      ]}
+                    >
+                      {d.ml > 0 ? `${d.ml}` : ""}
+                    </Text>
+                    <View style={styles.chartBarBg}>
+                      <View
+                        style={[
+                          styles.chartBarFill,
+                          { height: `${barH}%` },
+                          isToday && styles.chartBarToday,
+                        ]}
+                      />
+                    </View>
+                    <Text
+                      style={[
+                        styles.chartDayLabel,
+                        isToday && styles.chartDayLabelToday,
+                      ]}
+                    >
+                      {d.label}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
           </View>
 
-          {waterHistory.length === 0 ? (
+          {/* HISTÓRICO DE HOJE */}
+          <View style={styles.sectionHeader}>
+            <Ionicons name="water" size={18} color="#14B8D4" />
+            <Text style={styles.sectionTitle}>Hoje</Text>
+          </View>
+          {todayHistory.length === 0 ? (
             <View style={styles.emptyBox}>
-              <Text style={styles.emptyText}>Nenhum registro ainda hoje.</Text>
+              <Text style={styles.emptyText}>Nenhum registro hoje.</Text>
             </View>
           ) : (
-            Object.keys(groupedHistory).map((dateLabel) => (
-              <View key={dateLabel}>
-                {/* Separador de data */}
-                <Text style={styles.dateLabel}>{dateLabel}</Text>
-
-                {groupedHistory[dateLabel].map((entry, i) => (
-                  <View key={i} style={styles.historyItem}>
-                    <View style={styles.historyIcon}>
-                      <Text style={styles.historyIconEmoji}>
-                        {getWaterIcon(entry.ml)}
-                      </Text>
-                    </View>
-                    <View style={styles.historyInfo}>
-                      <Text style={styles.historyMl}>{entry.ml} ml</Text>
-                      <Text style={styles.historyTime}>
-                        Registrado às {formatTime(entry.time)}
-                      </Text>
-                    </View>
-                    <Text style={styles.historyAmount}>+{entry.ml}</Text>
-                  </View>
-                ))}
+            todayHistory.map((entry, i) => (
+              <View key={i} style={styles.historyItem}>
+                <View style={styles.historyIcon}>
+                  <Text style={styles.historyIconEmoji}>
+                    {getWaterIcon(entry.ml)}
+                  </Text>
+                </View>
+                <View style={styles.historyInfo}>
+                  <Text style={styles.historyMl}>{entry.ml} ml</Text>
+                  <Text style={styles.historyTime}>
+                    Registrado às {formatTime(entry.time)}
+                  </Text>
+                </View>
+                <Text style={styles.historyAmount}>+{entry.ml}</Text>
               </View>
             ))
           )}
 
-          {/* ---- CONQUISTAS (placeholder) ---- */}
-          <View style={styles.sectionHeader}>
+          {/* CONQUISTAS placeholder */}
+          <View style={[styles.sectionHeader, { marginTop: 20 }]}>
             <Ionicons name="trophy" size={18} color="#FFD700" />
             <Text style={styles.sectionTitle}>Conquistas</Text>
           </View>
-
           <View style={styles.conquistaPlaceholder}>
             <Ionicons name="trophy-outline" size={40} color="#E0E6EC" />
             <Text style={styles.conquistaText}>
@@ -275,7 +311,6 @@ export function UserProfileModal({
 }
 
 const styles = StyleSheet.create({
-  /* overlay */
   overlay: {
     position: "absolute",
     top: 0,
@@ -284,14 +319,12 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: "rgba(0,0,0,0.45)",
   },
-
-  /* sheet */
   sheet: {
     position: "absolute",
     left: 0,
     right: 0,
     bottom: 0,
-    height: screenHeight * 0.88,
+    height: SHEET_HEIGHT,
     backgroundColor: "#F5F9FF",
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
@@ -310,35 +343,22 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 4,
   },
-  closeBtn: {
-    position: "absolute",
-    top: 16,
-    right: 20,
-    zIndex: 2,
-  },
-  scrollContent: {
-    paddingHorizontal: 22,
-    paddingBottom: 40,
-  },
+  scrollContent: { paddingHorizontal: 22, paddingBottom: 40 },
 
-  /* ---- perfil ---- */
   profileCard: {
     alignItems: "center",
     backgroundColor: "white",
     borderRadius: 22,
     padding: 24,
-    marginTop: 12,
-    marginBottom: 24,
+    marginTop: 8,
+    marginBottom: 20,
     elevation: 3,
     shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
   },
-  avatarWrapper: {
-    position: "relative",
-    marginBottom: 14,
-  },
+  avatarWrapper: { position: "relative", marginBottom: 12 },
   medalRing: {
     width: 96,
     height: 96,
@@ -348,11 +368,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 3,
   },
-  avatar: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
-  },
+  avatar: { width: 84, height: 84, borderRadius: 42 },
   medalBadge: {
     position: "absolute",
     bottom: -4,
@@ -366,7 +382,6 @@ const styles = StyleSheet.create({
     borderColor: "white",
   },
   medalText: { fontSize: 16 },
-
   profileName: {
     fontSize: 21,
     fontWeight: "900",
@@ -379,15 +394,10 @@ const styles = StyleSheet.create({
     gap: 6,
     marginBottom: 8,
   },
-  statValue: {
-    fontSize: 28,
-    fontWeight: "900",
-    color: "#14B8D4",
-  },
+  statValue: { fontSize: 28, fontWeight: "900", color: "#14B8D4" },
   statValueGold: { color: "#DAA520" },
   statSep: { fontSize: 18, color: "#D0D8E0", fontWeight: "600" },
   statMeta: { fontSize: 18, color: "#9BA8B5", fontWeight: "600" },
-
   metaAchievedBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -399,7 +409,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   metaAchievedText: { color: "white", fontSize: 13, fontWeight: "bold" },
-
   progressBg: {
     width: "100%",
     height: 12,
@@ -407,11 +416,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     overflow: "hidden",
   },
-  progressFill: {
-    height: "100%",
-    backgroundColor: "#14B8D4",
-    borderRadius: 6,
-  },
+  progressFill: { height: "100%", backgroundColor: "#14B8D4", borderRadius: 6 },
   progressFillGold: { backgroundColor: "#FFD700" },
   progressLabel: {
     fontSize: 12,
@@ -422,29 +427,63 @@ const styles = StyleSheet.create({
   },
   progressLabelGold: { color: "#DAA520" },
 
-  /* ---- seção ---- */
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     marginBottom: 12,
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#2B5B8E",
-  },
+  sectionTitle: { fontSize: 16, fontWeight: "800", color: "#2B5B8E" },
 
-  /* ---- histórico ---- */
-  dateLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#9BA8B5",
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-    marginBottom: 8,
-    marginTop: 4,
+  chartCard: {
+    backgroundColor: "white",
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 22,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
   },
+  chartBars: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    height: 110,
+  },
+  chartCol: {
+    flex: 1,
+    alignItems: "center",
+    flexDirection: "column",
+    justifyContent: "flex-end",
+    height: "100%",
+  },
+  chartMlLabel: {
+    fontSize: 9,
+    color: "#9BA8B5",
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  chartMlLabelToday: { color: "#14B8D4" },
+  chartBarBg: {
+    width: 28,
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "#F0F4F8",
+    borderRadius: 6,
+    overflow: "hidden",
+  },
+  chartBarFill: { width: "100%", backgroundColor: "#C8E6F5", borderRadius: 6 },
+  chartBarToday: { backgroundColor: "#14B8D4" },
+  chartDayLabel: {
+    fontSize: 11,
+    color: "#9BA8B5",
+    fontWeight: "600",
+    marginTop: 6,
+  },
+  chartDayLabelToday: { color: "#14B8D4", fontWeight: "800" },
+
   historyItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -471,12 +510,7 @@ const styles = StyleSheet.create({
   historyInfo: { flex: 1 },
   historyMl: { fontSize: 15, fontWeight: "bold", color: "#2B3E50" },
   historyTime: { fontSize: 12, color: "#9BA8B5" },
-  historyAmount: {
-    fontSize: 15,
-    fontWeight: "900",
-    color: "#14B8D4",
-  },
-
+  historyAmount: { fontSize: 15, fontWeight: "900", color: "#14B8D4" },
   emptyBox: {
     backgroundColor: "white",
     borderRadius: 14,
@@ -486,7 +520,6 @@ const styles = StyleSheet.create({
   },
   emptyText: { color: "#9BA8B5", fontSize: 14 },
 
-  /* ---- conquistas placeholder ---- */
   conquistaPlaceholder: {
     backgroundColor: "white",
     borderRadius: 18,
