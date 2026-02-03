@@ -1,16 +1,6 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import React from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { RankingActions } from "./RankingActions";
-
-interface RankItemTop3Props {
-  position: number;
-  name: string;
-  ml: number;
-  goal: number;
-  photo?: string;
-  reactions?: { emoji: string; count: number }[];
-  onReactionAdd?: (emoji: string) => void; // ADICIONE ISSO
-}
 
 export function RankItemTop3({
   position,
@@ -18,11 +8,12 @@ export function RankItemTop3({
   ml,
   goal,
   photo,
-  reactions: initialReactions = [],
-}: RankItemTop3Props) {
-  const [localReactions, setLocalReactions] = useState(initialReactions);
-  const metaAlcancada = ml >= goal;
-
+  localReactions,
+  onPress,
+  isMe,
+  metaAlcancada,
+  onReactionUpdate,
+}: any) {
   const config =
     position === 1
       ? { bg: "#14B8D4", badge: "#FDB813", photoSize: 80 }
@@ -40,37 +31,40 @@ export function RankItemTop3({
           <Text style={styles.positionText}>{position}º Lugar</Text>
         </View>
 
-        <View style={styles.rightIcons}>
+        <View style={styles.rightGroup}>
           {metaAlcancada && (
             <View style={styles.metaBadge}>
               <Text style={styles.metaText}>Meta!</Text>
             </View>
           )}
-
-          {/* Componente Unificado de Ações */}
+          {/* Removidas as props problemáticas */}
           <RankingActions
+            isMe={isMe}
             isTop3={true}
             metaAlcancada={metaAlcancada}
-            initialReactions={initialReactions}
-            onReactionUpdate={(newReactions) => setLocalReactions(newReactions)}
+            initialReactions={localReactions}
+            onReactionUpdate={onReactionUpdate}
           />
         </View>
       </View>
 
-      <View style={styles.mainContent}>
-        <View style={styles.photoContainer}>
-          <Image
-            source={{ uri: photo || "https://i.pravatar.cc/150" }}
-            style={[
-              styles.photo,
-              {
-                width: config.photoSize,
-                height: config.photoSize,
-                borderRadius: config.photoSize / 2,
-              },
-            ]}
-          />
-        </View>
+      <TouchableOpacity
+        style={styles.mainContentClickable}
+        onPress={onPress}
+        activeOpacity={0.8}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <Image
+          source={{ uri: photo || "https://i.pravatar.cc/150" }}
+          style={[
+            styles.photo,
+            {
+              width: config.photoSize,
+              height: config.photoSize,
+              borderRadius: config.photoSize / 2,
+            },
+          ]}
+        />
         <View style={styles.infoContainer}>
           <Text style={styles.userName}>{name}</Text>
           <View style={styles.statsRow}>
@@ -78,11 +72,11 @@ export function RankItemTop3({
             <Text style={styles.mlGoal}> / {goal}ml</Text>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
 
       {localReactions.length > 0 && (
         <View style={styles.reactionsContainer}>
-          {localReactions.map((r, i) => (
+          {localReactions.map((r: any, i: number) => (
             <View key={i} style={styles.reactionBadge}>
               <Text style={styles.reactionEmoji}>{r.emoji}</Text>
               <Text style={styles.reactionCount}>{r.count}</Text>
@@ -110,9 +104,20 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     gap: 4,
   },
+  rightGroup: { flexDirection: "row", alignItems: "center", gap: 8 },
   medalIcon: { fontSize: 16 },
   positionText: { fontSize: 13, fontWeight: "bold", color: "#333" },
-  rightIcons: { flexDirection: "row", alignItems: "center", gap: 8 },
+  mainContentClickable: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  photo: { borderWidth: 3, borderColor: "white", marginRight: 16 },
+  infoContainer: { flex: 1 },
+  userName: { fontSize: 18, fontWeight: "bold", color: "white" },
+  statsRow: { flexDirection: "row", alignItems: "baseline" },
+  mlValue: { fontSize: 24, fontWeight: "900", color: "white" },
+  mlGoal: { fontSize: 14, color: "rgba(255,255,255,0.7)", fontWeight: "600" },
   metaBadge: {
     backgroundColor: "#2ECC71",
     paddingHorizontal: 10,
@@ -120,14 +125,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   metaText: { color: "white", fontSize: 11, fontWeight: "bold" },
-  mainContent: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
-  photoContainer: { marginRight: 16 },
-  photo: { borderWidth: 3, borderColor: "white" },
-  infoContainer: { flex: 1 },
-  userName: { fontSize: 18, fontWeight: "bold", color: "white" },
-  statsRow: { flexDirection: "row", alignItems: "baseline" },
-  mlValue: { fontSize: 24, fontWeight: "900", color: "white" },
-  mlGoal: { fontSize: 14, color: "rgba(255,255,255,0.7)", fontWeight: "600" },
   reactionsContainer: {
     flexDirection: "row",
     gap: 8,

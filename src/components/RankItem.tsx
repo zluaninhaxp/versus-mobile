@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { RankItemTop3 } from "./RankItemTop3";
 import { RankItemRegular } from "./RankItemRegular";
 
@@ -9,43 +9,41 @@ interface RankItemProps {
   meta: number;
   foto?: string;
   reactions?: { emoji: string; count: number }[];
-  onReactionAdd?: (emoji: string) => void;
+  activeReactionId: string | null;
+  onOpenReaction: (id: string | null) => void;
+  onPress?: () => void;
 }
 
-export function RankItem({
-  position,
-  nome,
-  ml,
-  meta,
-  foto,
-  reactions,
-  onReactionAdd,
-}: RankItemProps) {
-  // Top 3 recebem o card colorido e grande
-  if (position <= 3) {
-    return (
-      <RankItemTop3
-        position={position}
-        name={nome}
-        ml={ml}
-        goal={meta}
-        photo={foto}
-        reactions={reactions}
-        onReactionAdd={onReactionAdd}
-      />
-    );
+export function RankItem(props: RankItemProps) {
+  const [localReactions, setLocalReactions] = useState(props.reactions || []);
+
+  // Lógica dinâmica: Se a meta aumentar no modal, isso vira false na hora
+  const metaAlcancada = props.ml >= props.meta;
+  const isMe = props.nome === "Luana Castro";
+  const myId =
+    props.position <= 3 ? `top3-${props.position}` : `reg-${props.position}`;
+
+  const dataProps = {
+    position: props.position,
+    name: props.nome,
+    ml: props.ml,
+    goal: props.meta,
+    photo: props.foto,
+    localReactions,
+    activeReactionId: props.activeReactionId,
+    onOpenReaction: props.onOpenReaction,
+    onPress: props.onPress,
+    myId,
+    isMe,
+    metaAlcancada,
+    onReactionUpdate: (newReactions: { emoji: string; count: number }[]) =>
+      setLocalReactions(newReactions),
+  };
+
+  // Se ml for 0 ou posição > 3, usa visual regular
+  if (props.position <= 3 && props.ml > 0) {
+    return <RankItemTop3 {...dataProps} />;
   }
 
-  // 4º em diante recebem o card simples
-  return (
-    <RankItemRegular
-      position={position}
-      name={nome}
-      ml={ml}
-      goal={meta}
-      photo={foto}
-      reactions={reactions}
-      onReactionAdd={onReactionAdd}
-    />
-  );
+  return <RankItemRegular {...dataProps} />;
 }

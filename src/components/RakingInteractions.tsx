@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
+// Sistema global "só um aberto por vez"
 let _nextId = 0;
 const _listeners: Set<(openedId: number | null) => void> = new Set();
 function _broadcast(openedId: number | null) {
@@ -21,17 +22,11 @@ function _broadcast(openedId: number | null) {
 
 const REACTIONS = ["🤩", "😂", "😳", "🥺", "😡"];
 
-interface ReactionSelectorProps {
-  onReactionSelect?: (emoji: string) => void;
-  currentReaction?: string | null;
-  isTop3?: boolean;
-}
-
 export function ReactionSelector({
   onReactionSelect,
   currentReaction,
   isTop3 = false,
-}: ReactionSelectorProps) {
+}: any) {
   const myIdRef = useRef<number | null>(null);
   if (myIdRef.current === null) myIdRef.current = _nextId++;
   const myId = myIdRef.current;
@@ -43,15 +38,15 @@ export function ReactionSelector({
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
+  // CORREÇÃO DO ERRO TS2345: O retorno do delete é booleano, o React exige void
   useEffect(() => {
     const listener = (openedId: number | null) => {
       if (openedId !== myId) setIsOpen(false);
     };
     _listeners.add(listener);
 
-    // FIX: Envolver o delete em chaves para garantir que o retorno seja void
     return () => {
-      _listeners.delete(listener);
+      _listeners.delete(listener); // Chaves garantem retorno void
     };
   }, [myId]);
 
@@ -98,6 +93,7 @@ export function ReactionSelector({
     [onReactionSelect, close],
   );
 
+  // --- AJUSTES DE DELICADEZA ---
   const bubbleWidth = 230;
   const bubbleLeft = Math.max(
     10,

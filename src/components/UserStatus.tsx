@@ -10,17 +10,14 @@ interface UserStatusProps {
 }
 
 export function UserStatus({ ml, onAdd, userName, meta }: UserStatusProps) {
-  // Lógica de cálculo baseada na meta dinâmica do App.tsx
   const porcentagemReal = (ml / meta) * 100;
   const porcentagemExibida = Math.min(porcentagemReal, 100);
   const bateuAMeta = ml >= meta;
 
-  // Foto fictícia para o layout
   const fotoPerfil = "https://i.pravatar.cc/300?img=32";
 
   return (
     <View style={styles.container}>
-      {/* HEADER DO STATUS (LAYOUT SOLTO) */}
       <View style={styles.topRow}>
         <View style={[styles.avatarContainer, bateuAMeta && styles.avatarGold]}>
           <Image source={{ uri: fotoPerfil }} style={styles.avatarImage} />
@@ -30,7 +27,6 @@ export function UserStatus({ ml, onAdd, userName, meta }: UserStatusProps) {
         <View style={styles.nameContainer}>
           <Text style={styles.userName}>{userName}</Text>
           <View style={styles.statsRow}>
-            {/* O valor em destaque e a meta clarinha ao lado */}
             <Text style={[styles.userStats, bateuAMeta && styles.textGold]}>
               {ml}ml
             </Text>
@@ -38,11 +34,10 @@ export function UserStatus({ ml, onAdd, userName, meta }: UserStatusProps) {
           </View>
         </View>
 
-        {/* Botão de Adicionar (passando o estado dourado) */}
+        {/* Mantido apenas o botão de adicionar água à direita */}
         <AddWaterModal onAdd={onAdd} isGold={bateuAMeta} />
       </View>
 
-      {/* BARRA DE PROGRESSO (ESTILO DASHBOARD) */}
       <View style={styles.progressSection}>
         <View style={styles.progressBarBg}>
           <View
@@ -94,13 +89,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   nameContainer: { flex: 1, marginLeft: 20 },
-  userName: {
-    fontSize: 13,
-    fontWeight: "800",
-    color: "#4e4e4e",
-    letterSpacing: 1.5,
-    marginBottom: 4,
-  },
+  userName: { fontSize: 18, fontWeight: "bold", color: "#2B3E50" },
   statsRow: { flexDirection: "row", alignItems: "baseline" },
   userStats: { fontSize: 32, fontWeight: "900", color: "#2B5B8E" },
   textGold: { color: "#DAA520" },

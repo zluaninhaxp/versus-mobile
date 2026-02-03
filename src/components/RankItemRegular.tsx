@@ -1,16 +1,6 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import React from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { RankingActions } from "./RankingActions";
-
-interface RankItemRegularProps {
-  position: number;
-  name: string;
-  ml: number;
-  goal: number;
-  photo?: string;
-  reactions?: { emoji: string; count: number }[];
-  onReactionAdd?: (emoji: string) => void; // ADICIONE ISSO
-}
 
 export function RankItemRegular({
   position,
@@ -18,11 +8,12 @@ export function RankItemRegular({
   ml,
   goal,
   photo,
-  reactions: initialReactions = [],
-}: RankItemRegularProps) {
-  const [localReactions, setLocalReactions] = useState(initialReactions);
-  const metaAlcancada = ml >= goal;
-
+  localReactions,
+  onPress,
+  isMe,
+  metaAlcancada,
+  onReactionUpdate,
+}: any) {
   return (
     <View style={styles.card}>
       <View style={styles.mainRow}>
@@ -30,33 +21,45 @@ export function RankItemRegular({
           <Text style={styles.positionNumber}>{position}</Text>
         </View>
 
-        <View style={styles.photoContainer}>
+        <TouchableOpacity
+          style={styles.userClickArea}
+          onPress={onPress}
+          activeOpacity={0.7}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
           <Image
             source={{ uri: photo || "https://i.pravatar.cc/150" }}
             style={styles.photo}
           />
-        </View>
-
-        <View style={styles.infoContainer}>
-          <Text style={styles.userName}>{name}</Text>
-          <View style={styles.statsRow}>
-            <Text style={styles.mlValue}>{ml} ml</Text>
-            <Text style={styles.mlGoal}> / {goal}ml</Text>
+          <View style={styles.infoContainer}>
+            <Text style={styles.userName}>{name}</Text>
+            <View style={styles.statsRow}>
+              <Text style={styles.mlValue}>{ml} ml</Text>
+              <Text style={styles.mlGoal}> / {goal}ml</Text>
+            </View>
           </View>
-        </View>
+        </TouchableOpacity>
 
-        {/* Componente Unificado de Ações */}
-        <RankingActions
-          isTop3={false}
-          metaAlcancada={metaAlcancada}
-          initialReactions={initialReactions}
-          onReactionUpdate={(newReactions) => setLocalReactions(newReactions)}
-        />
+        <View style={styles.rightBlock}>
+          {metaAlcancada && (
+            <View style={styles.metaBadge}>
+              <Text style={styles.metaText}>Meta!</Text>
+            </View>
+          )}
+          {/* Removidas as props problemáticas */}
+          <RankingActions
+            isMe={isMe}
+            isTop3={false}
+            metaAlcancada={metaAlcancada}
+            initialReactions={localReactions}
+            onReactionUpdate={onReactionUpdate}
+          />
+        </View>
       </View>
 
       {localReactions.length > 0 && (
         <View style={styles.reactionsContainer}>
-          {localReactions.map((r, i) => (
+          {localReactions.map((r: any, i: number) => (
             <View key={i} style={styles.reactionBadge}>
               <Text style={styles.reactionEmoji}>{r.emoji}</Text>
               <Text style={styles.reactionCount}>{r.count}</Text>
@@ -84,27 +87,36 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0F4F8",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
+    marginRight: 10,
   },
   positionNumber: { fontSize: 16, fontWeight: "bold", color: "#6B7D8F" },
-  photoContainer: { marginRight: 12 },
+  userClickArea: { flexDirection: "row", alignItems: "center", flex: 1 },
   photo: {
     width: 56,
     height: 56,
     borderRadius: 28,
     borderWidth: 2,
     borderColor: "#F0F4F8",
+    marginRight: 10,
   },
   infoContainer: { flex: 1 },
-  userName: { fontSize: 16, fontWeight: "bold", color: "#2B3E50" },
+  userName: { fontSize: 15, fontWeight: "bold", color: "#2B3E50" },
   statsRow: { flexDirection: "row", alignItems: "baseline" },
-  mlValue: { fontSize: 18, fontWeight: "900", color: "#14B8D4" },
-  mlGoal: { fontSize: 13, color: "#9BA8B5", fontWeight: "600" },
+  mlValue: { fontSize: 17, fontWeight: "900", color: "#14B8D4" },
+  mlGoal: { fontSize: 12, color: "#9BA8B5", fontWeight: "600" },
+  rightBlock: { flexDirection: "row", alignItems: "center", gap: 8 },
+  metaBadge: {
+    backgroundColor: "#2ECC71",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  metaText: { color: "white", fontSize: 10, fontWeight: "bold" },
   reactionsContainer: {
     flexDirection: "row",
     gap: 8,
-    marginTop: 12,
-    paddingTop: 12,
+    marginTop: 10,
+    paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: "#F0F4F8",
     flexWrap: "wrap",
