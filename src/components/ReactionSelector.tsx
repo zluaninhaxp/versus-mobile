@@ -5,182 +5,213 @@ import {
   StyleSheet,
   TouchableOpacity,
   Animated,
-  Modal,
   TouchableWithoutFeedback,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-const REACTIONS = ["❤️", "👏", "🔥", "💪", "🎉", "👍"];
+const REACTIONS = ["🤩", "😂", "😳", "🥺", "😡"];
 
 interface ReactionSelectorProps {
-  onReactionSelect?: (reaction: string) => void;
-  currentReaction?: string | null;
+  currentReaction: string | null;
+  onReactionSelect: (reaction: string) => void;
+  isTop3?: boolean;
 }
 
 export function ReactionSelector({
-  onReactionSelect,
   currentReaction,
+  onReactionSelect,
+  isTop3 = false,
 }: ReactionSelectorProps) {
-  const [modalVisible, setModalVisible] = useState(false);
-  const slideAnim = useRef(new Animated.Value(-200)).current;
+  const [open, setOpen] = useState(false);
+  const scaleAnim = useRef(new Animated.Value(0.6)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
 
-  const openModal = () => {
-    setModalVisible(true);
-    Animated.spring(slideAnim, {
-      toValue: 0,
-      useNativeDriver: true,
-      tension: 50,
-      friction: 8,
-    }).start();
+  const show = () => {
+    setOpen(true);
+    Animated.parallel([
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+        tension: 100,
+        friction: 7,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 1,
+        duration: 160,
+        useNativeDriver: true,
+      }),
+    ]).start();
   };
 
-  const closeModal = () => {
-    Animated.timing(slideAnim, {
-      toValue: -200,
-      duration: 200,
-      useNativeDriver: true,
-    }).start(() => {
-      setModalVisible(false);
-    });
+  const hide = () => {
+    Animated.parallel([
+      Animated.timing(scaleAnim, {
+        toValue: 0.6,
+        duration: 140,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 0,
+        duration: 140,
+        useNativeDriver: true,
+      }),
+    ]).start(() => setOpen(false));
   };
 
-  const handleReactionSelect = (reaction: string) => {
-    onReactionSelect?.(reaction);
-    closeModal();
+  const pick = (emoji: string) => {
+    onReactionSelect(emoji);
+    hide();
   };
 
   return (
-    <View>
+    <View style={styles.wrapper}>
+      {/* Botão que abre/fecha */}
       <TouchableOpacity
         style={[
-          styles.actionButton,
-          currentReaction ? styles.actionButtonActive : null,
+          styles.btn,
+          isTop3 && styles.btnTop3,
+          currentReaction && styles.btnActive,
         ]}
-        onPress={() => {
-          if (currentReaction) {
-            onReactionSelect?.(currentReaction);
-          } else {
-            openModal();
-          }
-        }}
+        onPress={() => (open ? hide() : show())}
+        zIndex={11}
       >
         {currentReaction ? (
-          <View style={styles.reactionActiveWrapper}>
-            <Text style={styles.emojiText}>{currentReaction}</Text>
-            {/* O "xizinho" indicando que pode cancelar */}
-            <View style={styles.closeBadge}>
-              <Ionicons name="close" size={10} color="white" />
+          <View>
+            <Text style={styles.emojiActive}>{currentReaction}</Text>
+            <View style={styles.xBadge}>
+              <Ionicons name="close" size={9} color="white" />
             </View>
           </View>
         ) : (
-          <Ionicons name="happy-outline" size={20} color="#6B7D8F" />
+          <Ionicons
+            name="happy-outline"
+            size={20}
+            color={isTop3 ? "rgba(255,255,255,0.85)" : "#6B7D8F"}
+          />
         )}
       </TouchableOpacity>
 
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="none"
-        onRequestClose={closeModal}
-      >
-        <TouchableWithoutFeedback onPress={closeModal}>
-          <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback>
-              <Animated.View
-                style={[
-                  styles.reactionModal,
-                  { transform: [{ translateX: slideAnim }] },
-                ]}
-              >
-                <View style={styles.reactionGrid}>
-                  {REACTIONS.map((reaction) => (
-                    <TouchableOpacity
-                      key={reaction}
-                      style={[
-                        styles.reactionOption,
-                        currentReaction === reaction &&
-                          styles.reactionOptionSelected,
-                      ]}
-                      onPress={() => handleReactionSelect(reaction)}
-                    >
-                      <Text style={styles.reactionEmoji}>{reaction}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </Animated.View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+      {/* Bolha de reações — posicionada acima do botão */}
+      {open && (
+        <>
+          {/* Camada transparente para captar toque fora */}
+          <TouchableWithoutFeedback onPress={hide}>
+            <View style={styles.outsideTouchLayer} />
+          </TouchableWithoutFeedback>
+
+          <Animated.View
+            style={[
+              styles.bubble,
+              { opacity: opacityAnim, transform: [{ scale: scaleAnim }] },
+            ]}
+          >
+            <View style={styles.emojiRow}>
+              {REACTIONS.map((emoji) => (
+                <TouchableOpacity
+                  key={emoji}
+                  onPress={() => pick(emoji)}
+                  style={[
+                    styles.emojiBtn,
+                    currentReaction === emoji && styles.emojiBtnSelected,
+                  ]}
+                >
+                  <Text style={styles.emojiText}>{emoji}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {/* Cauda da bolha */}
+            <View style={styles.tail} />
+          </Animated.View>
+        </>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  actionButton: {
+  wrapper: {
+    position: "relative",
+  },
+  btn: {
     width: 38,
     height: 38,
     borderRadius: 19,
     backgroundColor: "#F8FBFF",
-    justifyContent: "center",
-    alignItems: "center",
     borderWidth: 1,
     borderColor: "#E1EFFF",
-  },
-  actionButtonActive: {
-    backgroundColor: "#E1EFFF",
-    borderColor: "#4A90E2",
-  },
-  reactionActiveWrapper: {
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 11,
   },
-  closeBadge: {
+  btnTop3: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderColor: "transparent",
+  },
+  btnActive: {
+    backgroundColor: "#E8F4FF",
+    borderColor: "#4CAFFF",
+  },
+  emojiActive: { fontSize: 20 },
+  xBadge: {
     position: "absolute",
-    top: -8,
-    right: -8,
-    backgroundColor: "#FF4D4D", // Vermelho para indicar cancelamento
+    top: -6,
+    right: -6,
     width: 14,
     height: 14,
     borderRadius: 7,
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: "#FF4D4D",
     borderWidth: 1,
     borderColor: "white",
-  },
-  emojiText: { fontSize: 20 },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
     justifyContent: "center",
     alignItems: "center",
   },
-  reactionModal: {
+  outsideTouchLayer: {
+    position: "absolute",
+    top: -600,
+    left: -600,
+    width: 1400,
+    height: 1400,
+    zIndex: 9,
+  },
+  bubble: {
+    position: "absolute",
+    bottom: 46,
+    right: -10,
+    zIndex: 10,
+    alignItems: "center",
+  },
+  emojiRow: {
+    flexDirection: "row",
+    gap: 4,
     backgroundColor: "white",
-    borderRadius: 16,
-    padding: 12,
-    elevation: 10,
+    borderRadius: 26,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    elevation: 14,
     shadowColor: "#000",
     shadowOpacity: 0.2,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    borderWidth: 2,
-    borderColor: "#E1EFFF",
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 5 },
   },
-  reactionGrid: { flexDirection: "row", flexWrap: "wrap", width: 180, gap: 8 },
-  reactionOption: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#F8FBFF",
+  emojiBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#E1EFFF",
   },
-  reactionOptionSelected: {
-    backgroundColor: "#E1EFFF",
-    borderColor: "#4A90E2",
+  emojiBtnSelected: {
+    backgroundColor: "#E8F4FF",
   },
-  reactionEmoji: { fontSize: 24 },
+  emojiText: { fontSize: 28 },
+  tail: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 11,
+    borderRightWidth: 11,
+    borderTopWidth: 11,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderTopColor: "white",
+  },
 });

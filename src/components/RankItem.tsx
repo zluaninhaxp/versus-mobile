@@ -10,6 +10,7 @@ interface RankItemProps {
   foto?: string;
   reactions?: { emoji: string; count: number }[];
   onReactionAdd?: (emoji: string) => void;
+  onPress?: () => void;
 }
 
 export function RankItem({
@@ -20,8 +21,8 @@ export function RankItem({
   foto,
   reactions,
   onReactionAdd,
+  onPress,
 }: RankItemProps) {
-  // Top 3 recebem o card colorido e grande
   if (position <= 3) {
     return (
       <RankItemTop3
@@ -32,11 +33,11 @@ export function RankItem({
         photo={foto}
         reactions={reactions}
         onReactionAdd={onReactionAdd}
+        onPress={onPress}
       />
     );
   }
 
-  // 4º em diante recebem o card simples
   return (
     <RankItemRegular
       position={position}
@@ -46,6 +47,7 @@ export function RankItem({
       photo={foto}
       reactions={reactions}
       onReactionAdd={onReactionAdd}
+      onPress={onPress}
     />
   );
 }

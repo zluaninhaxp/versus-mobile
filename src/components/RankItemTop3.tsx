@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { RankingActions } from "./RankingActions";
 
 interface RankItemTop3Props {
@@ -9,7 +9,8 @@ interface RankItemTop3Props {
   goal: number;
   photo?: string;
   reactions?: { emoji: string; count: number }[];
-  onReactionAdd?: (emoji: string) => void; // ADICIONE ISSO
+  onReactionAdd?: (emoji: string) => void;
+  onPress?: () => void;
 }
 
 export function RankItemTop3({
@@ -19,6 +20,7 @@ export function RankItemTop3({
   goal,
   photo,
   reactions: initialReactions = [],
+  onPress,
 }: RankItemTop3Props) {
   const [localReactions, setLocalReactions] = useState(initialReactions);
   const metaAlcancada = ml >= goal;
@@ -31,7 +33,11 @@ export function RankItemTop3({
         : { bg: "#E67E22", badge: "#FFD89B", photoSize: 64 };
 
   return (
-    <View style={[styles.card, { backgroundColor: config.bg }]}>
+    <TouchableOpacity
+      style={[styles.card, { backgroundColor: config.bg }]}
+      onPress={onPress}
+      activeOpacity={0.88}
+    >
       <View style={styles.topRow}>
         <View style={[styles.positionBadge, { backgroundColor: config.badge }]}>
           <Text style={styles.medalIcon}>
@@ -46,8 +52,6 @@ export function RankItemTop3({
               <Text style={styles.metaText}>Meta!</Text>
             </View>
           )}
-
-          {/* Componente Unificado de Ações */}
           <RankingActions
             isTop3={true}
             metaAlcancada={metaAlcancada}
@@ -90,7 +94,7 @@ export function RankItemTop3({
           ))}
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
 }
 

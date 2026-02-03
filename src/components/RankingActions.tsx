@@ -18,11 +18,8 @@ export function RankingActions({
   metaAlcancada,
   onReactionUpdate,
 }: RankingActionsProps) {
-  // Estados para Reação
   const [myReaction, setMyReaction] = useState<string | null>(null);
   const [localReactions, setLocalReactions] = useState(initialReactions);
-
-  // Estados para Notificação (Countdown de 1h)
   const [cooldown, setCooldown] = useState(0);
 
   useEffect(() => {
@@ -43,7 +40,7 @@ export function RankingActions({
     let updated = [...localReactions];
 
     if (newEmoji === myReaction) {
-      // Toggle OFF: Remove a reação
+      // Toggle OFF
       updated = updated
         .map((r) =>
           r.emoji === newEmoji ? { ...r, count: Math.max(0, r.count - 1) } : r,
@@ -51,7 +48,7 @@ export function RankingActions({
         .filter((r) => r.count > 0);
       setMyReaction(null);
     } else {
-      // Troca ou Adiciona
+      // Remove antiga se existir
       if (myReaction) {
         updated = updated
           .map((r) =>
@@ -61,6 +58,7 @@ export function RankingActions({
           )
           .filter((r) => r.count > 0);
       }
+      // Adiciona nova
       const idx = updated.findIndex((r) => r.emoji === newEmoji);
       if (idx > -1) {
         updated[idx] = { ...updated[idx], count: updated[idx].count + 1 };
@@ -75,13 +73,12 @@ export function RankingActions({
 
   return (
     <View style={styles.container}>
-      {/* Lado Esquerdo: Seletor de Reação */}
       <ReactionSelector
         currentReaction={myReaction}
         onReactionSelect={handleReactionChange}
+        isTop3={isTop3}
       />
 
-      {/* Lado Direito: Botão de Notificação (Só aparece se não bateu a meta) */}
       {!metaAlcancada && (
         <View style={styles.notifyContainer}>
           <TouchableOpacity

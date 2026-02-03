@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { RankingActions } from "./RankingActions";
 
 interface RankItemRegularProps {
@@ -9,7 +9,8 @@ interface RankItemRegularProps {
   goal: number;
   photo?: string;
   reactions?: { emoji: string; count: number }[];
-  onReactionAdd?: (emoji: string) => void; // ADICIONE ISSO
+  onReactionAdd?: (emoji: string) => void;
+  onPress?: () => void;
 }
 
 export function RankItemRegular({
@@ -19,17 +20,24 @@ export function RankItemRegular({
   goal,
   photo,
   reactions: initialReactions = [],
+  onPress,
 }: RankItemRegularProps) {
   const [localReactions, setLocalReactions] = useState(initialReactions);
   const metaAlcancada = ml >= goal;
 
   return (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={onPress}
+      activeOpacity={0.88}
+    >
       <View style={styles.mainRow}>
+        {/* Posição */}
         <View style={styles.positionCircle}>
           <Text style={styles.positionNumber}>{position}</Text>
         </View>
 
+        {/* Foto */}
         <View style={styles.photoContainer}>
           <Image
             source={{ uri: photo || "https://i.pravatar.cc/150" }}
@@ -37,15 +45,23 @@ export function RankItemRegular({
           />
         </View>
 
+        {/* Nome + ml */}
         <View style={styles.infoContainer}>
-          <Text style={styles.userName}>{name}</Text>
+          <View style={styles.nameRow}>
+            <Text style={styles.userName}>{name}</Text>
+            {metaAlcancada && (
+              <View style={styles.metaBadge}>
+                <Text style={styles.metaText}>Meta!</Text>
+              </View>
+            )}
+          </View>
           <View style={styles.statsRow}>
             <Text style={styles.mlValue}>{ml} ml</Text>
             <Text style={styles.mlGoal}> / {goal}ml</Text>
           </View>
         </View>
 
-        {/* Componente Unificado de Ações */}
+        {/* Reação + notificação */}
         <RankingActions
           isTop3={false}
           metaAlcancada={metaAlcancada}
@@ -54,6 +70,7 @@ export function RankItemRegular({
         />
       </View>
 
+      {/* Badges de reações */}
       {localReactions.length > 0 && (
         <View style={styles.reactionsContainer}>
           {localReactions.map((r, i) => (
@@ -64,7 +81,7 @@ export function RankItemRegular({
           ))}
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -96,7 +113,15 @@ const styles = StyleSheet.create({
     borderColor: "#F0F4F8",
   },
   infoContainer: { flex: 1 },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   userName: { fontSize: 16, fontWeight: "bold", color: "#2B3E50" },
+  metaBadge: {
+    backgroundColor: "#2ECC71",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  metaText: { color: "white", fontSize: 10, fontWeight: "bold" },
   statsRow: { flexDirection: "row", alignItems: "baseline" },
   mlValue: { fontSize: 18, fontWeight: "900", color: "#14B8D4" },
   mlGoal: { fontSize: 13, color: "#9BA8B5", fontWeight: "600" },
