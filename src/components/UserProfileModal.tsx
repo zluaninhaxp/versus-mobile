@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,12 +10,12 @@ import {
   Easing,
   PanResponder,
   Dimensions,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 const { height: screenHeight } = Dimensions.get("screen");
-const SHEET_HEIGHT = screenHeight * 0.88;
-const DRAG_THRESHOLD = 60;
+const SHEET_HEIGHT = screenHeight * 0.75;
 
 interface WaterEntry {
   ml: number;
@@ -43,14 +43,12 @@ export function UserProfileModal({
   position,
   waterHistory,
 }: UserProfileModalProps) {
-  const slideAnim = useRef(new Animated.Value(SHEET_HEIGHT)).current;
-  const dragOffset = useRef(new Animated.Value(0)).current;
-  const [showModal, setShowModal] = React.useState(visible);
+  const slideAnim = useRef(new Animated.Value(screenHeight)).current;
+  const [showModal, setShowModal] = useState(visible);
 
   useEffect(() => {
     if (visible) {
       setShowModal(true);
-      dragOffset.setValue(0);
       Animated.timing(slideAnim, {
         toValue: 0,
         duration: 380,
@@ -58,31 +56,40 @@ export function UserProfileModal({
         useNativeDriver: true,
       }).start();
     } else {
-      Animated.timing(slideAnim, {
-        toValue: SHEET_HEIGHT,
-        duration: 300,
-        easing: Easing.in(Easing.ease),
-        useNativeDriver: true,
-      }).start(() => setShowModal(false));
+      closeModal();
     }
   }, [visible]);
 
+  const closeModal = () => {
+    Animated.timing(slideAnim, {
+      toValue: screenHeight,
+      duration: 300,
+      easing: Easing.in(Easing.ease),
+      useNativeDriver: true,
+    }).start(() => {
+      setShowModal(false);
+      onClose();
+    });
+  };
+
+  // PanResponder focado apenas no gesto de fechar
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: (_, g) => g.dy > 0,
-      onMoveShouldSetPanResponder: (_, g) => g.dy > 8,
-      onPanResponderMove: (_, g) => {
-        if (g.dy > 0) dragOffset.setValue(g.dy);
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => gestureState.dy > 5,
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dy > 0) {
+          slideAnim.setValue(gestureState.dy);
+        }
       },
-      onPanResponderReleaseOrTerminate: (_, g) => {
-        if (g.dy > DRAG_THRESHOLD) {
-          onClose();
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy > 120 || gestureState.vy > 0.5) {
+          closeModal();
         } else {
-          Animated.spring(dragOffset, {
+          Animated.spring(slideAnim, {
             toValue: 0,
             useNativeDriver: true,
-            tension: 60,
-            friction: 10,
+            bounciness: 4,
           }).start();
         }
       },
@@ -111,7 +118,6 @@ export function UserProfileModal({
           ? "🥉"
           : `${position}º`;
 
-  // histórico só hoje
   const today = new Date();
   const todayHistory = waterHistory.filter((e) => {
     const d = new Date(e.time);
@@ -122,7 +128,6 @@ export function UserProfileModal({
     );
   });
 
-  // gráfico: últimos 7 dias
   const weekData: { label: string; ml: number }[] = [];
   for (let i = 6; i >= 0; i--) {
     const day = new Date(today);
@@ -150,182 +155,181 @@ export function UserProfileModal({
     <Modal
       transparent
       visible={showModal}
-      onRequestClose={onClose}
+      onRequestClose={closeModal}
       animationType="none"
       statusBarTranslucent
     >
-      <View style={styles.overlay} />
+      <View style={styles.overlay}>
+        <TouchableWithoutFeedback onPress={closeModal}>
+          <View style={styles.backdrop} />
+        </TouchableWithoutFeedback>
 
-      <Animated.View
-        style={[
-          styles.sheet,
-          { transform: [{ translateY: Animated.add(slideAnim, dragOffset) }] },
-        ]}
-        {...panResponder.panHandlers}
-      >
-        <View style={styles.handle} />
-
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
+        <Animated.View
+          style={[styles.sheet, { transform: [{ translateY: slideAnim }] }]}
         >
-          {/* PERFIL */}
-          <View style={styles.profileCard}>
-            <View style={styles.avatarWrapper}>
-              <View style={[styles.medalRing, { borderColor: medalColor }]}>
-                <Image
-                  source={{ uri: foto || "https://i.pravatar.cc/150" }}
-                  style={styles.avatar}
+          {/* ÁREA INVISÍVEL DE ARRASTO: Cobre o topo sem mudar o visual */}
+          <View
+            {...panResponder.panHandlers}
+            style={styles.invisibleDragShield}
+          />
+
+          <View style={styles.handle} />
+
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
+          >
+            {/* PERFIL */}
+            <View style={styles.profileCard}>
+              <View style={styles.avatarWrapper}>
+                <View style={[styles.medalRing, { borderColor: medalColor }]}>
+                  <Image
+                    source={{ uri: foto || "https://i.pravatar.cc/150" }}
+                    style={styles.avatar}
+                  />
+                </View>
+                <View
+                  style={[styles.medalBadge, { backgroundColor: medalColor }]}
+                >
+                  <Text style={styles.medalText}>{medalEmoji}</Text>
+                </View>
+              </View>
+              <Text style={styles.profileName}>{nome}</Text>
+              <View style={styles.statsRow}>
+                <Text
+                  style={[
+                    styles.statValue,
+                    metaAlcancada && styles.statValueGold,
+                  ]}
+                >
+                  {ml} ml
+                </Text>
+                <Text style={styles.statSep}>/</Text>
+                <Text style={styles.statMeta}>{meta} ml</Text>
+              </View>
+              {metaAlcancada && (
+                <View style={styles.metaAchievedBadge}>
+                  <Ionicons name="checkmark-circle" size={16} color="white" />
+                  <Text style={styles.metaAchievedText}>Meta alcançada!</Text>
+                </View>
+              )}
+              <View style={styles.progressBg}>
+                <View
+                  style={[
+                    styles.progressFill,
+                    { width: `${porcentagem}%` },
+                    metaAlcancada && styles.progressFillGold,
+                  ]}
                 />
               </View>
-              <View
-                style={[styles.medalBadge, { backgroundColor: medalColor }]}
-              >
-                <Text style={styles.medalText}>{medalEmoji}</Text>
-              </View>
-            </View>
-            <Text style={styles.profileName}>{nome}</Text>
-            <View style={styles.statsRow}>
               <Text
                 style={[
-                  styles.statValue,
-                  metaAlcancada && styles.statValueGold,
+                  styles.progressLabel,
+                  metaAlcancada && styles.progressLabelGold,
                 ]}
               >
-                {ml} ml
+                {Math.round(porcentagem)}% concluído
               </Text>
-              <Text style={styles.statSep}>/</Text>
-              <Text style={styles.statMeta}>{meta} ml</Text>
             </View>
-            {metaAlcancada && (
-              <View style={styles.metaAchievedBadge}>
-                <Ionicons name="checkmark-circle" size={16} color="white" />
-                <Text style={styles.metaAchievedText}>Meta alcançada!</Text>
-              </View>
-            )}
-            <View style={styles.progressBg}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${porcentagem}%` },
-                  metaAlcancada && styles.progressFillGold,
-                ]}
-              />
-            </View>
-            <Text
-              style={[
-                styles.progressLabel,
-                metaAlcancada && styles.progressLabelGold,
-              ]}
-            >
-              {Math.round(porcentagem)}% concluído
-            </Text>
-          </View>
 
-          {/* GRÁFICO SEMANAL */}
-          <View style={styles.sectionHeader}>
-            <Ionicons name="bar-chart" size={18} color="#14B8D4" />
-            <Text style={styles.sectionTitle}>Última semana</Text>
-          </View>
-          <View style={styles.chartCard}>
-            <View style={styles.chartBars}>
-              {weekData.map((d, i) => {
-                const isToday = i === 6;
-                const barH = Math.max((d.ml / maxMl) * 100, d.ml > 0 ? 8 : 4);
-                return (
-                  <View key={i} style={styles.chartCol}>
-                    <Text
-                      style={[
-                        styles.chartMlLabel,
-                        isToday && styles.chartMlLabelToday,
-                      ]}
-                    >
-                      {d.ml > 0 ? `${d.ml}` : ""}
-                    </Text>
-                    <View style={styles.chartBarBg}>
-                      <View
+            {/* GRÁFICO SEMANAL */}
+            <View style={styles.sectionHeader}>
+              <Ionicons name="bar-chart" size={18} color="#14B8D4" />
+              <Text style={styles.sectionTitle}>Última semana</Text>
+            </View>
+            <View style={styles.chartCard}>
+              <View style={styles.chartBars}>
+                {weekData.map((d, i) => {
+                  const isToday = i === 6;
+                  const barH = Math.max((d.ml / maxMl) * 100, d.ml > 0 ? 8 : 4);
+                  return (
+                    <View key={i} style={styles.chartCol}>
+                      <Text
                         style={[
-                          styles.chartBarFill,
-                          { height: `${barH}%` },
-                          isToday && styles.chartBarToday,
+                          styles.chartMlLabel,
+                          isToday && styles.chartMlLabelToday,
                         ]}
-                      />
+                      >
+                        {d.ml > 0 ? `${d.ml}` : ""}
+                      </Text>
+                      <View style={styles.chartBarBg}>
+                        <View
+                          style={[
+                            styles.chartBarFill,
+                            { height: `${barH}%` },
+                            isToday && styles.chartBarToday,
+                          ]}
+                        />
+                      </View>
+                      <Text
+                        style={[
+                          styles.chartDayLabel,
+                          isToday && styles.chartDayLabelToday,
+                        ]}
+                      >
+                        {d.label}
+                      </Text>
                     </View>
-                    <Text
-                      style={[
-                        styles.chartDayLabel,
-                        isToday && styles.chartDayLabelToday,
-                      ]}
-                    >
-                      {d.label}
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* HISTÓRICO DE HOJE */}
+            <View style={styles.sectionHeader}>
+              <Ionicons name="water" size={18} color="#14B8D4" />
+              <Text style={styles.sectionTitle}>Hoje</Text>
+            </View>
+            {todayHistory.length === 0 ? (
+              <View style={styles.emptyBox}>
+                <Text style={styles.emptyText}>Nenhum registro hoje.</Text>
+              </View>
+            ) : (
+              todayHistory.map((entry, i) => (
+                <View key={i} style={styles.historyItem}>
+                  <View style={styles.historyIcon}>
+                    <Text style={styles.historyIconEmoji}>
+                      {getWaterIcon(entry.ml)}
                     </Text>
                   </View>
-                );
-              })}
-            </View>
-          </View>
-
-          {/* HISTÓRICO DE HOJE */}
-          <View style={styles.sectionHeader}>
-            <Ionicons name="water" size={18} color="#14B8D4" />
-            <Text style={styles.sectionTitle}>Hoje</Text>
-          </View>
-          {todayHistory.length === 0 ? (
-            <View style={styles.emptyBox}>
-              <Text style={styles.emptyText}>Nenhum registro hoje.</Text>
-            </View>
-          ) : (
-            todayHistory.map((entry, i) => (
-              <View key={i} style={styles.historyItem}>
-                <View style={styles.historyIcon}>
-                  <Text style={styles.historyIconEmoji}>
-                    {getWaterIcon(entry.ml)}
-                  </Text>
+                  <View style={styles.historyInfo}>
+                    <Text style={styles.historyMl}>{entry.ml} ml</Text>
+                    <Text style={styles.historyTime}>
+                      Registrado às {formatTime(entry.time)}
+                    </Text>
+                  </View>
+                  <Text style={styles.historyAmount}>+{entry.ml}</Text>
                 </View>
-                <View style={styles.historyInfo}>
-                  <Text style={styles.historyMl}>{entry.ml} ml</Text>
-                  <Text style={styles.historyTime}>
-                    Registrado às {formatTime(entry.time)}
-                  </Text>
-                </View>
-                <Text style={styles.historyAmount}>+{entry.ml}</Text>
-              </View>
-            ))
-          )}
+              ))
+            )}
 
-          {/* CONQUISTAS placeholder */}
-          <View style={[styles.sectionHeader, { marginTop: 20 }]}>
-            <Ionicons name="trophy" size={18} color="#FFD700" />
-            <Text style={styles.sectionTitle}>Conquistas</Text>
-          </View>
-          <View style={styles.conquistaPlaceholder}>
-            <Ionicons name="trophy-outline" size={40} color="#E0E6EC" />
-            <Text style={styles.conquistaText}>
-              Conquistas serão implementadas em breve!
-            </Text>
-          </View>
-        </ScrollView>
-      </Animated.View>
+            {/* CONQUISTAS placeholder */}
+            <View style={[styles.sectionHeader, { marginTop: 20 }]}>
+              <Ionicons name="trophy" size={18} color="#FFD700" />
+              <Text style={styles.sectionTitle}>Conquistas</Text>
+            </View>
+            <View style={styles.conquistaPlaceholder}>
+              <Ionicons name="trophy-outline" size={40} color="#E0E6EC" />
+              <Text style={styles.conquistaText}>
+                Conquistas serão implementadas em breve!
+              </Text>
+            </View>
+          </ScrollView>
+        </Animated.View>
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+  overlay: { flex: 1, justifyContent: "flex-end" },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.45)",
   },
   sheet: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: SHEET_HEIGHT,
     backgroundColor: "#F5F9FF",
+    height: SHEET_HEIGHT,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     elevation: 30,
@@ -333,6 +337,15 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -6 },
     shadowOpacity: 0.25,
     shadowRadius: 16,
+  },
+  invisibleDragShield: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 100, // Área de toque invisível
+    backgroundColor: "transparent",
+    zIndex: 9999,
   },
   handle: {
     width: 44,
@@ -344,7 +357,6 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   scrollContent: { paddingHorizontal: 22, paddingBottom: 40 },
-
   profileCard: {
     alignItems: "center",
     backgroundColor: "white",
@@ -426,7 +438,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   progressLabelGold: { color: "#DAA520" },
-
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -434,7 +445,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: { fontSize: 16, fontWeight: "800", color: "#2B5B8E" },
-
   chartCard: {
     backgroundColor: "white",
     borderRadius: 18,
@@ -483,7 +493,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   chartDayLabelToday: { color: "#14B8D4", fontWeight: "800" },
-
   historyItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -519,7 +528,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   emptyText: { color: "#9BA8B5", fontSize: 14 },
-
   conquistaPlaceholder: {
     backgroundColor: "white",
     borderRadius: 18,
