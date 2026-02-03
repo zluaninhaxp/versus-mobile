@@ -130,27 +130,6 @@ export default function App() {
       ],
     },
     {
-      id: 4,
-      nome: "Diego Santos",
-      ml: 2200,
-      meta: 2500,
-      foto: "https://i.pravatar.cc/300?img=33",
-      reactions: [
-        { emoji: "👍", count: 1 },
-        { emoji: "👏", count: 1 },
-      ],
-      waterHistory: [
-        { ml: 500, time: daysAgoAt(2, 9, 0) },
-        { ml: 500, time: daysAgoAt(2, 14, 30) },
-        { ml: 500, time: yesterdayAt(9, 0) },
-        { ml: 500, time: yesterdayAt(14, 30) },
-        { ml: 500, time: todayAt(7, 45) },
-        { ml: 700, time: todayAt(12, 0) },
-        { ml: 500, time: todayAt(16, 10) },
-        { ml: 500, time: todayAt(19, 30) },
-      ],
-    },
-    {
       id: 5,
       nome: "Mariana Lima",
       ml: 2100,

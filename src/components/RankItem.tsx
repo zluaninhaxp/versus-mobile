@@ -15,16 +15,16 @@ interface RankItemProps {
 }
 
 export function RankItem(props: RankItemProps) {
-  // Centralização do Estado de Reações
+  // Estado local para as reações (gerenciado aqui para os dois tipos de visual)
   const [localReactions, setLocalReactions] = useState(props.reactions || []);
 
   // Regras de Negócio centralizadas
   const metaAlcancada = props.ml >= props.meta;
-  const isMe = props.nome === "Luana Castro";
+  const isMe = props.nome === "Luana Castro"; // Trava para seu perfil
   const myId =
     props.position <= 3 ? `top3-${props.position}` : `reg-${props.position}`;
 
-  // Props unificadas para os filhos
+  // Props preparadas para os subcomponentes
   const dataProps = {
     position: props.position,
     name: props.nome,
@@ -42,7 +42,12 @@ export function RankItem(props: RankItemProps) {
       setLocalReactions(newReactions),
   };
 
-  if (props.position <= 3) {
+  /**
+   * LÓGICA DE RENDERIZAÇÃO:
+   * 1. Se a posição for Top 3 (1, 2 ou 3) E o usuário já bebeu algo (> 0 ml), usa o visual de pódio.
+   * 2. Caso contrário (posição > 3 OU ml === 0), usa o visual de lista regular.
+   */
+  if (props.position <= 3 && props.ml > 0) {
     return <RankItemTop3 {...dataProps} />;
   }
 
