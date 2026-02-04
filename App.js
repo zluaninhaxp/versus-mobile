@@ -6,10 +6,10 @@ import { UserStatus } from "./src/components/UserStatus";
 import { RankItem } from "./src/components/RankItem";
 import { ProfileDrawer } from "./src/components/ProfileDrawer";
 import { WaterSettingsModal } from "./src/components/WaterSettingsModal";
-import { UserProfileModal } from "./src/components/UserProfile";
+import { UserProfileModal } from "./src/components/UserProfile"; // Verifique se o nome do arquivo termina em Modal
 import { MyHistoryModal } from "./src/components/MyHistory";
 
-// Helpers para timestamps (mantidos)
+// Helpers para timestamps
 function todayAt(h, m) {
   const d = new Date();
   d.setHours(h, m, 0, 0);
@@ -30,14 +30,15 @@ function daysAgoAt(days, h, m) {
 
 export default function App() {
   const [mlConsumido, setMlConsumido] = useState(2850);
-  const [nome, setNome] = useState("Luana Castro"); // Nome atualizado conforme solicitado
+  const [nome, setNome] = useState("Luana Castro");
   const [meta, setMeta] = useState(2500);
 
+  // Estados de visibilidade dos Modais e Drawer
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isWaterSettingsOpen, setIsWaterSettingsOpen] = useState(false);
-  const [activeReactionId, setActiveReactionId] = useState(null);
-  const [selectedUserId, setSelectedUserId] = useState(null);
   const [isMyHistoryOpen, setIsMyHistoryOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [activeReactionId, setActiveReactionId] = useState(null);
 
   const [usuarios, setUsuarios] = useState([
     {
@@ -46,31 +47,10 @@ export default function App() {
       ml: 2850,
       meta: 2500,
       foto: "https://i.pravatar.cc/300?img=32",
-      reactions: [
-        { emoji: "❤️", count: 5 },
-        { emoji: "👏", count: 3 },
-        { emoji: "👍", count: 2 },
-      ],
+      reactions: [{ emoji: "❤️", count: 5 }],
       waterHistory: [
-        { ml: 500, time: daysAgoAt(5, 7, 30) },
-        { ml: 750, time: daysAgoAt(5, 12, 0) },
-        { ml: 500, time: daysAgoAt(4, 8, 15) },
-        { ml: 1000, time: daysAgoAt(4, 13, 0) },
-        { ml: 250, time: daysAgoAt(4, 18, 30) },
-        { ml: 600, time: daysAgoAt(3, 7, 0) },
-        { ml: 800, time: daysAgoAt(3, 12, 45) },
-        { ml: 500, time: daysAgoAt(3, 19, 0) },
-        { ml: 500, time: daysAgoAt(2, 6, 30) },
-        { ml: 1000, time: daysAgoAt(2, 11, 50) },
-        { ml: 400, time: daysAgoAt(2, 16, 20) },
-        { ml: 750, time: yesterdayAt(7, 30) },
-        { ml: 500, time: yesterdayAt(12, 0) },
-        { ml: 1000, time: yesterdayAt(18, 15) },
         { ml: 500, time: todayAt(7, 0) },
-        { ml: 250, time: todayAt(9, 30) },
         { ml: 1000, time: todayAt(12, 10) },
-        { ml: 600, time: todayAt(15, 45) },
-        { ml: 500, time: todayAt(17, 5) },
       ],
     },
     {
@@ -79,25 +59,8 @@ export default function App() {
       ml: 2600,
       meta: 2500,
       foto: "https://i.pravatar.cc/300?img=12",
-      reactions: [
-        { emoji: "💧", count: 4 },
-        { emoji: "🎉", count: 2 },
-      ],
-      waterHistory: [
-        { ml: 500, time: daysAgoAt(4, 9, 0) },
-        { ml: 750, time: daysAgoAt(4, 14, 30) },
-        { ml: 600, time: daysAgoAt(3, 8, 0) },
-        { ml: 500, time: daysAgoAt(3, 13, 15) },
-        { ml: 800, time: daysAgoAt(2, 7, 45) },
-        { ml: 500, time: daysAgoAt(2, 12, 0) },
-        { ml: 500, time: yesterdayAt(8, 0) },
-        { ml: 750, time: yesterdayAt(13, 0) },
-        { ml: 500, time: yesterdayAt(18, 30) },
-        { ml: 500, time: todayAt(7, 15) },
-        { ml: 600, time: todayAt(11, 40) },
-        { ml: 1000, time: todayAt(13, 50) },
-        { ml: 500, time: todayAt(16, 0) },
-      ],
+      reactions: [],
+      waterHistory: [],
     },
     {
       id: 3,
@@ -105,21 +68,8 @@ export default function App() {
       ml: 2400,
       meta: 2000,
       foto: "https://i.pravatar.cc/300?img=45",
-      reactions: [{ emoji: "💖", count: 6 }],
-      waterHistory: [
-        { ml: 500, time: daysAgoAt(3, 10, 0) },
-        { ml: 400, time: daysAgoAt(3, 15, 30) },
-        { ml: 750, time: daysAgoAt(2, 7, 20) },
-        { ml: 500, time: daysAgoAt(2, 14, 0) },
-        { ml: 250, time: yesterdayAt(6, 45) },
-        { ml: 500, time: yesterdayAt(12, 20) },
-        { ml: 750, time: yesterdayAt(19, 0) },
-        { ml: 500, time: todayAt(8, 10) },
-        { ml: 400, time: todayAt(10, 55) },
-        { ml: 1000, time: todayAt(13, 0) },
-        { ml: 250, time: todayAt(15, 30) },
-        { ml: 250, time: todayAt(18, 0) },
-      ],
+      reactions: [],
+      waterHistory: [],
     },
     {
       id: 5,
@@ -127,20 +77,8 @@ export default function App() {
       ml: 2100,
       meta: 2000,
       foto: "https://i.pravatar.cc/300?img=28",
-      reactions: [{ emoji: "🔥", count: 3 }],
-      waterHistory: [
-        { ml: 300, time: daysAgoAt(3, 7, 20) },
-        { ml: 500, time: daysAgoAt(3, 11, 50) },
-        { ml: 500, time: daysAgoAt(2, 8, 0) },
-        { ml: 750, time: daysAgoAt(2, 14, 30) },
-        { ml: 300, time: yesterdayAt(7, 20) },
-        { ml: 500, time: yesterdayAt(11, 50) },
-        { ml: 500, time: yesterdayAt(18, 0) },
-        { ml: 500, time: todayAt(8, 0) },
-        { ml: 800, time: todayAt(12, 30) },
-        { ml: 500, time: todayAt(17, 45) },
-        { ml: 300, time: todayAt(20, 0) },
-      ],
+      reactions: [],
+      waterHistory: [],
     },
     {
       id: 6,
@@ -149,15 +87,7 @@ export default function App() {
       meta: 2500,
       foto: "https://i.pravatar.cc/300?img=15",
       reactions: [],
-      waterHistory: [
-        { ml: 500, time: daysAgoAt(2, 10, 0) },
-        { ml: 250, time: daysAgoAt(2, 16, 0) },
-        { ml: 500, time: yesterdayAt(10, 0) },
-        { ml: 250, time: yesterdayAt(16, 0) },
-        { ml: 500, time: todayAt(7, 30) },
-        { ml: 450, time: todayAt(13, 15) },
-        { ml: 750, time: todayAt(18, 0) },
-      ],
+      waterHistory: [],
     },
   ]);
 
@@ -169,9 +99,8 @@ export default function App() {
     );
   };
 
-  // Ranking sempre atualizado com os dados vivos do App.js
   const rankingOrdenado = [...usuarios]
-    .map((u) => (u.id === 1 ? { ...u, ml: mlConsumido, meta: meta } : u)) // Injeta meta e ml atuais
+    .map((u) => (u.id === 1 ? { ...u, ml: mlConsumido, meta: meta } : u))
     .sort((a, b) => b.ml - a.ml);
 
   const selectedUser = usuarios.find((u) => u.id === selectedUserId) || null;
@@ -182,11 +111,13 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
+        {/* O Header recebe as funções que alteram os estados acima */}
         <Header
           onOpenMenu={() => setIsProfileOpen(true)}
           onOpenHistory={() => setIsMyHistoryOpen(true)}
           onOpenSettings={() => setIsWaterSettingsOpen(true)}
         />
+
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
@@ -197,12 +128,14 @@ export default function App() {
             meta={meta}
             onAdd={handleAddWater}
           />
+
           <View style={styles.rankingHeader}>
             <Text style={styles.rankingTitle}>💧 Ranking de Hidratação</Text>
             <Text style={styles.rankingSubtitle}>
               Reaja e incentive seus amigos!
             </Text>
           </View>
+
           <View style={styles.rankingWrapper}>
             {rankingOrdenado.map((item, index) => (
               <RankItem
@@ -210,7 +143,7 @@ export default function App() {
                 position={index + 1}
                 nome={item.nome}
                 ml={item.ml}
-                meta={item.meta} // Esta prop agora recebe o valor atualizado do modal
+                meta={item.meta}
                 foto={item.foto}
                 reactions={item.reactions}
                 activeReactionId={activeReactionId}
@@ -221,17 +154,20 @@ export default function App() {
           </View>
         </ScrollView>
 
+        {/* Componentes de Modal e Drawer chamados com suas respectivas props de visibilidade */}
         <ProfileDrawer
           visible={isProfileOpen}
           onClose={() => setIsProfileOpen(false)}
           userName={nome}
         />
+
         <WaterSettingsModal
           visible={isWaterSettingsOpen}
           onClose={() => setIsWaterSettingsOpen(false)}
           currentMeta={meta}
-          onSave={(newMeta) => setMeta(newMeta)} // Atualiza o estado global
+          onSave={(newMeta) => setMeta(newMeta)}
         />
+
         <UserProfileModal
           visible={selectedUserId !== null}
           onClose={() => setSelectedUserId(null)}
@@ -242,12 +178,11 @@ export default function App() {
           position={selectedPosition}
           waterHistory={selectedUser?.waterHistory || []}
         />
+
         <MyHistoryModal
           visible={isMyHistoryOpen}
           onClose={() => setIsMyHistoryOpen(false)}
           waterHistory={usuarios.find((u) => u.id === 1)?.waterHistory || []}
-          totalMl={mlConsumido}
-          meta={meta}
         />
       </SafeAreaView>
     </SafeAreaProvider>

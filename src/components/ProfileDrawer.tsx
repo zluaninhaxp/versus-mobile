@@ -10,29 +10,98 @@ import {
   Modal,
   Easing,
   StatusBar,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { EditProfileModal } from "./EditProfileModal";
+import { AchievementsModal } from "./AchievementsModal";
+import { PreferencesModal } from "./PreferencesModal";
 
-// Pegamos a altura da 'screen' para cobrir inclusive as barras de navegação do Android
 const { width, height: screenHeight } = Dimensions.get("screen");
 const DRAWER_WIDTH = width * 0.75;
+
+// Avatares disponíveis
+const AVATARS = [
+  { id: 1, icon: "person", color: "#4CAFFF" },
+  { id: 2, icon: "happy", color: "#2ECC71" },
+  { id: 3, icon: "star", color: "#FFD700" },
+  { id: 4, icon: "heart", color: "#E74C3C" },
+  { id: 5, icon: "flash", color: "#F39C12" },
+  { id: 6, icon: "rocket", color: "#9B59B6" },
+  { id: 7, icon: "leaf", color: "#27AE60" },
+  { id: 8, icon: "water", color: "#3498DB" },
+];
+
+// Conquistas exemplo
+const INITIAL_ACHIEVEMENTS = [
+  {
+    id: 1,
+    title: "Primeira Gota",
+    description: "Registre seu primeiro copo de água",
+    icon: "water",
+    color: "#4CAFFF",
+    unlocked: true,
+  },
+  {
+    id: 2,
+    title: "Hidratação Consistente",
+    description: "Bata sua meta 7 dias seguidos",
+    icon: "flame",
+    color: "#E74C3C",
+    unlocked: false,
+    progress: 3,
+    total: 7,
+  },
+  {
+    id: 3,
+    title: "Mestre da Água",
+    description: "Bata sua meta 30 dias seguidos",
+    icon: "trophy",
+    color: "#FFD700",
+    unlocked: false,
+    progress: 3,
+    total: 30,
+  },
+  {
+    id: 4,
+    title: "Oceano de Saúde",
+    description: "Beba 100 litros no total",
+    icon: "boat",
+    color: "#3498DB",
+    unlocked: false,
+    progress: 45,
+    total: 100,
+  },
+];
 
 interface ProfileDrawerProps {
   visible: boolean;
   onClose: () => void;
   userName: string;
+  userAvatar?: number;
+  onUpdateProfile?: (name: string, avatar: number) => void;
 }
 
 export function ProfileDrawer({
   visible,
   onClose,
   userName,
+  userAvatar = 1,
+  onUpdateProfile,
 }: ProfileDrawerProps) {
   const [showModal, setShowModal] = useState(visible);
+  const [editProfileVisible, setEditProfileVisible] = useState(false);
+  const [achievementsVisible, setAchievementsVisible] = useState(false);
+  const [preferencesVisible, setPreferencesVisible] = useState(false);
 
-  // Animação de slide (começa fora da tela à esquerda)
+  const [preferences, setPreferences] = useState({
+    notifications: true,
+    reminderFrequency: 2,
+    darkMode: false,
+    soundEffects: true,
+  });
+
   const slideAnim = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
-  // Animação de opacidade do fundo escuro
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -42,7 +111,7 @@ export function ProfileDrawer({
         Animated.timing(slideAnim, {
           toValue: 0,
           duration: 350,
-          easing: Easing.out(Easing.back(0.3)), // Efeito de frenagem suave
+          easing: Easing.out(Easing.back(0.3)),
           useNativeDriver: true,
         }),
         Animated.timing(opacityAnim, {
@@ -70,76 +139,167 @@ export function ProfileDrawer({
     }
   }, [visible]);
 
+  const handleLogout = () => {
+    Alert.alert(
+      "Sair do App",
+      "Tem certeza que deseja sair?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Sair",
+          style: "destructive",
+          onPress: () => {
+            onClose();
+            // Aqui você implementaria a lógica de logout
+            Alert.alert("Logout", "Funcionalidade em desenvolvimento");
+          },
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
+  const handleSaveProfile = (name: string, avatar: number) => {
+    onUpdateProfile?.(name, avatar);
+  };
+
+  const handleSavePreferences = (prefs: any) => {
+    setPreferences(prefs);
+    // Aqui você salvaria no AsyncStorage ou contexto global
+  };
+
   if (!showModal) return null;
 
+  const currentAvatar = AVATARS.find((a) => a.id === userAvatar) || AVATARS[0];
+
   return (
-    <Modal
-      transparent
-      visible={showModal}
-      onRequestClose={onClose}
-      animationType="none"
-      // RESOLVE O GLITCH: Faz o modal vazar por baixo da barra de status e botões
-      statusBarTranslucent={true}
-    >
-      <View style={styles.overlay}>
-        {/* Fundo escuro (Overlay) animado */}
-        <Animated.View style={[styles.pressableArea, { opacity: opacityAnim }]}>
-          <Pressable style={styles.fullScreen} onPress={onClose} />
-        </Animated.View>
+    <>
+      <Modal
+        transparent
+        visible={showModal}
+        onRequestClose={onClose}
+        animationType="none"
+        statusBarTranslucent={true}
+      >
+        <View style={styles.overlay}>
+          <Animated.View
+            style={[styles.pressableArea, { opacity: opacityAnim }]}
+          >
+            <Pressable style={styles.fullScreen} onPress={onClose} />
+          </Animated.View>
 
-        {/* Conteúdo do Menu (Drawer) que desliza */}
-        <Animated.View
-          style={[
-            styles.drawerContent,
-            { transform: [{ translateX: slideAnim }] },
-          ]}
-        >
-          {/* Sessão do Perfil */}
-          <View style={styles.profileSection}>
-            <View style={styles.avatarPlaceholder}>
-              <Ionicons name="person" size={40} color="#4CAFFF" />
-            </View>
-            <Text style={styles.userNameText}>{userName}</Text>
-            <TouchableOpacity style={styles.editBtn}>
-              <Text style={styles.editBtnText}>EDITAR PERFIL</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Opções do Menu */}
-          <View style={styles.menuItems}>
-            <TouchableOpacity style={styles.menuItem}>
-              <View style={styles.iconCircle}>
+          <Animated.View
+            style={[
+              styles.drawerContent,
+              { transform: [{ translateX: slideAnim }] },
+            ]}
+          >
+            {/* Seção do Perfil */}
+            <View style={styles.profileSection}>
+              <View
+                style={[
+                  styles.avatarPlaceholder,
+                  { borderColor: currentAvatar.color },
+                ]}
+              >
                 <Ionicons
-                  name="color-palette-outline"
-                  size={20}
-                  color="#2B5B8E"
+                  name={currentAvatar.icon as any}
+                  size={40}
+                  color={currentAvatar.color}
                 />
               </View>
-              <Text style={styles.menuItemText}>Escolher Mascote</Text>
+              <Text style={styles.userNameText}>{userName}</Text>
+              <TouchableOpacity
+                style={styles.editBtn}
+                onPress={() => setEditProfileVisible(true)}
+              >
+                <Text style={styles.editBtnText}>EDITAR PERFIL</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Opções do Menu */}
+            <View style={styles.menuItems}>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => setAchievementsVisible(true)}
+              >
+                <View style={styles.iconCircle}>
+                  <Ionicons name="trophy-outline" size={20} color="#2B5B8E" />
+                </View>
+                <Text style={styles.menuItemText}>Conquistas</Text>
+                <Ionicons name="chevron-forward" size={20} color="#CBD5E1" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => setPreferencesVisible(true)}
+              >
+                <View style={styles.iconCircle}>
+                  <Ionicons name="settings-outline" size={20} color="#2B5B8E" />
+                </View>
+                <Text style={styles.menuItemText}>Preferências</Text>
+                <Ionicons name="chevron-forward" size={20} color="#CBD5E1" />
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.menuItem}>
+                <View style={styles.iconCircle}>
+                  <Ionicons
+                    name="help-circle-outline"
+                    size={20}
+                    color="#2B5B8E"
+                  />
+                </View>
+                <Text style={styles.menuItemText}>Ajuda</Text>
+                <Ionicons name="chevron-forward" size={20} color="#CBD5E1" />
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.menuItem}>
+                <View style={styles.iconCircle}>
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={20}
+                    color="#2B5B8E"
+                  />
+                </View>
+                <Text style={styles.menuItemText}>Sobre</Text>
+                <Ionicons name="chevron-forward" size={20} color="#CBD5E1" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Botão Sair */}
+            <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+              <Ionicons name="log-out-outline" size={18} color="#FF6B6B" />
+              <Text style={styles.logoutText}>SAIR DO APP</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem}>
-              <View style={styles.iconCircle}>
-                <Ionicons name="trophy-outline" size={20} color="#2B5B8E" />
-              </View>
-              <Text style={styles.menuItemText}>Conquistas</Text>
-            </TouchableOpacity>
+            {/* Versão */}
+            <Text style={styles.versionText}>Versão 1.0.0</Text>
+          </Animated.View>
+        </View>
+      </Modal>
 
-            <TouchableOpacity style={styles.menuItem}>
-              <View style={styles.iconCircle}>
-                <Ionicons name="settings-outline" size={20} color="#2B5B8E" />
-              </View>
-              <Text style={styles.menuItemText}>Preferências</Text>
-            </TouchableOpacity>
-          </View>
+      {/* Modais das opções */}
+      <EditProfileModal
+        visible={editProfileVisible}
+        onClose={() => setEditProfileVisible(false)}
+        currentName={userName}
+        currentAvatar={userAvatar}
+        onSave={handleSaveProfile}
+      />
 
-          {/* Botão Sair */}
-          <TouchableOpacity style={styles.logoutBtn} onPress={onClose}>
-            <Text style={styles.logoutText}>SAIR DO APP</Text>
-          </TouchableOpacity>
-        </Animated.View>
-      </View>
-    </Modal>
+      <AchievementsModal
+        visible={achievementsVisible}
+        onClose={() => setAchievementsVisible(false)}
+        achievements={INITIAL_ACHIEVEMENTS}
+      />
+
+      <PreferencesModal
+        visible={preferencesVisible}
+        onClose={() => setPreferencesVisible(false)}
+        preferences={preferences}
+        onSave={handleSavePreferences}
+      />
+    </>
   );
 }
 
@@ -184,8 +344,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 15,
-    borderWidth: 2,
-    borderColor: "#E1EFFF",
+    borderWidth: 3,
   },
   userNameText: {
     fontSize: 20,
@@ -227,16 +386,29 @@ const styles = StyleSheet.create({
     color: "#2B5B8E",
     marginLeft: 15,
     fontWeight: "600",
+    flex: 1,
   },
   logoutBtn: {
-    marginBottom: 60, // Espaço extra para não ficar colado nos botões do sistema
+    marginBottom: 15,
     paddingVertical: 15,
     alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#F0F7FF",
+    paddingTop: 20,
   },
   logoutText: {
     color: "#FF6B6B",
     fontWeight: "800",
     letterSpacing: 1.5,
     fontSize: 11,
+  },
+  versionText: {
+    textAlign: "center",
+    color: "#CBD5E1",
+    fontSize: 11,
+    marginBottom: 20,
   },
 });
