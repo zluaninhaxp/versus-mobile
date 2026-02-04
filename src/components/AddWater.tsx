@@ -6,13 +6,12 @@ import {
   StyleSheet,
   Modal,
   TextInput,
-  Pressable,
   ScrollView,
   Alert,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { BottomSheetModal } from "./BottomSheetModal";
 
-// Interface para o TypeScript parar de reclamar
 interface AddWaterModalProps {
   onAdd: (quantidade: number) => void;
   isGold?: boolean;
@@ -58,8 +57,14 @@ export function AddWaterModal({ onAdd, isGold }: AddWaterModalProps) {
       setAtalhos(atalhos.filter((item) => item !== valor));
     } else {
       onAdd(valor);
-      fecharModais();
+      handleClose();
     }
+  };
+
+  const handleClose = () => {
+    setModalVisible(false);
+    setIsEditMode(false);
+    setValorCustomizado("");
   };
 
   const adicionarNovoAtalho = () => {
@@ -69,15 +74,9 @@ export function AddWaterModal({ onAdd, isGold }: AddWaterModalProps) {
         setAtalhos([...atalhos, num].sort((a, b) => a - b));
       }
       onAdd(num);
-      fecharModais();
+      setSubModalVisible(false);
+      handleClose();
     }
-  };
-
-  const fecharModais = () => {
-    setModalVisible(false);
-    setSubModalVisible(false);
-    setIsEditMode(false);
-    setValorCustomizado("");
   };
 
   return (
@@ -89,65 +88,66 @@ export function AddWaterModal({ onAdd, isGold }: AddWaterModalProps) {
         <Ionicons name="add" size={40} color="white" />
       </TouchableOpacity>
 
-      <Modal
-        animationType="slide"
-        transparent
+      <BottomSheetModal
         visible={modalVisible}
-        onRequestClose={fecharModais}
+        onClose={handleClose}
+        height={0.6}
       >
-        <Pressable style={styles.modalOverlay} onPress={fecharModais}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <View>
-                <Text style={styles.modalTitle}>Bebeu quanto? 💧</Text>
-                <Text style={styles.modalSub}>
-                  {isEditMode ? "Toque para remover" : "Toque para registrar"}
-                </Text>
-              </View>
-              <TouchableOpacity onPress={() => setIsEditMode(!isEditMode)}>
-                <Ionicons
-                  name={isEditMode ? "checkmark-circle" : "trash-outline"}
-                  size={28}
-                  color={isEditMode ? "#2ECC71" : "#E74C3C"}
-                />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView contentContainerStyle={styles.optionsGrid}>
-              {atalhos.map((valor) => (
-                <TouchableOpacity
-                  key={valor}
-                  style={[
-                    styles.optionButton,
-                    isEditMode && styles.optionButtonEdit,
-                  ]}
-                  onPress={() => handlePress(valor)}
-                >
-                  {isEditMode && (
-                    <View style={styles.deleteBadge}>
-                      <Ionicons name="close" size={16} color="white" />
-                    </View>
-                  )}
-                  {getWaterIcon(valor)}
-                  <Text style={styles.optionText}>
-                    {valor >= 1000 ? `${valor / 1000}L` : `${valor}ml`}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-              {!isEditMode && (
-                <TouchableOpacity
-                  style={styles.customAddBtn}
-                  onPress={() => setSubModalVisible(true)}
-                >
-                  <Ionicons name="settings-outline" size={30} color="#4CAFFF" />
-                  <Text style={styles.moreText}>Novo</Text>
-                </TouchableOpacity>
-              )}
-            </ScrollView>
+        {/* Header */}
+        <View style={styles.modalHeader}>
+          <View>
+            <Text style={styles.modalTitle}>Bebeu quanto? 💧</Text>
+            <Text style={styles.modalSub}>
+              {isEditMode ? "Toque para remover" : "Toque para registrar"}
+            </Text>
           </View>
-        </Pressable>
-      </Modal>
+          <TouchableOpacity onPress={() => setIsEditMode(!isEditMode)}>
+            <Ionicons
+              name={isEditMode ? "checkmark-circle" : "trash-outline"}
+              size={28}
+              color={isEditMode ? "#2ECC71" : "#E74C3C"}
+            />
+          </TouchableOpacity>
+        </View>
 
+        {/* Grid de opções */}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.optionsGrid}
+        >
+          {atalhos.map((valor) => (
+            <TouchableOpacity
+              key={valor}
+              style={[
+                styles.optionButton,
+                isEditMode && styles.optionButtonEdit,
+              ]}
+              onPress={() => handlePress(valor)}
+            >
+              {isEditMode && (
+                <View style={styles.deleteBadge}>
+                  <Ionicons name="close" size={16} color="white" />
+                </View>
+              )}
+              {getWaterIcon(valor)}
+              <Text style={styles.optionText}>
+                {valor >= 1000 ? `${valor / 1000}L` : `${valor}ml`}
+              </Text>
+            </TouchableOpacity>
+          ))}
+          {!isEditMode && (
+            <TouchableOpacity
+              style={styles.customAddBtn}
+              onPress={() => setSubModalVisible(true)}
+            >
+              <Ionicons name="settings-outline" size={30} color="#4CAFFF" />
+              <Text style={styles.moreText}>Novo</Text>
+            </TouchableOpacity>
+          )}
+        </ScrollView>
+      </BottomSheetModal>
+
+      {/* Submodal para adicionar novo atalho */}
       <Modal animationType="fade" transparent visible={subModalVisible}>
         <View style={styles.subModalOverlay}>
           <View style={styles.subModalContent}>
@@ -164,6 +164,7 @@ export function AddWaterModal({ onAdd, isGold }: AddWaterModalProps) {
               keyboardType="numeric"
               value={valorCustomizado}
               onChangeText={setValorCustomizado}
+              autoFocus
             />
             <TouchableOpacity
               style={[
@@ -204,30 +205,19 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     shadowOpacity: 0.5,
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
-  },
-  modalContent: {
-    backgroundColor: "white",
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
-    padding: 25,
-    height: "75%",
-  },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    width: "100%",
+    marginBottom: 15,
   },
   modalTitle: { fontSize: 22, fontWeight: "bold", color: "#2B5B8E" },
   modalSub: { fontSize: 12, color: "#888" },
   optionsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    paddingBottom: 40,
+    paddingBottom: 60,
     paddingTop: 5,
     justifyContent: "flex-start",
   },

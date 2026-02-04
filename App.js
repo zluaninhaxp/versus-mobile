@@ -6,8 +6,8 @@ import { UserStatus } from "./src/components/UserStatus";
 import { RankItem } from "./src/components/RankItem";
 import { ProfileDrawer } from "./src/components/ProfileDrawer";
 import { WaterSettingsModal } from "./src/components/WaterSettingsModal";
-import { UserProfileModal } from "./src/components/UserProfileModal";
-import { MyHistoryModal } from "./src/components/MyHistoryModal";
+import { UserProfileModal } from "./src/components/UserProfile";
+import { MyHistoryModal } from "./src/components/MyHistory";
 
 // Helpers para timestamps (mantidos)
 function todayAt(h, m) {
@@ -46,8 +46,32 @@ export default function App() {
       ml: 2850,
       meta: 2500,
       foto: "https://i.pravatar.cc/300?img=32",
-      reactions: [{ emoji: "❤️", count: 5 }],
-      waterHistory: [],
+      reactions: [
+        { emoji: "❤️", count: 5 },
+        { emoji: "👏", count: 3 },
+        { emoji: "👍", count: 2 },
+      ],
+      waterHistory: [
+        { ml: 500, time: daysAgoAt(5, 7, 30) },
+        { ml: 750, time: daysAgoAt(5, 12, 0) },
+        { ml: 500, time: daysAgoAt(4, 8, 15) },
+        { ml: 1000, time: daysAgoAt(4, 13, 0) },
+        { ml: 250, time: daysAgoAt(4, 18, 30) },
+        { ml: 600, time: daysAgoAt(3, 7, 0) },
+        { ml: 800, time: daysAgoAt(3, 12, 45) },
+        { ml: 500, time: daysAgoAt(3, 19, 0) },
+        { ml: 500, time: daysAgoAt(2, 6, 30) },
+        { ml: 1000, time: daysAgoAt(2, 11, 50) },
+        { ml: 400, time: daysAgoAt(2, 16, 20) },
+        { ml: 750, time: yesterdayAt(7, 30) },
+        { ml: 500, time: yesterdayAt(12, 0) },
+        { ml: 1000, time: yesterdayAt(18, 15) },
+        { ml: 500, time: todayAt(7, 0) },
+        { ml: 250, time: todayAt(9, 30) },
+        { ml: 1000, time: todayAt(12, 10) },
+        { ml: 600, time: todayAt(15, 45) },
+        { ml: 500, time: todayAt(17, 5) },
+      ],
     },
     {
       id: 2,
@@ -55,8 +79,25 @@ export default function App() {
       ml: 2600,
       meta: 2500,
       foto: "https://i.pravatar.cc/300?img=12",
-      reactions: [],
-      waterHistory: [],
+      reactions: [
+        { emoji: "💧", count: 4 },
+        { emoji: "🎉", count: 2 },
+      ],
+      waterHistory: [
+        { ml: 500, time: daysAgoAt(4, 9, 0) },
+        { ml: 750, time: daysAgoAt(4, 14, 30) },
+        { ml: 600, time: daysAgoAt(3, 8, 0) },
+        { ml: 500, time: daysAgoAt(3, 13, 15) },
+        { ml: 800, time: daysAgoAt(2, 7, 45) },
+        { ml: 500, time: daysAgoAt(2, 12, 0) },
+        { ml: 500, time: yesterdayAt(8, 0) },
+        { ml: 750, time: yesterdayAt(13, 0) },
+        { ml: 500, time: yesterdayAt(18, 30) },
+        { ml: 500, time: todayAt(7, 15) },
+        { ml: 600, time: todayAt(11, 40) },
+        { ml: 1000, time: todayAt(13, 50) },
+        { ml: 500, time: todayAt(16, 0) },
+      ],
     },
     {
       id: 3,
@@ -64,17 +105,21 @@ export default function App() {
       ml: 2400,
       meta: 2000,
       foto: "https://i.pravatar.cc/300?img=45",
-      reactions: [],
-      waterHistory: [],
-    },
-    {
-      id: 4,
-      nome: "Diego Santos",
-      ml: 2200,
-      meta: 2500,
-      foto: "https://i.pravatar.cc/300?img=33",
-      reactions: [],
-      waterHistory: [],
+      reactions: [{ emoji: "💖", count: 6 }],
+      waterHistory: [
+        { ml: 500, time: daysAgoAt(3, 10, 0) },
+        { ml: 400, time: daysAgoAt(3, 15, 30) },
+        { ml: 750, time: daysAgoAt(2, 7, 20) },
+        { ml: 500, time: daysAgoAt(2, 14, 0) },
+        { ml: 250, time: yesterdayAt(6, 45) },
+        { ml: 500, time: yesterdayAt(12, 20) },
+        { ml: 750, time: yesterdayAt(19, 0) },
+        { ml: 500, time: todayAt(8, 10) },
+        { ml: 400, time: todayAt(10, 55) },
+        { ml: 1000, time: todayAt(13, 0) },
+        { ml: 250, time: todayAt(15, 30) },
+        { ml: 250, time: todayAt(18, 0) },
+      ],
     },
     {
       id: 5,
@@ -82,8 +127,20 @@ export default function App() {
       ml: 2100,
       meta: 2000,
       foto: "https://i.pravatar.cc/300?img=28",
-      reactions: [],
-      waterHistory: [],
+      reactions: [{ emoji: "🔥", count: 3 }],
+      waterHistory: [
+        { ml: 300, time: daysAgoAt(3, 7, 20) },
+        { ml: 500, time: daysAgoAt(3, 11, 50) },
+        { ml: 500, time: daysAgoAt(2, 8, 0) },
+        { ml: 750, time: daysAgoAt(2, 14, 30) },
+        { ml: 300, time: yesterdayAt(7, 20) },
+        { ml: 500, time: yesterdayAt(11, 50) },
+        { ml: 500, time: yesterdayAt(18, 0) },
+        { ml: 500, time: todayAt(8, 0) },
+        { ml: 800, time: todayAt(12, 30) },
+        { ml: 500, time: todayAt(17, 45) },
+        { ml: 300, time: todayAt(20, 0) },
+      ],
     },
     {
       id: 6,
@@ -92,7 +149,15 @@ export default function App() {
       meta: 2500,
       foto: "https://i.pravatar.cc/300?img=15",
       reactions: [],
-      waterHistory: [],
+      waterHistory: [
+        { ml: 500, time: daysAgoAt(2, 10, 0) },
+        { ml: 250, time: daysAgoAt(2, 16, 0) },
+        { ml: 500, time: yesterdayAt(10, 0) },
+        { ml: 250, time: yesterdayAt(16, 0) },
+        { ml: 500, time: todayAt(7, 30) },
+        { ml: 450, time: todayAt(13, 15) },
+        { ml: 750, time: todayAt(18, 0) },
+      ],
     },
   ]);
 
