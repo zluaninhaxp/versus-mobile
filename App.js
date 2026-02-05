@@ -190,10 +190,10 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F9FF" },
+  container: { flex: 1, backgroundColor: "#ffffff" },
   scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
   rankingHeader: { marginTop: 30, marginBottom: 20, paddingHorizontal: 4 },
-  rankingTitle: { fontSize: 20, fontWeight: "900", color: "#2B5B8E" },
+  rankingTitle: { fontSize: 20, fontWeight: "900", color: "#0267BA" },
   rankingSubtitle: { fontSize: 13, color: "#7B8FA3", fontWeight: "500" },
   rankingWrapper: { width: "100%" },
 });

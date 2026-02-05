@@ -73,7 +73,7 @@ export function RankItemRegular({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "white",
+    backgroundColor: "#E3FBFF",
     borderRadius: 16,
     padding: 12,
     marginBottom: 15,

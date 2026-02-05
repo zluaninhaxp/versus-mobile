@@ -16,10 +16,10 @@ export function RankItemTop3({
 }: any) {
   const config =
     position === 1
-      ? { bg: "#14B8D4", badge: "#FDB813", photoSize: 80 }
+      ? { bg: "#02A1B9", badge: "#FDB813", photoSize: 80 }
       : position === 2
-        ? { bg: "#6B7D8F", badge: "#E8E8E8", photoSize: 64 }
-        : { bg: "#E67E22", badge: "#FFD89B", photoSize: 64 };
+        ? { bg: "#028397", badge: "#E8E8E8", photoSize: 64 }
+        : { bg: "#016675", badge: "#FFD89B", photoSize: 64 };
 
   return (
     <View style={[styles.card, { backgroundColor: config.bg }]}>

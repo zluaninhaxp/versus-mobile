@@ -200,8 +200,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   buttonGold: {
-    backgroundColor: "#FFD700",
-    shadowColor: "#FFD700",
+    backgroundColor: "#02BA96",
+    shadowColor: "#02BA96",
     shadowRadius: 10,
     shadowOpacity: 0.5,
   },
