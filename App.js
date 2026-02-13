@@ -29,7 +29,7 @@ function daysAgoAt(days, h, m) {
 }
 
 export default function App() {
-  const [mlConsumido, setMlConsumido] = useState(2850);
+  const [mlConsumido, setMlConsumido] = useState(200);
   const [nome, setNome] = useState("Luana Castro");
   const [meta, setMeta] = useState(2500);
 
@@ -130,7 +130,7 @@ export default function App() {
           />
 
           <View style={styles.rankingHeader}>
-            <Text style={styles.rankingTitle}>💧 Ranking de Hidratação</Text>
+            <Text style={styles.rankingTitle}>Ranking de Hidratação</Text>
             <Text style={styles.rankingSubtitle}>
               Reaja e incentive seus amigos!
             </Text>
@@ -190,10 +190,10 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#ffffff" },
+  container: { flex: 1, backgroundColor: "#211a3a" },
   scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
   rankingHeader: { marginTop: 30, marginBottom: 20, paddingHorizontal: 4 },
-  rankingTitle: { fontSize: 20, fontWeight: "900", color: "#0267BA" },
-  rankingSubtitle: { fontSize: 13, color: "#7B8FA3", fontWeight: "500" },
+  rankingTitle: { fontSize: 20, fontWeight: "900", color: "white" },
+  rankingSubtitle: { fontSize: 13, color: "#BDC3C7", fontWeight: "500" },
   rankingWrapper: { width: "100%" },
 });

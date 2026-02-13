@@ -82,7 +82,7 @@ export function AddWaterModal({ onAdd, isGold }: AddWaterModalProps) {
   return (
     <>
       <TouchableOpacity
-        style={[styles.addButton, isGold && styles.buttonGold]}
+        style={[styles.addButton]}
         onPress={() => setModalVisible(true)}
       >
         <Ionicons name="add" size={40} color="white" />
@@ -193,17 +193,11 @@ const styles = StyleSheet.create({
   addButton: {
     width: 60,
     height: 60,
-    backgroundColor: "#4CAFFF",
+    backgroundColor: "#7737d1",
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
     elevation: 4,
-  },
-  buttonGold: {
-    backgroundColor: "#02BA96",
-    shadowColor: "#02BA96",
-    shadowRadius: 10,
-    shadowOpacity: 0.5,
   },
   modalHeader: {
     flexDirection: "row",
