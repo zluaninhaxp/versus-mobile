@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { LinearGradient } from "expo-linear-gradient"; // Importação do gradiente
 import { RankingActions } from "./RankingActions";
 
 export function RankItemRegular({
@@ -15,7 +16,13 @@ export function RankItemRegular({
   onReactionUpdate,
 }: any) {
   return (
-    <View style={styles.card}>
+    /* Substituição da View por LinearGradient com as cores sugeridas */
+    <LinearGradient
+      colors={["#4a2285", "#391a67"]} // Transição do roxo médio para o profundo
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.card}
+    >
       <View style={styles.mainRow}>
         <View style={styles.positionCircle}>
           <Text style={styles.positionNumber}>{position}</Text>
@@ -46,7 +53,6 @@ export function RankItemRegular({
               <Text style={styles.metaText}>Meta!</Text>
             </View>
           )}
-          {/* Removidas as props problemáticas */}
           <RankingActions
             isMe={isMe}
             isTop3={false}
@@ -67,43 +73,50 @@ export function RankItemRegular({
           ))}
         </View>
       )}
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "white",
     borderRadius: 16,
     padding: 12,
     marginBottom: 15,
-    elevation: 2,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   mainRow: { flexDirection: "row", alignItems: "center" },
   positionCircle: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#F0F4F8",
+    backgroundColor: "rgba(255, 255, 255, 0.15)", // Semi-transparente para o gradiente aparecer
     justifyContent: "center",
     alignItems: "center",
     marginRight: 10,
   },
-  positionNumber: { fontSize: 16, fontWeight: "bold", color: "#6B7D8F" },
+  positionNumber: { fontSize: 16, fontWeight: "bold", color: "#E1EFFF" }, // Texto claro
   userClickArea: { flexDirection: "row", alignItems: "center", flex: 1 },
   photo: {
     width: 56,
     height: 56,
     borderRadius: 28,
     borderWidth: 2,
-    borderColor: "#F0F4F8",
+    borderColor: "rgba(255, 255, 255, 0.3)",
     marginRight: 10,
   },
   infoContainer: { flex: 1 },
-  userName: { fontSize: 15, fontWeight: "bold", color: "#2B3E50" },
+  userName: { fontSize: 16, fontWeight: "bold", color: "white" }, // Mudado para branco
   statsRow: { flexDirection: "row", alignItems: "baseline" },
-  mlValue: { fontSize: 17, fontWeight: "900", color: "#14B8D4" },
-  mlGoal: { fontSize: 12, color: "#9BA8B5", fontWeight: "600" },
+  mlValue: { fontSize: 17, fontWeight: "900", color: "#4CAFFF" }, // Azul mais vibrante
+  mlGoal: {
+    fontSize: 12,
+    color: "rgba(255, 255, 255, 0.5)",
+    fontWeight: "600",
+  }, // Branco com alpha
   rightBlock: { flexDirection: "row", alignItems: "center", gap: 8 },
   metaBadge: {
     backgroundColor: "#2ECC71",
@@ -118,20 +131,20 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: "#F0F4F8",
+    borderTopColor: "rgba(255, 255, 255, 0.1)", // Divisor sutil
     flexWrap: "wrap",
   },
   reactionBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: "rgba(255, 255, 255, 0.1)", // Glassmorphism
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 16,
     gap: 4,
     borderWidth: 1,
-    borderColor: "#E8EEF4",
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   reactionEmoji: { fontSize: 14 },
-  reactionCount: { color: "#6B7D8F", fontSize: 13, fontWeight: "bold" },
+  reactionCount: { color: "#E1EFFF", fontSize: 13, fontWeight: "bold" },
 });

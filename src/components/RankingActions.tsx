@@ -95,7 +95,7 @@ export function RankingActions({
               isTop3 ? styles.btnTop3 : styles.btnRegular,
               cooldown > 0 && styles.btnDisabled,
             ]}
-            onPress={() => setCooldown(7200)} // Cooldown de 2 horas
+            onPress={() => setCooldown(3600)} // Cooldown de 1 horas
             disabled={cooldown > 0}
           >
             <Ionicons

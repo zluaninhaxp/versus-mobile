@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { LinearGradient } from "expo-linear-gradient"; // Importação necessária
 import { RankingActions } from "./RankingActions";
 
 export function RankItemTop3({
@@ -16,13 +17,31 @@ export function RankItemTop3({
 }: any) {
   const config =
     position === 1
-      ? { bg: "#14B8D4", badge: "#FDB813", photoSize: 80 }
+      ? {
+          colors: ["#7737d1", "#ffdd8e"], // Ouro reluzente
+          badge: "#FDB813",
+          photoSize: 80,
+        }
       : position === 2
-        ? { bg: "#6B7D8F", badge: "#E8E8E8", photoSize: 64 }
-        : { bg: "#E67E22", badge: "#FFD89B", photoSize: 64 };
+        ? {
+            colors: ["#7737d1", "#e9e9e9"], // Prata perolado
+            badge: "#D1D1D1",
+            photoSize: 64,
+          }
+        : {
+            colors: ["#7737d1", "#ffebcc"], // Bronze moderno / Ciano
+            badge: "#FFD89B",
+            photoSize: 64,
+          };
 
   return (
-    <View style={[styles.card, { backgroundColor: config.bg }]}>
+    /* Trocamos a View externa pelo LinearGradient */
+    <LinearGradient
+      colors={config.colors}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.card}
+    >
       <View style={styles.topRow}>
         <View style={[styles.positionBadge, { backgroundColor: config.badge }]}>
           <Text style={styles.medalIcon}>
@@ -37,7 +56,6 @@ export function RankItemTop3({
               <Text style={styles.metaText}>Meta!</Text>
             </View>
           )}
-          {/* Removidas as props problemáticas */}
           <RankingActions
             isMe={isMe}
             isTop3={true}
@@ -84,12 +102,22 @@ export function RankItemTop3({
           ))}
         </View>
       )}
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 20, padding: 16, marginBottom: 15 },
+  card: {
+    borderRadius: 24, // Aumentado para um visual mais moderno
+    padding: 16,
+    marginBottom: 15,
+    // Sombra para efeito de profundidade (gamificação)
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
+  },
   topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -134,7 +162,7 @@ const styles = StyleSheet.create({
   reactionBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.25)",
+    backgroundColor: "rgba(255,255,255,0.3)", // Um pouco mais opaco para ler melhor no gradiente
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 20,

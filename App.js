@@ -6,10 +6,10 @@ import { UserStatus } from "./src/components/UserStatus";
 import { RankItem } from "./src/components/RankItem";
 import { ProfileDrawer } from "./src/components/ProfileDrawer";
 import { WaterSettingsModal } from "./src/components/WaterSettingsModal";
-import { UserProfileModal } from "./src/components/UserProfileModal";
-import { MyHistoryModal } from "./src/components/MyHistoryModal";
+import { UserProfileModal } from "./src/components/UserProfile"; // Verifique se o nome do arquivo termina em Modal
+import { MyHistoryModal } from "./src/components/MyHistory";
 
-// Helpers para timestamps (mantidos)
+// Helpers para timestamps
 function todayAt(h, m) {
   const d = new Date();
   d.setHours(h, m, 0, 0);
@@ -29,15 +29,16 @@ function daysAgoAt(days, h, m) {
 }
 
 export default function App() {
-  const [mlConsumido, setMlConsumido] = useState(2850);
-  const [nome, setNome] = useState("Luana Castro"); // Nome atualizado conforme solicitado
+  const [mlConsumido, setMlConsumido] = useState(200);
+  const [nome, setNome] = useState("Luana Castro");
   const [meta, setMeta] = useState(2500);
 
+  // Estados de visibilidade dos Modais e Drawer
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isWaterSettingsOpen, setIsWaterSettingsOpen] = useState(false);
-  const [activeReactionId, setActiveReactionId] = useState(null);
-  const [selectedUserId, setSelectedUserId] = useState(null);
   const [isMyHistoryOpen, setIsMyHistoryOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [activeReactionId, setActiveReactionId] = useState(null);
 
   const [usuarios, setUsuarios] = useState([
     {
@@ -47,7 +48,10 @@ export default function App() {
       meta: 2500,
       foto: "https://i.pravatar.cc/300?img=32",
       reactions: [{ emoji: "❤️", count: 5 }],
-      waterHistory: [],
+      waterHistory: [
+        { ml: 500, time: todayAt(7, 0) },
+        { ml: 1000, time: todayAt(12, 10) },
+      ],
     },
     {
       id: 2,
@@ -64,15 +68,6 @@ export default function App() {
       ml: 2400,
       meta: 2000,
       foto: "https://i.pravatar.cc/300?img=45",
-      reactions: [],
-      waterHistory: [],
-    },
-    {
-      id: 4,
-      nome: "Diego Santos",
-      ml: 2200,
-      meta: 2500,
-      foto: "https://i.pravatar.cc/300?img=33",
       reactions: [],
       waterHistory: [],
     },
@@ -104,9 +99,8 @@ export default function App() {
     );
   };
 
-  // Ranking sempre atualizado com os dados vivos do App.js
   const rankingOrdenado = [...usuarios]
-    .map((u) => (u.id === 1 ? { ...u, ml: mlConsumido, meta: meta } : u)) // Injeta meta e ml atuais
+    .map((u) => (u.id === 1 ? { ...u, ml: mlConsumido, meta: meta } : u))
     .sort((a, b) => b.ml - a.ml);
 
   const selectedUser = usuarios.find((u) => u.id === selectedUserId) || null;
@@ -117,11 +111,13 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
+        {/* O Header recebe as funções que alteram os estados acima */}
         <Header
           onOpenMenu={() => setIsProfileOpen(true)}
           onOpenHistory={() => setIsMyHistoryOpen(true)}
           onOpenSettings={() => setIsWaterSettingsOpen(true)}
         />
+
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
@@ -132,12 +128,14 @@ export default function App() {
             meta={meta}
             onAdd={handleAddWater}
           />
+
           <View style={styles.rankingHeader}>
-            <Text style={styles.rankingTitle}>💧 Ranking de Hidratação</Text>
+            <Text style={styles.rankingTitle}>Ranking de Hidratação</Text>
             <Text style={styles.rankingSubtitle}>
               Reaja e incentive seus amigos!
             </Text>
           </View>
+
           <View style={styles.rankingWrapper}>
             {rankingOrdenado.map((item, index) => (
               <RankItem
@@ -145,7 +143,7 @@ export default function App() {
                 position={index + 1}
                 nome={item.nome}
                 ml={item.ml}
-                meta={item.meta} // Esta prop agora recebe o valor atualizado do modal
+                meta={item.meta}
                 foto={item.foto}
                 reactions={item.reactions}
                 activeReactionId={activeReactionId}
@@ -156,17 +154,20 @@ export default function App() {
           </View>
         </ScrollView>
 
+        {/* Componentes de Modal e Drawer chamados com suas respectivas props de visibilidade */}
         <ProfileDrawer
           visible={isProfileOpen}
           onClose={() => setIsProfileOpen(false)}
           userName={nome}
         />
+
         <WaterSettingsModal
           visible={isWaterSettingsOpen}
           onClose={() => setIsWaterSettingsOpen(false)}
           currentMeta={meta}
-          onSave={(newMeta) => setMeta(newMeta)} // Atualiza o estado global
+          onSave={(newMeta) => setMeta(newMeta)}
         />
+
         <UserProfileModal
           visible={selectedUserId !== null}
           onClose={() => setSelectedUserId(null)}
@@ -177,12 +178,11 @@ export default function App() {
           position={selectedPosition}
           waterHistory={selectedUser?.waterHistory || []}
         />
+
         <MyHistoryModal
           visible={isMyHistoryOpen}
           onClose={() => setIsMyHistoryOpen(false)}
           waterHistory={usuarios.find((u) => u.id === 1)?.waterHistory || []}
-          totalMl={mlConsumido}
-          meta={meta}
         />
       </SafeAreaView>
     </SafeAreaProvider>
@@ -190,10 +190,10 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F9FF" },
+  container: { flex: 1, backgroundColor: "#211a3a" },
   scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
   rankingHeader: { marginTop: 30, marginBottom: 20, paddingHorizontal: 4 },
-  rankingTitle: { fontSize: 20, fontWeight: "900", color: "#2B5B8E" },
-  rankingSubtitle: { fontSize: 13, color: "#7B8FA3", fontWeight: "500" },
+  rankingTitle: { fontSize: 20, fontWeight: "900", color: "white" },
+  rankingSubtitle: { fontSize: 13, color: "#BDC3C7", fontWeight: "500" },
   rankingWrapper: { width: "100%" },
 });
