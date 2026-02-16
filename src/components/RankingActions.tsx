@@ -7,7 +7,7 @@ interface RankingActionsProps {
   initialReactions: { emoji: string; count: number }[];
   isTop3: boolean;
   metaAlcancada: boolean;
-  isMe?: boolean; // Propriedade para identificar o usuário logado
+  isMe?: boolean;
   onReactionUpdate: (
     updatedReactions: { emoji: string; count: number }[],
   ) => void;
@@ -17,14 +17,13 @@ export function RankingActions({
   initialReactions,
   isTop3,
   metaAlcancada,
-  isMe = false, // Padrão falso para permitir interação com outros
+  isMe = false,
   onReactionUpdate,
 }: RankingActionsProps) {
   const [myReaction, setMyReaction] = useState<string | null>(null);
   const [localReactions, setLocalReactions] = useState(initialReactions);
   const [cooldown, setCooldown] = useState(0);
 
-  // Regra de negócio: Se for o item da Luana Castro, não exibe botões de ação
   if (isMe) {
     return null;
   }
@@ -47,7 +46,6 @@ export function RankingActions({
     let updated = [...localReactions];
 
     if (newEmoji === myReaction) {
-      // Remover reação (Toggle OFF)
       updated = updated
         .map((r) =>
           r.emoji === newEmoji ? { ...r, count: Math.max(0, r.count - 1) } : r,
@@ -55,7 +53,6 @@ export function RankingActions({
         .filter((r) => r.count > 0);
       setMyReaction(null);
     } else {
-      // Substituir reação antiga se existir
       if (myReaction) {
         updated = updated
           .map((r) =>
@@ -66,7 +63,6 @@ export function RankingActions({
           .filter((r) => r.count > 0);
       }
 
-      // Adicionar nova reação
       const idx = updated.findIndex((r) => r.emoji === newEmoji);
       if (idx > -1) {
         updated[idx] = { ...updated[idx], count: updated[idx].count + 1 };
@@ -81,12 +77,7 @@ export function RankingActions({
 
   return (
     <View style={styles.container}>
-      <ReactionSelector
-        currentReaction={myReaction}
-        onReactionSelect={handleReactionChange}
-        isTop3={isTop3}
-      />
-
+      {/* Botão de Notificação (Incentivo) agora vem primeiro */}
       {!metaAlcancada && (
         <View style={styles.notifyContainer}>
           <TouchableOpacity
@@ -95,13 +86,13 @@ export function RankingActions({
               isTop3 ? styles.btnTop3 : styles.btnRegular,
               cooldown > 0 && styles.btnDisabled,
             ]}
-            onPress={() => setCooldown(3600)} // Cooldown de 1 horas
+            onPress={() => setCooldown(3600)}
             disabled={cooldown > 0}
           >
             <Ionicons
               name={cooldown > 0 ? "notifications" : "notifications-outline"}
               size={18}
-              color={isTop3 || cooldown > 0 ? "white" : "#6B7D8F"}
+              color={isTop3 || cooldown > 0 ? "white" : "#64748B"}
             />
           </TouchableOpacity>
 
@@ -114,10 +105,16 @@ export function RankingActions({
           )}
         </View>
       )}
+
+      {/* Seletor de Reações agora vem depois */}
+      <ReactionSelector
+        currentReaction={myReaction}
+        onReactionSelect={handleReactionChange}
+        isTop3={isTop3}
+      />
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
@@ -136,8 +133,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   btnRegular: {
-    backgroundColor: "#F8FBFF",
-    borderColor: "#E8EEF4",
+    backgroundColor: "#F8FAFC",
+    borderColor: "#E2E8F0",
   },
   btnTop3: {
     backgroundColor: "rgba(255,255,255,0.2)",

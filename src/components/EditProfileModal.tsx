@@ -20,11 +20,11 @@ interface EditProfileModalProps {
 }
 
 const AVATARS = [
-  { id: 1, icon: "person", color: "#4CAFFF" },
-  { id: 2, icon: "happy", color: "#2ECC71" },
+  { id: 1, icon: "person", color: "#2196F3" },
+  { id: 2, icon: "happy", color: "#10B981" },
   { id: 3, icon: "star", color: "#FFD700" },
-  { id: 4, icon: "heart", color: "#E74C3C" },
-  { id: 5, icon: "flash", color: "#F39C12" },
+  { id: 4, icon: "heart", color: "#EF4444" },
+  { id: 5, icon: "flash", color: "#F59E0B" },
   { id: 6, icon: "rocket", color: "#9B59B6" },
   { id: 7, icon: "leaf", color: "#27AE60" },
   { id: 8, icon: "water", color: "#3498DB" },
@@ -59,7 +59,6 @@ export function EditProfileModal({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
       >
-        {/* Nome */}
         <View style={styles.section}>
           <Text style={styles.label}>Nome</Text>
           <TextInput
@@ -72,7 +71,6 @@ export function EditProfileModal({
           <Text style={styles.charCount}>{name.length}/30</Text>
         </View>
 
-        {/* Escolher Avatar */}
         <View style={styles.section}>
           <Text style={styles.label}>Escolher Avatar</Text>
           <View style={styles.avatarGrid}>
@@ -101,7 +99,6 @@ export function EditProfileModal({
           </View>
         </View>
 
-        {/* Botões */}
         <View style={styles.buttonRow}>
           <TouchableOpacity style={styles.btnCancel} onPress={onClose}>
             <Text style={styles.btnCancelText}>Cancelar</Text>
@@ -117,27 +114,28 @@ export function EditProfileModal({
 
 const styles = StyleSheet.create({
   header: { marginBottom: 20 },
-  title: { fontSize: 22, fontWeight: "bold", color: "#2B5B8E" },
+  title: { fontSize: 22, fontWeight: "bold", color: "#334155" },
   content: { paddingBottom: 40 },
 
   section: { marginBottom: 25 },
   label: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#2B5B8E",
+    color: "#334155",
     marginBottom: 10,
   },
   input: {
-    backgroundColor: "#F8FBFF",
+    backgroundColor: "#F8FAFC",
     borderRadius: 15,
     padding: 18,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "#E1EFFF",
+    borderColor: "#E2E8F0",
+    color: "#334155",
   },
   charCount: {
     fontSize: 12,
-    color: "#9BA8B5",
+    color: "#94A3B8",
     textAlign: "right",
     marginTop: 5,
   },
@@ -151,21 +149,21 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: "#F8FBFF",
+    backgroundColor: "#F8FAFC",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 3,
     position: "relative",
   },
   avatarSelected: {
-    backgroundColor: "#EBF7FF",
+    backgroundColor: "#BBDEFB",
     borderWidth: 3,
   },
   checkBadge: {
     position: "absolute",
     top: -5,
     right: -5,
-    backgroundColor: "#2ECC71",
+    backgroundColor: "#10B981",
     width: 24,
     height: 24,
     borderRadius: 12,
@@ -182,19 +180,19 @@ const styles = StyleSheet.create({
   },
   btnCancel: {
     flex: 1,
-    backgroundColor: "#F0F4F8",
+    backgroundColor: "#F1F5F9",
     padding: 18,
     borderRadius: 15,
     alignItems: "center",
   },
   btnCancelText: {
-    color: "#6B7D8F",
+    color: "#64748B",
     fontWeight: "bold",
     fontSize: 16,
   },
   btnSave: {
     flex: 1,
-    backgroundColor: "#4CAFFF",
+    backgroundColor: "#2196F3",
     padding: 18,
     borderRadius: 15,
     alignItems: "center",

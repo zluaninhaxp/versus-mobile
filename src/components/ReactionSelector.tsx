@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
+// Gerenciamento global para fechar seletores abertos
 let _nextId = 0;
 const _listeners: Set<(openedId: number | null) => void> = new Set();
 function _broadcast(openedId: number | null) {
@@ -49,7 +50,8 @@ export function ReactionSelector({
     };
     _listeners.add(listener);
 
-    // FIX: Envolver o delete em chaves para garantir que o retorno seja void
+    // CORREÇÃO TS2345: O retorno precisa ser void.
+    // Envolver em chaves evita retornar o boolean do .delete()
     return () => {
       _listeners.delete(listener);
     };
@@ -74,7 +76,7 @@ export function ReactionSelector({
       scaleAnim.setValue(0);
       opacityAnim.setValue(0);
     }
-  }, [isOpen]);
+  }, [isOpen, scaleAnim, opacityAnim]);
 
   const open = useCallback(() => {
     buttonRef.current?.measureInWindow((x, y, width, height) => {
@@ -85,10 +87,6 @@ export function ReactionSelector({
   }, [myId]);
 
   const close = useCallback(() => setIsOpen(false), []);
-
-  const handlePress = useCallback(() => {
-    open();
-  }, [open]);
 
   const pick = useCallback(
     (emoji: string) => {
@@ -110,10 +108,11 @@ export function ReactionSelector({
       <TouchableOpacity
         style={[
           styles.btn,
-          isTop3 && styles.btnTop3,
-          currentReaction && styles.btnActive,
+          // Mantém o cinzinha regular ou o transparente do Top 3 conforme sua nova paleta
+          isTop3 ? styles.btnTop3 : styles.btnRegular,
+          currentReaction && isTop3 && styles.btnActiveTop3,
         ]}
-        onPress={handlePress}
+        onPress={open}
       >
         {currentReaction ? (
           <Text style={styles.emojiActive}>{currentReaction}</Text>
@@ -121,7 +120,7 @@ export function ReactionSelector({
           <Ionicons
             name="happy-outline"
             size={18}
-            color={isTop3 ? "rgba(255,255,255,0.85)" : "#6B7D8F"}
+            color={isTop3 ? "rgba(255,255,255,0.85)" : "#64748B"}
           />
         )}
       </TouchableOpacity>
@@ -174,17 +173,22 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: "#F8FBFF",
-    borderWidth: 1,
-    borderColor: "#E1EFFF",
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+  },
+  // Mantém o cinzinha regular conforme solicitado
+  btnRegular: {
+    backgroundColor: "#F8FAFC",
+    borderColor: "#E2E8F0",
   },
   btnTop3: {
     backgroundColor: "rgba(255,255,255,0.2)",
     borderColor: "transparent",
   },
-  btnActive: { backgroundColor: "#E8F4FF", borderColor: "#4CAFFF" },
+  btnActiveTop3: {
+    backgroundColor: "rgba(255,255,255,0.3)",
+  },
   emojiActive: { fontSize: 18 },
   overlay: { flex: 1, backgroundColor: "transparent" },
   bubble: { position: "absolute", alignItems: "flex-start" },
@@ -219,6 +223,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 20,
   },
-  emojiBtnSelected: { backgroundColor: "#E8F4FF" },
+  emojiBtnSelected: { backgroundColor: "#E3F2FD" },
   emojiText: { fontSize: 22 },
 });

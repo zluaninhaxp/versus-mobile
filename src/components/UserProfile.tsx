@@ -39,7 +39,7 @@ export function UserProfileModal({
         ? "#C0C0C0"
         : position === 3
           ? "#CD7F32"
-          : "#6B7D8F";
+          : "#64748B";
   const medalEmoji =
     position === 1
       ? "🥇"
@@ -49,7 +49,6 @@ export function UserProfileModal({
           ? "🥉"
           : `${position}º`;
 
-  // Histórico só de hoje
   const today = new Date();
   const todayHistory = waterHistory.filter((e) => {
     const d = new Date(e.time);
@@ -60,7 +59,6 @@ export function UserProfileModal({
     );
   });
 
-  // Dados da semana para gráfico
   const weekData: { label: string; ml: number }[] = [];
   for (let i = 6; i >= 0; i--) {
     const day = new Date(today);
@@ -86,18 +84,18 @@ export function UserProfileModal({
   const getWaterIcon = (quantidade: number) => {
     if (quantidade < 500)
       return (
-        <MaterialCommunityIcons name="cup-water" size={20} color="#4CAFFF" />
+        <MaterialCommunityIcons name="cup-water" size={20} color="#2196F3" />
       );
     if (quantidade < 1000)
       return (
         <MaterialCommunityIcons
           name="bottle-tonic-plus"
           size={20}
-          color="#4CAFFF"
+          color="#2196F3"
         />
       );
     return (
-      <MaterialCommunityIcons name="bottle-wine" size={20} color="#4CAFFF" />
+      <MaterialCommunityIcons name="bottle-wine" size={20} color="#2196F3" />
     );
   };
 
@@ -106,7 +104,7 @@ export function UserProfileModal({
       visible={visible}
       onClose={onClose}
       height={0.88}
-      backgroundColor="#F5F9FF"
+      backgroundColor="#F8FAFC"
     >
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -162,7 +160,7 @@ export function UserProfileModal({
 
         {/* GRÁFICO SEMANAL */}
         <View style={styles.sectionHeader}>
-          <Ionicons name="bar-chart" size={18} color="#14B8D4" />
+          <Ionicons name="bar-chart" size={18} color="#2196F3" />
           <Text style={styles.sectionTitle}>Última semana</Text>
         </View>
         <View style={styles.chartCard}>
@@ -205,7 +203,7 @@ export function UserProfileModal({
 
         {/* HISTÓRICO DE HOJE */}
         <View style={styles.sectionHeader}>
-          <Ionicons name="water" size={18} color="#14B8D4" />
+          <Ionicons name="water" size={18} color="#2196F3" />
           <Text style={styles.sectionTitle}>Hoje</Text>
         </View>
         {todayHistory.length === 0 ? (
@@ -247,7 +245,7 @@ const styles = StyleSheet.create({
   scrollContent: { paddingBottom: 40 },
   profileCard: {
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: "#FFFFFF",
     borderRadius: 22,
     padding: 24,
     marginTop: 8,
@@ -257,6 +255,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
   },
   avatarWrapper: { position: "relative", marginBottom: 12 },
   medalRing: {
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 21,
     fontWeight: "900",
-    color: "#2B5B8E",
+    color: "#334155",
     marginBottom: 6,
   },
   statsRow: {
@@ -294,14 +294,14 @@ const styles = StyleSheet.create({
     gap: 6,
     marginBottom: 8,
   },
-  statValue: { fontSize: 28, fontWeight: "900", color: "#14B8D4" },
+  statValue: { fontSize: 28, fontWeight: "900", color: "#2196F3" },
   statValueGold: { color: "#DAA520" },
-  statSep: { fontSize: 18, color: "#D0D8E0", fontWeight: "600" },
-  statMeta: { fontSize: 18, color: "#9BA8B5", fontWeight: "600" },
+  statSep: { fontSize: 18, color: "#CBD5E1", fontWeight: "600" },
+  statMeta: { fontSize: 18, color: "#94A3B8", fontWeight: "600" },
   metaAchievedBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#2ECC71",
+    backgroundColor: "#10B981",
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 16,
@@ -312,20 +312,20 @@ const styles = StyleSheet.create({
   progressBg: {
     width: "100%",
     height: 12,
-    backgroundColor: "#EBF4FF",
+    backgroundColor: "#E3F2FD",
     borderRadius: 6,
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    backgroundColor: "#14B8D4",
+    backgroundColor: "#2196F3",
     borderRadius: 6,
   },
   progressFillGold: { backgroundColor: "#FFD700" },
   progressLabel: {
     fontSize: 12,
     fontWeight: "800",
-    color: "#9BA8B5",
+    color: "#94A3B8",
     marginTop: 6,
     letterSpacing: 0.5,
   },
@@ -337,10 +337,10 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 12,
   },
-  sectionTitle: { fontSize: 16, fontWeight: "800", color: "#2B5B8E" },
+  sectionTitle: { fontSize: 16, fontWeight: "800", color: "#334155" },
 
   chartCard: {
-    backgroundColor: "white",
+    backgroundColor: "#FFFFFF",
     borderRadius: 18,
     padding: 16,
     marginBottom: 22,
@@ -349,6 +349,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
   },
   chartBars: {
     flexDirection: "row",
@@ -365,37 +367,37 @@ const styles = StyleSheet.create({
   },
   chartMlLabel: {
     fontSize: 9,
-    color: "#9BA8B5",
+    color: "#94A3B8",
     fontWeight: "700",
     marginBottom: 2,
   },
-  chartMlLabelToday: { color: "#14B8D4" },
+  chartMlLabelToday: { color: "#2196F3" },
   chartBarBg: {
     width: 28,
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "#F0F4F8",
+    backgroundColor: "#F1F5F9",
     borderRadius: 6,
     overflow: "hidden",
   },
   chartBarFill: {
     width: "100%",
-    backgroundColor: "#C8E6F5",
+    backgroundColor: "#90CAF9",
     borderRadius: 6,
   },
-  chartBarToday: { backgroundColor: "#14B8D4" },
+  chartBarToday: { backgroundColor: "#2196F3" },
   chartDayLabel: {
     fontSize: 11,
-    color: "#9BA8B5",
+    color: "#94A3B8",
     fontWeight: "600",
     marginTop: 6,
   },
-  chartDayLabelToday: { color: "#14B8D4", fontWeight: "800" },
+  chartDayLabelToday: { color: "#2196F3", fontWeight: "800" },
 
   historyItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: "#FFFFFF",
     borderRadius: 14,
     padding: 12,
     marginBottom: 8,
@@ -404,31 +406,35 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 1 },
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
   },
   historyIcon: {
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: "#EBF7FF",
+    backgroundColor: "#E3F2FD",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
   },
   historyInfo: { flex: 1 },
-  historyMl: { fontSize: 15, fontWeight: "bold", color: "#2B3E50" },
-  historyTime: { fontSize: 12, color: "#9BA8B5" },
-  historyAmount: { fontSize: 15, fontWeight: "900", color: "#14B8D4" },
+  historyMl: { fontSize: 15, fontWeight: "bold", color: "#334155" },
+  historyTime: { fontSize: 12, color: "#94A3B8" },
+  historyAmount: { fontSize: 15, fontWeight: "900", color: "#2196F3" },
   emptyBox: {
-    backgroundColor: "white",
+    backgroundColor: "#FFFFFF",
     borderRadius: 14,
     padding: 28,
     alignItems: "center",
     marginBottom: 24,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
   },
-  emptyText: { color: "#9BA8B5", fontSize: 14 },
+  emptyText: { color: "#94A3B8", fontSize: 14 },
 
   conquistaPlaceholder: {
-    backgroundColor: "white",
+    backgroundColor: "#FFFFFF",
     borderRadius: 18,
     padding: 36,
     alignItems: "center",
@@ -437,7 +443,7 @@ const styles = StyleSheet.create({
     borderColor: "#E0E6EC",
   },
   conquistaText: {
-    color: "#9BA8B5",
+    color: "#94A3B8",
     fontSize: 14,
     marginTop: 10,
     textAlign: "center",

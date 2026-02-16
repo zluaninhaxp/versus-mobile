@@ -29,21 +29,21 @@ export function AddWaterModal({ onAdd, isGold }: AddWaterModalProps) {
   const getWaterIcon = (quantidade: number, size = 30) => {
     if (quantidade < 500)
       return (
-        <MaterialCommunityIcons name="cup-water" size={size} color="#4CAFFF" />
+        <MaterialCommunityIcons name="cup-water" size={size} color="#2196F3" />
       );
     if (quantidade < 1000)
       return (
         <MaterialCommunityIcons
           name="bottle-tonic-plus"
           size={size}
-          color="#4CAFFF"
+          color="#2196F3"
         />
       );
     return (
       <MaterialCommunityIcons
         name="bottle-wine"
         size={size + 5}
-        color="#4CAFFF"
+        color="#2196F3"
       />
     );
   };
@@ -105,7 +105,7 @@ export function AddWaterModal({ onAdd, isGold }: AddWaterModalProps) {
             <Ionicons
               name={isEditMode ? "checkmark-circle" : "trash-outline"}
               size={28}
-              color={isEditMode ? "#2ECC71" : "#E74C3C"}
+              color={isEditMode ? "#10B981" : "#EF4444"}
             />
           </TouchableOpacity>
         </View>
@@ -140,7 +140,7 @@ export function AddWaterModal({ onAdd, isGold }: AddWaterModalProps) {
               style={styles.customAddBtn}
               onPress={() => setSubModalVisible(true)}
             >
-              <Ionicons name="settings-outline" size={30} color="#4CAFFF" />
+              <Ionicons name="settings-outline" size={30} color="#2196F3" />
               <Text style={styles.moreText}>Novo</Text>
             </TouchableOpacity>
           )}
@@ -193,11 +193,15 @@ const styles = StyleSheet.create({
   addButton: {
     width: 60,
     height: 60,
-    backgroundColor: "#7737d1",
+    backgroundColor: "#6096ba",
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
     elevation: 4,
+    shadowColor: "#6096ba",
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
   },
   modalHeader: {
     flexDirection: "row",
@@ -206,8 +210,8 @@ const styles = StyleSheet.create({
     width: "100%",
     marginBottom: 15,
   },
-  modalTitle: { fontSize: 22, fontWeight: "bold", color: "#2B5B8E" },
-  modalSub: { fontSize: 12, color: "#888" },
+  modalTitle: { fontSize: 22, fontWeight: "bold", color: "#334155" },
+  modalSub: { fontSize: 12, color: "#64748B" },
   optionsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -216,24 +220,24 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   optionButton: {
-    backgroundColor: "#F8FBFF",
+    backgroundColor: "#F8FAFC",
     width: "30%",
     height: 100,
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: "#E1EFFF",
+    borderColor: "#E2E8F0",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 10,
     marginHorizontal: "1.5%",
   },
-  optionButtonEdit: { borderColor: "#E74C3C", borderStyle: "dashed" },
-  optionText: { color: "#2B5B8E", fontWeight: "bold", marginTop: 5 },
+  optionButtonEdit: { borderColor: "#EF4444", borderStyle: "dashed" },
+  optionText: { color: "#334155", fontWeight: "bold", marginTop: 5 },
   deleteBadge: {
     position: "absolute",
     top: -5,
     right: -5,
-    backgroundColor: "#E74C3C",
+    backgroundColor: "#EF4444",
     width: 24,
     height: 24,
     borderRadius: 12,
@@ -248,7 +252,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderStyle: "dashed",
     borderWidth: 2,
-    borderColor: "#4CAFFF",
+    borderColor: "#2196F3",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 10,
@@ -256,7 +260,7 @@ const styles = StyleSheet.create({
   },
   moreText: {
     fontSize: 11,
-    color: "#4CAFFF",
+    color: "#2196F3",
     fontWeight: "bold",
     marginTop: 5,
   },
@@ -276,27 +280,29 @@ const styles = StyleSheet.create({
   subModalTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#2B5B8E",
+    color: "#334155",
     marginBottom: 20,
   },
   previewIcon: { marginBottom: 20, alignItems: "center" },
   previewText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#4CAFFF",
+    color: "#2196F3",
     marginTop: 10,
   },
   input: {
     width: "100%",
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#F8FAFC",
     borderRadius: 15,
     padding: 18,
     fontSize: 20,
     textAlign: "center",
     marginBottom: 25,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
   },
   btnFinalAdd: {
-    backgroundColor: "#4CAFFF",
+    backgroundColor: "#2196F3",
     width: "100%",
     padding: 18,
     borderRadius: 20,

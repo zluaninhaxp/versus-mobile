@@ -39,7 +39,7 @@ export function WaterSettingsModal({
               <Ionicons
                 name="water"
                 size={24}
-                color="#4CAFFF"
+                color="#2196F3"
                 style={{ marginRight: 8 }}
               />
               <Text style={styles.title}>Configurar Água</Text>
@@ -61,7 +61,7 @@ export function WaterSettingsModal({
             <Ionicons
               name="information-circle-outline"
               size={20}
-              color="#4CAFFF"
+              color="#2196F3"
             />
             <Text style={styles.infoText}>
               Especialistas recomendam em média 35ml por kg de peso corporal.
@@ -102,34 +102,36 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 25,
   },
-  title: { fontSize: 18, fontWeight: "bold", color: "#2B5B8E" },
+  title: { fontSize: 18, fontWeight: "bold", color: "#334155" },
   label: {
     fontSize: 12,
     fontWeight: "bold",
-    color: "#BDC3C7",
+    color: "#94A3B8",
     marginBottom: 8,
   },
   input: {
-    backgroundColor: "#F5F9FF",
+    backgroundColor: "#F8FAFC",
     padding: 15,
     borderRadius: 15,
     fontSize: 18,
     fontWeight: "bold",
-    color: "#2B5B8E",
+    color: "#334155",
     textAlign: "center",
     marginBottom: 15,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
   },
   infoBox: {
     flexDirection: "row",
-    backgroundColor: "#F0F7FF",
+    backgroundColor: "#E3F2FD",
     padding: 12,
     borderRadius: 12,
     marginBottom: 20,
     alignItems: "center",
   },
-  infoText: { flex: 1, fontSize: 12, color: "#4CAFFF", marginLeft: 8 },
+  infoText: { flex: 1, fontSize: 12, color: "#2196F3", marginLeft: 8 },
   btn: {
-    backgroundColor: "#2B5B8E",
+    backgroundColor: "#2196F3",
     padding: 18,
     borderRadius: 15,
     alignItems: "center",

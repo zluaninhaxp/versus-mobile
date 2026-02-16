@@ -1,29 +1,19 @@
 import React, { useState } from "react";
 import { StyleSheet, ScrollView, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+
+// Importações dos seus componentes
 import { Header } from "./src/components/Header";
 import { UserStatus } from "./src/components/UserStatus";
 import { RankItem } from "./src/components/RankItem";
-import { ProfileDrawer } from "./src/components/ProfileDrawer";
 import { WaterSettingsModal } from "./src/components/WaterSettingsModal";
-import { UserProfileModal } from "./src/components/UserProfile"; // Verifique se o nome do arquivo termina em Modal
+import { UserProfileModal } from "./src/components/UserProfile";
 import { MyHistoryModal } from "./src/components/MyHistory";
+import { BottomTabs } from "./src/components/BottomTabs"; // Novo!
 
-// Helpers para timestamps
+// Funções auxiliares para datas
 function todayAt(h, m) {
   const d = new Date();
-  d.setHours(h, m, 0, 0);
-  return d.toISOString();
-}
-function yesterdayAt(h, m) {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  d.setHours(h, m, 0, 0);
-  return d.toISOString();
-}
-function daysAgoAt(days, h, m) {
-  const d = new Date();
-  d.setDate(d.getDate() - days);
   d.setHours(h, m, 0, 0);
   return d.toISOString();
 }
@@ -33,8 +23,6 @@ export default function App() {
   const [nome, setNome] = useState("Luana Castro");
   const [meta, setMeta] = useState(2500);
 
-  // Estados de visibilidade dos Modais e Drawer
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isWaterSettingsOpen, setIsWaterSettingsOpen] = useState(false);
   const [isMyHistoryOpen, setIsMyHistoryOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -111,17 +99,16 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
-        {/* O Header recebe as funções que alteram os estados acima */}
-        <Header
-          onOpenMenu={() => setIsProfileOpen(true)}
-          onOpenHistory={() => setIsMyHistoryOpen(true)}
-          onOpenSettings={() => setIsWaterSettingsOpen(true)}
-        />
-
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
+          <Header
+            onOpenMenu={() => {}} // Placeholder já que removeu o drawer
+            onOpenHistory={() => setIsMyHistoryOpen(true)}
+            onOpenSettings={() => setIsWaterSettingsOpen(true)}
+          />
+
           <UserStatus
             userName={nome}
             ml={mlConsumido}
@@ -154,13 +141,10 @@ export default function App() {
           </View>
         </ScrollView>
 
-        {/* Componentes de Modal e Drawer chamados com suas respectivas props de visibilidade */}
-        <ProfileDrawer
-          visible={isProfileOpen}
-          onClose={() => setIsProfileOpen(false)}
-          userName={nome}
-        />
+        {/* MENU INFERIOR FIXO */}
+        <BottomTabs />
 
+        {/* MODAIS */}
         <WaterSettingsModal
           visible={isWaterSettingsOpen}
           onClose={() => setIsWaterSettingsOpen(false)}
@@ -190,10 +174,30 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#211a3a" },
-  scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
-  rankingHeader: { marginTop: 30, marginBottom: 20, paddingHorizontal: 4 },
-  rankingTitle: { fontSize: 20, fontWeight: "900", color: "white" },
-  rankingSubtitle: { fontSize: 13, color: "#BDC3C7", fontWeight: "500" },
-  rankingWrapper: { width: "100%" },
+  container: {
+    flex: 1,
+    backgroundColor: "#F8FAFC",
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  rankingHeader: {
+    marginTop: 30,
+    marginBottom: 20,
+    paddingHorizontal: 4,
+  },
+  rankingTitle: {
+    fontSize: 20,
+    fontWeight: "900",
+    color: "#274c77",
+  },
+  rankingSubtitle: {
+    fontSize: 13,
+    color: "#8b8c89",
+    fontWeight: "500",
+  },
+  rankingWrapper: {
+    width: "100%",
+  },
 });

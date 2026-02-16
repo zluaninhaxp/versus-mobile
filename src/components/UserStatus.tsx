@@ -13,21 +13,18 @@ interface UserStatusProps {
 export function UserStatus({ ml, onAdd, userName, meta }: UserStatusProps) {
   const porcentagemReal = (ml / meta) * 100;
   const porcentagemExibida = Math.min(porcentagemReal, 100);
-
-  // Mantendo a verificação apenas para lógica de UI (como o botão Gold),
-  // mas as cores da barra e textos agora são estáticas.
   const bateuAMeta = ml >= meta;
+
   const fotoPerfil = "https://i.pravatar.cc/300?img=32";
 
-  // Gradiente fixo independente do progresso
-  const progressColors = ["#7737d1", "#ffdd8e"];
+  // CORREÇÃO: Adicionado 'as const' para garantir que seja lido como uma tupla imutável
+  const progressColors = ["#a3cef1", "#6096ba"] as const;
 
   return (
     <View style={styles.container}>
       <View style={styles.topRow}>
         <View style={styles.avatarContainer}>
           <Image source={{ uri: fotoPerfil }} style={styles.avatarImage} />
-          {bateuAMeta && <View style={styles.haloGold} />}
         </View>
 
         <View style={styles.nameContainer}>
@@ -44,7 +41,7 @@ export function UserStatus({ ml, onAdd, userName, meta }: UserStatusProps) {
       <View style={styles.progressSection}>
         <View style={styles.progressBarBg}>
           <LinearGradient
-            colors={progressColors}
+            colors={progressColors} // Agora o TS reconhece como Tupla válida
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={[
@@ -62,7 +59,11 @@ export function UserStatus({ ml, onAdd, userName, meta }: UserStatusProps) {
 }
 
 const styles = StyleSheet.create({
-  container: { width: "100%", marginBottom: 10, marginTop: 10 },
+  container: {
+    width: "100%",
+    marginBottom: 10,
+    marginTop: 10,
+  },
   topRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -73,28 +74,47 @@ const styles = StyleSheet.create({
     width: 85,
     height: 85,
     borderRadius: 42.5,
-    backgroundColor: "#fefbff",
+    backgroundColor: "transparent",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 3,
-    borderColor: "#fefbff", // Borda fixa no tom dourado/amarelo
-    elevation: 8,
+    borderColor: "#ffffff",
   },
-  avatarImage: { width: "100%", height: "100%", borderRadius: 42.5 },
-  nameContainer: { flex: 1, marginLeft: 20 },
-  userName: { fontSize: 18, fontWeight: "bold", color: "#fefbff" },
-  statsRow: { flexDirection: "row", alignItems: "baseline" },
-  userStats: { fontSize: 32, fontWeight: "900", color: "#fefbff" }, // Cor fixa de destaque
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 42.5,
+  },
+  nameContainer: {
+    flex: 1,
+    marginLeft: 20,
+  },
+  userName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#000000",
+  },
+  statsRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+  },
+  userStats: {
+    fontSize: 32,
+    fontWeight: "900",
+    color: "#274c77",
+  },
   metaText: {
     fontSize: 16,
-    color: "#BDC3C7",
+    color: "rgba(0, 0, 0, 0.6)",
     fontWeight: "600",
     marginLeft: 4,
   },
-  progressSection: { width: "100%", paddingHorizontal: 5 },
+  progressSection: {
+    width: "100%",
+  },
   progressBarBg: {
     height: 14,
-    backgroundColor: "rgba(189, 195, 199, 0.3)",
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
     borderRadius: 7,
     overflow: "hidden",
   },
@@ -105,7 +125,7 @@ const styles = StyleSheet.create({
   progressPercent: {
     fontSize: 12,
     fontWeight: "900",
-    color: "#BDC3C7", // Cor fixa para o percentual
+    color: "rgba(0, 0, 0, 0.6)",
     marginTop: 8,
     textAlign: "center",
     letterSpacing: 1,

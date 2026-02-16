@@ -1,6 +1,15 @@
-import React from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
-import { LinearGradient } from "expo-linear-gradient"; // Importação necessária
+import React, { useEffect, useRef } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Animated,
+  Easing,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
 import { RankingActions } from "./RankingActions";
 
 export function RankItemTop3({
@@ -15,159 +24,262 @@ export function RankItemTop3({
   metaAlcancada,
   onReactionUpdate,
 }: any) {
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const gradientAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.05,
+          duration: 1000,
+          easing: Easing.bezier(0.4, 0, 0.6, 1),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          easing: Easing.bezier(0.4, 0, 0.6, 1),
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+
+    if (metaAlcancada) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(gradientAnim, {
+            toValue: 1,
+            duration: 1500,
+            easing: Easing.inOut(Easing.sin),
+            useNativeDriver: true,
+          }),
+          Animated.timing(gradientAnim, {
+            toValue: 0,
+            duration: 1500,
+            easing: Easing.inOut(Easing.sin),
+            useNativeDriver: true,
+          }),
+        ]),
+      ).start();
+    }
+  }, [metaAlcancada]);
+
+  const medalColor =
+    position === 1 ? "#ffc800" : position === 2 ? "#e7ecef" : "#CD7F32";
+  const medalEmoji = position === 1 ? "🥇" : position === 2 ? "🥈" : "🥉";
+
+  // A correção está no 'as const' para garantir o tipo Tuple para o TS
   const config =
     position === 1
-      ? {
-          colors: ["#7737d1", "#ffdd8e"], // Ouro reluzente
-          badge: "#FDB813",
-          photoSize: 80,
-        }
-      : position === 2
-        ? {
-            colors: ["#7737d1", "#e9e9e9"], // Prata perolado
-            badge: "#D1D1D1",
-            photoSize: 64,
-          }
-        : {
-            colors: ["#7737d1", "#ffebcc"], // Bronze moderno / Ciano
-            badge: "#FFD89B",
-            photoSize: 64,
-          };
+      ? { colors: ["#6096ba", "#3f6ea5"] as const }
+      : { colors: ["#a3cef1", "#80b8dd"] as const };
+
+  const PHOTO_SIZE = 56;
+  const RING_SIZE = 64;
 
   return (
-    /* Trocamos a View externa pelo LinearGradient */
-    <LinearGradient
-      colors={config.colors}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={styles.card}
-    >
-      <View style={styles.topRow}>
-        <View style={[styles.positionBadge, { backgroundColor: config.badge }]}>
-          <Text style={styles.medalIcon}>
-            {position === 1 ? "🥇" : position === 2 ? "🥈" : "🥉"}
-          </Text>
-          <Text style={styles.positionText}>{position}º Lugar</Text>
-        </View>
-
-        <View style={styles.rightGroup}>
-          {metaAlcancada && (
-            <View style={styles.metaBadge}>
-              <Text style={styles.metaText}>Meta!</Text>
-            </View>
-          )}
-          <RankingActions
-            isMe={isMe}
-            isTop3={true}
-            metaAlcancada={metaAlcancada}
-            initialReactions={localReactions}
-            onReactionUpdate={onReactionUpdate}
-          />
-        </View>
-      </View>
-
-      <TouchableOpacity
-        style={styles.mainContentClickable}
-        onPress={onPress}
-        activeOpacity={0.8}
-        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+    <View style={styles.shadowWrapper}>
+      <LinearGradient
+        colors={config.colors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.card}
       >
-        <Image
-          source={{ uri: photo || "https://i.pravatar.cc/150" }}
-          style={[
-            styles.photo,
-            {
-              width: config.photoSize,
-              height: config.photoSize,
-              borderRadius: config.photoSize / 2,
-            },
-          ]}
-        />
-        <View style={styles.infoContainer}>
-          <Text style={styles.userName}>{name}</Text>
-          <View style={styles.statsRow}>
-            <Text style={styles.mlValue}>{ml} ml</Text>
-            <Text style={styles.mlGoal}> / {goal}ml</Text>
+        <View style={styles.mainRow}>
+          <View style={styles.positionNumberContainer}>
+            <Text style={styles.positionNumberText}>{position}</Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.userClickArea}
+            onPress={onPress}
+            activeOpacity={0.7}
+          >
+            <View style={styles.avatarWrapper}>
+              <View
+                style={[
+                  styles.medalRing,
+                  {
+                    borderColor: medalColor,
+                    width: RING_SIZE,
+                    height: RING_SIZE,
+                    borderRadius: RING_SIZE / 2,
+                  },
+                ]}
+              >
+                <Image
+                  source={{ uri: photo || "https://i.pravatar.cc/150" }}
+                  style={{
+                    width: PHOTO_SIZE,
+                    height: PHOTO_SIZE,
+                    borderRadius: PHOTO_SIZE / 2,
+                  }}
+                />
+              </View>
+
+              <Animated.View
+                style={[
+                  styles.medalBadge,
+                  {
+                    backgroundColor: medalColor,
+                    transform: [{ scale: pulseAnim }],
+                    opacity: pulseAnim.interpolate({
+                      inputRange: [1, 1.2],
+                      outputRange: [1, 0.9],
+                    }),
+                  },
+                ]}
+              >
+                <Text style={styles.medalText}>{medalEmoji}</Text>
+              </Animated.View>
+            </View>
+
+            <View style={styles.infoContainer}>
+              <Text style={styles.userName}>{name}</Text>
+              <View style={styles.statsRow}>
+                <Text style={styles.mlValue}>{ml} ml</Text>
+                <Text style={styles.mlGoal}> / {goal}ml</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+
+          <View style={styles.rightBlock}>
+            {metaAlcancada && (
+              <View style={styles.metaBadge}>
+                <LinearGradient
+                  colors={["#7ae582", "#25a18e"] as const}
+                  style={StyleSheet.absoluteFill}
+                />
+                <Animated.View
+                  style={[StyleSheet.absoluteFill, { opacity: gradientAnim }]}
+                >
+                  <LinearGradient
+                    colors={["#34d399", "#10b981"] as const}
+                    style={StyleSheet.absoluteFill}
+                  />
+                </Animated.View>
+                <Ionicons name="water" size={16} color="white" />
+              </View>
+            )}
+            <RankingActions
+              isMe={isMe}
+              isTop3={true}
+              metaAlcancada={metaAlcancada}
+              initialReactions={localReactions}
+              onReactionUpdate={onReactionUpdate}
+            />
           </View>
         </View>
-      </TouchableOpacity>
 
-      {localReactions.length > 0 && (
-        <View style={styles.reactionsContainer}>
-          {localReactions.map((r: any, i: number) => (
-            <View key={i} style={styles.reactionBadge}>
-              <Text style={styles.reactionEmoji}>{r.emoji}</Text>
-              <Text style={styles.reactionCount}>{r.count}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-    </LinearGradient>
+        {localReactions.length > 0 && (
+          <View style={styles.reactionsContainer}>
+            {localReactions.map((r: any, i: number) => (
+              <View key={i} style={styles.reactionBadge}>
+                <Text style={styles.reactionEmoji}>{r.emoji}</Text>
+                <Text style={styles.reactionCount}>{r.count}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+      </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    borderRadius: 24, // Aumentado para um visual mais moderno
-    padding: 16,
+  shadowWrapper: {
     marginBottom: 15,
-    // Sombra para efeito de profundidade (gamificação)
+    borderRadius: 24,
+    elevation: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    backgroundColor: "transparent",
   },
-  topRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  card: {
+    borderRadius: 24,
+    padding: 12,
+    overflow: "hidden",
+  },
+  mainRow: { flexDirection: "row", alignItems: "center" },
+  positionNumberContainer: {
+    width: 25,
     alignItems: "center",
-    marginBottom: 12,
+    justifyContent: "center",
+    marginRight: 8,
   },
-  positionBadge: {
-    flexDirection: "row",
+  positionNumberText: {
+    fontSize: 22,
+    fontWeight: "900",
+    color: "rgba(255, 255, 255, 0.8)",
+    fontStyle: "italic",
+  },
+  userClickArea: { flexDirection: "row", alignItems: "center", flex: 1 },
+  avatarWrapper: {
+    position: "relative",
+    marginRight: 12,
+    justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    gap: 4,
   },
-  rightGroup: { flexDirection: "row", alignItems: "center", gap: 8 },
-  medalIcon: { fontSize: 16 },
-  positionText: { fontSize: 13, fontWeight: "bold", color: "#333" },
-  mainContentClickable: {
-    flexDirection: "row",
+  medalRing: {
+    borderWidth: 3,
+    justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
+    backgroundColor: "rgba(255,255,255,0.1)",
   },
-  photo: { borderWidth: 3, borderColor: "white", marginRight: 16 },
+  medalBadge: {
+    position: "absolute",
+    bottom: -2,
+    right: -2,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "white",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  medalText: { fontSize: 13 },
   infoContainer: { flex: 1 },
-  userName: { fontSize: 18, fontWeight: "bold", color: "white" },
+  userName: { fontSize: 16, fontWeight: "bold", color: "white" },
   statsRow: { flexDirection: "row", alignItems: "baseline" },
-  mlValue: { fontSize: 24, fontWeight: "900", color: "white" },
-  mlGoal: { fontSize: 14, color: "rgba(255,255,255,0.7)", fontWeight: "600" },
+  mlValue: { fontSize: 18, fontWeight: "900", color: "white" },
+  mlGoal: { fontSize: 12, color: "rgba(255,255,255,0.7)", fontWeight: "600" },
+  rightBlock: { flexDirection: "row", alignItems: "center", gap: 6 },
   metaBadge: {
-    backgroundColor: "#2ECC71",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 20,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 3,
+    overflow: "hidden", // Importante para o gradiente não vazar o border radius
   },
-  metaText: { color: "white", fontSize: 11, fontWeight: "bold" },
   reactionsContainer: {
     flexDirection: "row",
     gap: 8,
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255, 255, 255, 0.2)",
     flexWrap: "wrap",
-    marginTop: 8,
   },
   reactionBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.3)", // Um pouco mais opaco para ler melhor no gradiente
+    backgroundColor: "rgba(255,255,255,0.25)",
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 20,
+    borderRadius: 16,
     gap: 4,
   },
-  reactionEmoji: { fontSize: 16 },
-  reactionCount: { color: "white", fontSize: 14, fontWeight: "bold" },
+  reactionEmoji: { fontSize: 14 },
+  reactionCount: { color: "white", fontSize: 13, fontWeight: "bold" },
 });
