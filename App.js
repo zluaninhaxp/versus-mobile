@@ -4,7 +4,6 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Header } from "./src/components/Header";
 import { UserStatus } from "./src/components/UserStatus";
 import { RankItem } from "./src/components/RankItem";
-import { ProfileDrawer } from "./src/components/ProfileDrawer";
 import { WaterSettingsModal } from "./src/components/WaterSettingsModal";
 import { UserProfileModal } from "./src/components/UserProfile";
 import { MyHistoryModal } from "./src/components/MyHistory";
@@ -109,16 +108,16 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
-        <Header
-          onOpenMenu={() => setIsProfileOpen(true)}
-          onOpenHistory={() => setIsMyHistoryOpen(true)}
-          onOpenSettings={() => setIsWaterSettingsOpen(true)}
-        />
-
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
+          <Header
+            onOpenMenu={() => setIsProfileOpen(true)}
+            onOpenHistory={() => setIsMyHistoryOpen(true)}
+            onOpenSettings={() => setIsWaterSettingsOpen(true)}
+          />
+
           <UserStatus
             userName={nome}
             ml={mlConsumido}
@@ -150,12 +149,6 @@ export default function App() {
             ))}
           </View>
         </ScrollView>
-
-        <ProfileDrawer
-          visible={isProfileOpen}
-          onClose={() => setIsProfileOpen(false)}
-          userName={nome}
-        />
 
         <WaterSettingsModal
           visible={isWaterSettingsOpen}

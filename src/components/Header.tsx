@@ -1,3 +1,4 @@
+import React from "react";
 import { View, TouchableOpacity, StyleSheet, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -46,14 +47,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
+
     paddingTop: 20,
     paddingBottom: 10,
+    backgroundColor: "transparent", // Garante que não cubra outros itens
   },
   logoText: {
     fontSize: 24,
     fontWeight: "900",
-    color: "#2196F3", // Azul!
+    color: "#274c77",
     letterSpacing: 2,
     fontStyle: "italic",
   },

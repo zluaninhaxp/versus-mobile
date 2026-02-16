@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
+// Gerenciamento global para fechar seletores abertos
 let _nextId = 0;
 const _listeners: Set<(openedId: number | null) => void> = new Set();
 function _broadcast(openedId: number | null) {
@@ -48,7 +49,12 @@ export function ReactionSelector({
       if (openedId !== myId) setIsOpen(false);
     };
     _listeners.add(listener);
-    return () => _listeners.delete(listener);
+
+    // CORREÇÃO TS2345: O retorno precisa ser void.
+    // Envolver em chaves evita retornar o boolean do .delete()
+    return () => {
+      _listeners.delete(listener);
+    };
   }, [myId]);
 
   useEffect(() => {
@@ -70,7 +76,7 @@ export function ReactionSelector({
       scaleAnim.setValue(0);
       opacityAnim.setValue(0);
     }
-  }, [isOpen]);
+  }, [isOpen, scaleAnim, opacityAnim]);
 
   const open = useCallback(() => {
     buttonRef.current?.measureInWindow((x, y, width, height) => {
@@ -102,9 +108,8 @@ export function ReactionSelector({
       <TouchableOpacity
         style={[
           styles.btn,
-          // Aplica o cinzinha regular ou o transparente do Top 3
+          // Mantém o cinzinha regular ou o transparente do Top 3 conforme sua nova paleta
           isTop3 ? styles.btnTop3 : styles.btnRegular,
-          // Se for Top 3 e estiver ativo, dá um leve destaque extra
           currentReaction && isTop3 && styles.btnActiveTop3,
         ]}
         onPress={open}
@@ -172,7 +177,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
   },
-  // MANTÉM O CINZINHA MESMO COM EMOJI
+  // Mantém o cinzinha regular conforme solicitado
   btnRegular: {
     backgroundColor: "#F8FAFC",
     borderColor: "#E2E8F0",
