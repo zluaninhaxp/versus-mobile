@@ -1,3 +1,4 @@
+// Este arquivo já está correto! Não precisa de alterações
 import React, { useRef, useEffect, useState, ReactNode } from "react";
 import {
   View,
@@ -15,7 +16,7 @@ interface BottomSheetModalProps {
   visible: boolean;
   onClose: () => void;
   children: ReactNode;
-  height?: number; // altura em % da tela (ex: 0.6 = 60%)
+  height?: number;
   backgroundColor?: string;
   dragHandleColor?: string;
 }
@@ -101,16 +102,11 @@ export function BottomSheetModal({
             },
           ]}
         >
-          {/* FIX: Escudo invisível para arraste. 
-            Ele captura os gestos em uma área muito maior (100px de altura) 
-            sem alterar o layout visual dos componentes abaixo.
-          */}
           <View
             {...panResponder.panHandlers}
             style={styles.invisibleDragShield}
           />
 
-          {/* O handle visual continua aqui para o usuário saber onde interagir */}
           <View style={styles.dragArea}>
             <View
               style={[styles.dragHandle, { backgroundColor: dragHandleColor }]}
@@ -145,15 +141,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 12,
   },
-  // Estilo baseado no UserProfileModal para expandir a área de toque
   invisibleDragShield: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    height: 100, // Área de 100px de altura para capturar o arraste
+    height: 100,
     backgroundColor: "transparent",
-    zIndex: 9999, // Garante que fica por cima de outros elementos clicáveis no topo
+    zIndex: 9999,
   },
   dragArea: {
     width: "100%",

@@ -32,7 +32,7 @@ export function AchievementsModal({
       visible={visible}
       onClose={onClose}
       height={0.8}
-      backgroundColor="#F5F9FF"
+      backgroundColor="#F8FAFC"
     >
       <View style={styles.header}>
         <Ionicons name="trophy" size={28} color="#FFD700" />
@@ -73,7 +73,7 @@ export function AchievementsModal({
                 {
                   backgroundColor: achievement.unlocked
                     ? achievement.color + "20"
-                    : "#F0F4F8",
+                    : "#F1F5F9",
                 },
               ]}
             >
@@ -121,7 +121,7 @@ export function AchievementsModal({
 
             {achievement.unlocked && (
               <View style={styles.unlockedBadge}>
-                <Ionicons name="checkmark-circle" size={24} color="#2ECC71" />
+                <Ionicons name="checkmark-circle" size={24} color="#10B981" />
               </View>
             )}
           </View>
@@ -141,24 +141,26 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "#2B5B8E",
+    color: "#334155",
   },
 
   stats: {
-    backgroundColor: "white",
-    borderRadius: 15,
-    padding: 15,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
   },
   statsText: {
     fontSize: 14,
-    color: "#2B5B8E",
+    color: "#334155",
     fontWeight: "600",
     marginBottom: 10,
   },
   progressBar: {
     height: 8,
-    backgroundColor: "#EBF4FF",
+    backgroundColor: "#E3F2FD",
     borderRadius: 4,
     overflow: "hidden",
   },
@@ -173,15 +175,17 @@ const styles = StyleSheet.create({
   achievementCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   achievementLocked: {
     opacity: 0.6,
@@ -202,28 +206,28 @@ const styles = StyleSheet.create({
   achievementTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#2B5B8E",
+    color: "#334155",
     marginBottom: 4,
   },
   achievementDesc: {
     fontSize: 13,
-    color: "#6B7D8F",
+    color: "#64748B",
   },
   textLocked: {
-    color: "#9BA8B5",
+    color: "#94A3B8",
   },
 
   miniProgress: {
     position: "relative",
     height: 6,
-    backgroundColor: "#EBF4FF",
+    backgroundColor: "#E3F2FD",
     borderRadius: 3,
     marginTop: 8,
     overflow: "hidden",
   },
   miniProgressFill: {
     height: "100%",
-    backgroundColor: "#4CAFFF",
+    backgroundColor: "#2196F3",
     borderRadius: 3,
   },
   miniProgressText: {
@@ -231,7 +235,7 @@ const styles = StyleSheet.create({
     right: 5,
     top: -15,
     fontSize: 10,
-    color: "#9BA8B5",
+    color: "#94A3B8",
     fontWeight: "bold",
   },
 

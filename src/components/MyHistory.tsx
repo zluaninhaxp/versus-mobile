@@ -19,7 +19,6 @@ export function MyHistoryModal({
   onClose,
   waterHistory,
 }: MyHistoryModalProps) {
-  // Filtragem para mostrar apenas registros de hoje
   const today = new Date();
   const todayHistory = waterHistory.filter((entry) => {
     const entryDate = new Date(entry.time);
@@ -37,18 +36,18 @@ export function MyHistoryModal({
   const getWaterIcon = (quantidade: number) => {
     if (quantidade < 500)
       return (
-        <MaterialCommunityIcons name="cup-water" size={24} color="#4CAFFF" />
+        <MaterialCommunityIcons name="cup-water" size={24} color="#2196F3" />
       );
     if (quantidade < 1000)
       return (
         <MaterialCommunityIcons
           name="bottle-tonic-plus"
           size={24}
-          color="#4CAFFF"
+          color="#2196F3"
         />
       );
     return (
-      <MaterialCommunityIcons name="bottle-wine" size={24} color="#4CAFFF" />
+      <MaterialCommunityIcons name="bottle-wine" size={24} color="#2196F3" />
     );
   };
 
@@ -64,15 +63,13 @@ export function MyHistoryModal({
       height={0.6}
       backgroundColor="#F8FAFC"
     >
-      {/* Header */}
       <View style={styles.header}>
         <View style={styles.sectionHeader}>
-          <Ionicons name="water" size={20} color="#14B8D4" />
+          <Ionicons name="water" size={20} color="#2196F3" />
           <Text style={styles.sectionTitle}>Histórico de Hoje</Text>
         </View>
       </View>
 
-      {/* Lista de registros */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -103,12 +100,12 @@ export function MyHistoryModal({
 const styles = StyleSheet.create({
   header: { width: "100%", marginBottom: 10 },
   sectionHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
-  sectionTitle: { fontSize: 18, fontWeight: "800", color: "#2B5B8E" },
+  sectionTitle: { fontSize: 18, fontWeight: "800", color: "#334155" },
   scrollContent: { paddingBottom: 60, paddingTop: 5 },
   historyItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 12,
     marginBottom: 10,
@@ -119,15 +116,15 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: "#EBF7FF",
+    backgroundColor: "#E3F2FD",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
   },
   historyInfo: { flex: 1 },
-  historyMl: { fontSize: 15, fontWeight: "bold", color: "#2B3E50" },
-  historyTime: { fontSize: 12, color: "#9BA8B5" },
-  historyAmount: { fontSize: 15, fontWeight: "900", color: "#14B8D4" },
+  historyMl: { fontSize: 15, fontWeight: "bold", color: "#334155" },
+  historyTime: { fontSize: 12, color: "#94A3B8" },
+  historyAmount: { fontSize: 15, fontWeight: "900", color: "#2196F3" },
   emptyBox: { padding: 40, alignItems: "center" },
-  emptyText: { color: "#9BA8B5", fontSize: 14 },
+  emptyText: { color: "#94A3B8", fontSize: 14 },
 });

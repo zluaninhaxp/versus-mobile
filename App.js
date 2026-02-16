@@ -6,10 +6,9 @@ import { UserStatus } from "./src/components/UserStatus";
 import { RankItem } from "./src/components/RankItem";
 import { ProfileDrawer } from "./src/components/ProfileDrawer";
 import { WaterSettingsModal } from "./src/components/WaterSettingsModal";
-import { UserProfileModal } from "./src/components/UserProfile"; // Verifique se o nome do arquivo termina em Modal
+import { UserProfileModal } from "./src/components/UserProfile";
 import { MyHistoryModal } from "./src/components/MyHistory";
 
-// Helpers para timestamps
 function todayAt(h, m) {
   const d = new Date();
   d.setHours(h, m, 0, 0);
@@ -33,7 +32,6 @@ export default function App() {
   const [nome, setNome] = useState("Luana Castro");
   const [meta, setMeta] = useState(2500);
 
-  // Estados de visibilidade dos Modais e Drawer
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isWaterSettingsOpen, setIsWaterSettingsOpen] = useState(false);
   const [isMyHistoryOpen, setIsMyHistoryOpen] = useState(false);
@@ -111,7 +109,6 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
-        {/* O Header recebe as funções que alteram os estados acima */}
         <Header
           onOpenMenu={() => setIsProfileOpen(true)}
           onOpenHistory={() => setIsMyHistoryOpen(true)}
@@ -154,7 +151,6 @@ export default function App() {
           </View>
         </ScrollView>
 
-        {/* Componentes de Modal e Drawer chamados com suas respectivas props de visibilidade */}
         <ProfileDrawer
           visible={isProfileOpen}
           onClose={() => setIsProfileOpen(false)}
@@ -190,10 +186,30 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#211a3a" },
-  scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
-  rankingHeader: { marginTop: 30, marginBottom: 20, paddingHorizontal: 4 },
-  rankingTitle: { fontSize: 20, fontWeight: "900", color: "white" },
-  rankingSubtitle: { fontSize: 13, color: "#BDC3C7", fontWeight: "500" },
-  rankingWrapper: { width: "100%" },
+  container: {
+    flex: 1,
+    backgroundColor: "#F8FAFC", // TEMA CLARO!
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  rankingHeader: {
+    marginTop: 30,
+    marginBottom: 20,
+    paddingHorizontal: 4,
+  },
+  rankingTitle: {
+    fontSize: 20,
+    fontWeight: "900",
+    color: "#274c77", // Texto escuro
+  },
+  rankingSubtitle: {
+    fontSize: 13,
+    color: "#8b8c89", // Texto secundário
+    fontWeight: "500",
+  },
+  rankingWrapper: {
+    width: "100%",
+  },
 });

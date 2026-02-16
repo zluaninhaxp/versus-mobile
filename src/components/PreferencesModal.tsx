@@ -42,7 +42,7 @@ export function PreferencesModal({
   return (
     <BottomSheetModal visible={visible} onClose={onClose} height={0.75}>
       <View style={styles.header}>
-        <Ionicons name="settings" size={28} color="#4CAFFF" />
+        <Ionicons name="settings" size={28} color="#2196F3" />
         <Text style={styles.title}>Preferências</Text>
       </View>
 
@@ -56,13 +56,13 @@ export function PreferencesModal({
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Ionicons name="notifications" size={20} color="#4CAFFF" />
+              <Ionicons name="notifications" size={20} color="#2196F3" />
               <Text style={styles.settingLabel}>Ativar lembretes</Text>
             </View>
             <Switch
               value={localPrefs.notifications}
               onValueChange={(v) => updatePref("notifications", v)}
-              trackColor={{ false: "#CBD5E1", true: "#4CAFFF" }}
+              trackColor={{ false: "#CBD5E1", true: "#2196F3" }}
               thumbColor="white"
             />
           </View>
@@ -103,13 +103,13 @@ export function PreferencesModal({
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Ionicons name="moon" size={20} color="#4CAFFF" />
+              <Ionicons name="moon" size={20} color="#2196F3" />
               <Text style={styles.settingLabel}>Modo escuro</Text>
             </View>
             <Switch
               value={localPrefs.darkMode}
               onValueChange={(v) => updatePref("darkMode", v)}
-              trackColor={{ false: "#CBD5E1", true: "#4CAFFF" }}
+              trackColor={{ false: "#CBD5E1", true: "#2196F3" }}
               thumbColor="white"
             />
           </View>
@@ -121,13 +121,13 @@ export function PreferencesModal({
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Ionicons name="volume-high" size={20} color="#4CAFFF" />
+              <Ionicons name="volume-high" size={20} color="#2196F3" />
               <Text style={styles.settingLabel}>Efeitos sonoros</Text>
             </View>
             <Switch
               value={localPrefs.soundEffects}
               onValueChange={(v) => updatePref("soundEffects", v)}
-              trackColor={{ false: "#CBD5E1", true: "#4CAFFF" }}
+              trackColor={{ false: "#CBD5E1", true: "#2196F3" }}
               thumbColor="white"
             />
           </View>
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "#2B5B8E",
+    color: "#334155",
   },
   content: { paddingBottom: 40 },
 
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#2B5B8E",
+    color: "#334155",
     marginBottom: 12,
   },
 
@@ -175,11 +175,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#F8FBFF",
+    backgroundColor: "#F8FAFC",
     padding: 16,
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: "#E1EFFF",
+    borderColor: "#E2E8F0",
   },
   settingInfo: {
     flexDirection: "row",
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   },
   settingLabel: {
     fontSize: 15,
-    color: "#2B5B8E",
+    color: "#334155",
     fontWeight: "600",
   },
 
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   },
   subLabel: {
     fontSize: 13,
-    color: "#6B7D8F",
+    color: "#64748B",
     marginBottom: 10,
   },
   frequencyOptions: {
@@ -210,18 +210,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 12,
-    backgroundColor: "#F0F4F8",
+    backgroundColor: "#F1F5F9",
     borderWidth: 2,
-    borderColor: "#E1EFFF",
+    borderColor: "#E2E8F0",
   },
   frequencyBtnActive: {
-    backgroundColor: "#4CAFFF",
-    borderColor: "#4CAFFF",
+    backgroundColor: "#2196F3",
+    borderColor: "#2196F3",
   },
   frequencyText: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#6B7D8F",
+    color: "#64748B",
   },
   frequencyTextActive: {
     color: "white",
@@ -234,19 +234,19 @@ const styles = StyleSheet.create({
   },
   btnCancel: {
     flex: 1,
-    backgroundColor: "#F0F4F8",
+    backgroundColor: "#F1F5F9",
     padding: 18,
     borderRadius: 15,
     alignItems: "center",
   },
   btnCancelText: {
-    color: "#6B7D8F",
+    color: "#64748B",
     fontWeight: "bold",
     fontSize: 16,
   },
   btnSave: {
     flex: 1,
-    backgroundColor: "#4CAFFF",
+    backgroundColor: "#2196F3",
     padding: 18,
     borderRadius: 15,
     alignItems: "center",

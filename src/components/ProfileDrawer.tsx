@@ -20,26 +20,24 @@ import { PreferencesModal } from "./PreferencesModal";
 const { width, height: screenHeight } = Dimensions.get("screen");
 const DRAWER_WIDTH = width * 0.75;
 
-// Avatares disponíveis
 const AVATARS = [
-  { id: 1, icon: "person", color: "#4CAFFF" },
-  { id: 2, icon: "happy", color: "#2ECC71" },
+  { id: 1, icon: "person", color: "#2196F3" },
+  { id: 2, icon: "happy", color: "#10B981" },
   { id: 3, icon: "star", color: "#FFD700" },
-  { id: 4, icon: "heart", color: "#E74C3C" },
-  { id: 5, icon: "flash", color: "#F39C12" },
+  { id: 4, icon: "heart", color: "#EF4444" },
+  { id: 5, icon: "flash", color: "#F59E0B" },
   { id: 6, icon: "rocket", color: "#9B59B6" },
   { id: 7, icon: "leaf", color: "#27AE60" },
   { id: 8, icon: "water", color: "#3498DB" },
 ];
 
-// Conquistas exemplo
 const INITIAL_ACHIEVEMENTS = [
   {
     id: 1,
     title: "Primeira Gota",
     description: "Registre seu primeiro copo de água",
     icon: "water",
-    color: "#4CAFFF",
+    color: "#2196F3",
     unlocked: true,
   },
   {
@@ -47,7 +45,7 @@ const INITIAL_ACHIEVEMENTS = [
     title: "Hidratação Consistente",
     description: "Bata sua meta 7 dias seguidos",
     icon: "flame",
-    color: "#E74C3C",
+    color: "#EF4444",
     unlocked: false,
     progress: 3,
     total: 7,
@@ -150,7 +148,6 @@ export function ProfileDrawer({
           style: "destructive",
           onPress: () => {
             onClose();
-            // Aqui você implementaria a lógica de logout
             Alert.alert("Logout", "Funcionalidade em desenvolvimento");
           },
         },
@@ -165,7 +162,6 @@ export function ProfileDrawer({
 
   const handleSavePreferences = (prefs: any) => {
     setPreferences(prefs);
-    // Aqui você salvaria no AsyncStorage ou contexto global
   };
 
   if (!showModal) return null;
@@ -194,7 +190,6 @@ export function ProfileDrawer({
               { transform: [{ translateX: slideAnim }] },
             ]}
           >
-            {/* Seção do Perfil */}
             <View style={styles.profileSection}>
               <View
                 style={[
@@ -217,14 +212,13 @@ export function ProfileDrawer({
               </TouchableOpacity>
             </View>
 
-            {/* Opções do Menu */}
             <View style={styles.menuItems}>
               <TouchableOpacity
                 style={styles.menuItem}
                 onPress={() => setAchievementsVisible(true)}
               >
                 <View style={styles.iconCircle}>
-                  <Ionicons name="trophy-outline" size={20} color="#2B5B8E" />
+                  <Ionicons name="trophy-outline" size={20} color="#334155" />
                 </View>
                 <Text style={styles.menuItemText}>Conquistas</Text>
                 <Ionicons name="chevron-forward" size={20} color="#CBD5E1" />
@@ -235,7 +229,7 @@ export function ProfileDrawer({
                 onPress={() => setPreferencesVisible(true)}
               >
                 <View style={styles.iconCircle}>
-                  <Ionicons name="settings-outline" size={20} color="#2B5B8E" />
+                  <Ionicons name="settings-outline" size={20} color="#334155" />
                 </View>
                 <Text style={styles.menuItemText}>Preferências</Text>
                 <Ionicons name="chevron-forward" size={20} color="#CBD5E1" />
@@ -246,7 +240,7 @@ export function ProfileDrawer({
                   <Ionicons
                     name="help-circle-outline"
                     size={20}
-                    color="#2B5B8E"
+                    color="#334155"
                   />
                 </View>
                 <Text style={styles.menuItemText}>Ajuda</Text>
@@ -258,7 +252,7 @@ export function ProfileDrawer({
                   <Ionicons
                     name="information-circle-outline"
                     size={20}
-                    color="#2B5B8E"
+                    color="#334155"
                   />
                 </View>
                 <Text style={styles.menuItemText}>Sobre</Text>
@@ -266,19 +260,16 @@ export function ProfileDrawer({
               </TouchableOpacity>
             </View>
 
-            {/* Botão Sair */}
             <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
               <Ionicons name="log-out-outline" size={18} color="#FF6B6B" />
               <Text style={styles.logoutText}>SAIR DO APP</Text>
             </TouchableOpacity>
 
-            {/* Versão */}
             <Text style={styles.versionText}>Versão 1.0.0</Text>
           </Animated.View>
         </View>
       </Modal>
 
-      {/* Modais das opções */}
       <EditProfileModal
         visible={editProfileVisible}
         onClose={() => setEditProfileVisible(false)}
@@ -334,13 +325,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingBottom: 30,
     borderBottomWidth: 1,
-    borderBottomColor: "#F0F7FF",
+    borderBottomColor: "#E2E8F0",
   },
   avatarPlaceholder: {
     width: 85,
     height: 85,
     borderRadius: 42.5,
-    backgroundColor: "#F5F9FF",
+    backgroundColor: "#F8FAFC",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 15,
@@ -349,18 +340,18 @@ const styles = StyleSheet.create({
   userNameText: {
     fontSize: 20,
     fontWeight: "900",
-    color: "#2B5B8E",
+    color: "#334155",
     letterSpacing: 0.5,
   },
   editBtn: {
     marginTop: 12,
-    backgroundColor: "#E1EFFF",
+    backgroundColor: "#BBDEFB",
     paddingHorizontal: 15,
     paddingVertical: 5,
     borderRadius: 15,
   },
   editBtnText: {
-    color: "#4CAFFF",
+    color: "#2196F3",
     fontSize: 10,
     fontWeight: "bold",
     letterSpacing: 1,
@@ -375,15 +366,15 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: "#F8FBFF",
+    backgroundColor: "#F8FAFC",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#F0F7FF",
+    borderColor: "#E2E8F0",
   },
   menuItemText: {
     fontSize: 16,
-    color: "#2B5B8E",
+    color: "#334155",
     marginLeft: 15,
     fontWeight: "600",
     flex: 1,
@@ -396,7 +387,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     borderTopWidth: 1,
-    borderTopColor: "#F0F7FF",
+    borderTopColor: "#E2E8F0",
     paddingTop: 20,
   },
   logoutText: {

@@ -1,3 +1,4 @@
+// Este arquivo não precisa de alterações - apenas coordena os outros componentes
 import React, { useState } from "react";
 import { RankItemTop3 } from "./RankItemTop3";
 import { RankItemRegular } from "./RankItemRegular";
@@ -17,7 +18,6 @@ interface RankItemProps {
 export function RankItem(props: RankItemProps) {
   const [localReactions, setLocalReactions] = useState(props.reactions || []);
 
-  // Lógica dinâmica: Se a meta aumentar no modal, isso vira false na hora
   const metaAlcancada = props.ml >= props.meta;
   const isMe = props.nome === "Luana Castro";
   const myId =
@@ -40,7 +40,6 @@ export function RankItem(props: RankItemProps) {
       setLocalReactions(newReactions),
   };
 
-  // Se ml for 0 ou posição > 3, usa visual regular
   if (props.position <= 3 && props.ml > 0) {
     return <RankItemTop3 {...dataProps} />;
   }

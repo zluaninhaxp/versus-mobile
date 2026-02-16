@@ -13,7 +13,6 @@ import { Ionicons } from "@expo/vector-icons";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-// Sistema global "só um aberto por vez"
 let _nextId = 0;
 const _listeners: Set<(openedId: number | null) => void> = new Set();
 function _broadcast(openedId: number | null) {
@@ -38,7 +37,6 @@ export function ReactionSelector({
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
-  // CORREÇÃO DO ERRO TS2345: O retorno do delete é booleano, o React exige void
   useEffect(() => {
     const listener = (openedId: number | null) => {
       if (openedId !== myId) setIsOpen(false);
@@ -46,7 +44,7 @@ export function ReactionSelector({
     _listeners.add(listener);
 
     return () => {
-      _listeners.delete(listener); // Chaves garantem retorno void
+      _listeners.delete(listener);
     };
   }, [myId]);
 
@@ -93,7 +91,6 @@ export function ReactionSelector({
     [onReactionSelect, close],
   );
 
-  // --- AJUSTES DE DELICADEZA ---
   const bubbleWidth = 230;
   const bubbleLeft = Math.max(
     10,
@@ -117,7 +114,7 @@ export function ReactionSelector({
           <Ionicons
             name="happy-outline"
             size={18}
-            color={isTop3 ? "rgba(255,255,255,0.85)" : "#6B7D8F"}
+            color={isTop3 ? "rgba(255,255,255,0.85)" : "#64748B"}
           />
         )}
       </TouchableOpacity>
@@ -170,9 +167,9 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: "#F8FBFF",
+    backgroundColor: "#F8FAFC",
     borderWidth: 1,
-    borderColor: "#E1EFFF",
+    borderColor: "#E2E8F0",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -180,7 +177,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.2)",
     borderColor: "transparent",
   },
-  btnActive: { backgroundColor: "#E8F4FF", borderColor: "#4CAFFF" },
+  btnActive: { backgroundColor: "#E3F2FD", borderColor: "#2196F3" },
   emojiActive: { fontSize: 18 },
   overlay: { flex: 1, backgroundColor: "transparent" },
   bubble: { position: "absolute", alignItems: "flex-start" },
@@ -215,6 +212,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 20,
   },
-  emojiBtnSelected: { backgroundColor: "#E8F4FF" },
+  emojiBtnSelected: { backgroundColor: "#E3F2FD" },
   emojiText: { fontSize: 22 },
 });

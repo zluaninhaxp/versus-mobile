@@ -49,7 +49,6 @@ export function ReactionSelector({
     };
     _listeners.add(listener);
 
-    // FIX: Envolver o delete em chaves para garantir que o retorno seja void
     return () => {
       _listeners.delete(listener);
     };
@@ -121,7 +120,7 @@ export function ReactionSelector({
           <Ionicons
             name="happy-outline"
             size={18}
-            color={isTop3 ? "rgba(255,255,255,0.85)" : "#6B7D8F"}
+            color={isTop3 ? "rgba(255,255,255,0.85)" : "#64748B"}
           />
         )}
       </TouchableOpacity>
@@ -174,9 +173,9 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: "#F8FBFF",
+    backgroundColor: "#F8FAFC",
     borderWidth: 1,
-    borderColor: "#E1EFFF",
+    borderColor: "#E2E8F0",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -184,7 +183,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.2)",
     borderColor: "transparent",
   },
-  btnActive: { backgroundColor: "#E8F4FF", borderColor: "#4CAFFF" },
+  btnActive: { backgroundColor: "#E3F2FD", borderColor: "#2196F3" },
   emojiActive: { fontSize: 18 },
   overlay: { flex: 1, backgroundColor: "transparent" },
   bubble: { position: "absolute", alignItems: "flex-start" },
@@ -219,6 +218,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 20,
   },
-  emojiBtnSelected: { backgroundColor: "#E8F4FF" },
+  emojiBtnSelected: { backgroundColor: "#E3F2FD" },
   emojiText: { fontSize: 22 },
 });
