@@ -1,27 +1,19 @@
 import React, { useState } from "react";
 import { StyleSheet, ScrollView, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+
+// Importações dos seus componentes
 import { Header } from "./src/components/Header";
 import { UserStatus } from "./src/components/UserStatus";
 import { RankItem } from "./src/components/RankItem";
 import { WaterSettingsModal } from "./src/components/WaterSettingsModal";
 import { UserProfileModal } from "./src/components/UserProfile";
 import { MyHistoryModal } from "./src/components/MyHistory";
+import { BottomTabs } from "./src/components/BottomTabs"; // Novo!
 
+// Funções auxiliares para datas
 function todayAt(h, m) {
   const d = new Date();
-  d.setHours(h, m, 0, 0);
-  return d.toISOString();
-}
-function yesterdayAt(h, m) {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  d.setHours(h, m, 0, 0);
-  return d.toISOString();
-}
-function daysAgoAt(days, h, m) {
-  const d = new Date();
-  d.setDate(d.getDate() - days);
   d.setHours(h, m, 0, 0);
   return d.toISOString();
 }
@@ -31,7 +23,6 @@ export default function App() {
   const [nome, setNome] = useState("Luana Castro");
   const [meta, setMeta] = useState(2500);
 
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isWaterSettingsOpen, setIsWaterSettingsOpen] = useState(false);
   const [isMyHistoryOpen, setIsMyHistoryOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -113,7 +104,7 @@ export default function App() {
           contentContainerStyle={styles.scrollContent}
         >
           <Header
-            onOpenMenu={() => setIsProfileOpen(true)}
+            onOpenMenu={() => {}} // Placeholder já que removeu o drawer
             onOpenHistory={() => setIsMyHistoryOpen(true)}
             onOpenSettings={() => setIsWaterSettingsOpen(true)}
           />
@@ -150,6 +141,10 @@ export default function App() {
           </View>
         </ScrollView>
 
+        {/* MENU INFERIOR FIXO */}
+        <BottomTabs />
+
+        {/* MODAIS */}
         <WaterSettingsModal
           visible={isWaterSettingsOpen}
           onClose={() => setIsWaterSettingsOpen(false)}
@@ -181,11 +176,11 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8FAFC", // TEMA CLARO!
+    backgroundColor: "#F8FAFC",
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingBottom: 20,
   },
   rankingHeader: {
     marginTop: 30,
@@ -195,11 +190,11 @@ const styles = StyleSheet.create({
   rankingTitle: {
     fontSize: 20,
     fontWeight: "900",
-    color: "#274c77", // Texto escuro
+    color: "#274c77",
   },
   rankingSubtitle: {
     fontSize: 13,
-    color: "#8b8c89", // Texto secundário
+    color: "#8b8c89",
     fontWeight: "500",
   },
   rankingWrapper: {

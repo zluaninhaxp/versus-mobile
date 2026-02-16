@@ -77,12 +77,7 @@ export function RankingActions({
 
   return (
     <View style={styles.container}>
-      <ReactionSelector
-        currentReaction={myReaction}
-        onReactionSelect={handleReactionChange}
-        isTop3={isTop3}
-      />
-
+      {/* Botão de Notificação (Incentivo) agora vem primeiro */}
       {!metaAlcancada && (
         <View style={styles.notifyContainer}>
           <TouchableOpacity
@@ -110,10 +105,16 @@ export function RankingActions({
           )}
         </View>
       )}
+
+      {/* Seletor de Reações agora vem depois */}
+      <ReactionSelector
+        currentReaction={myReaction}
+        onReactionSelect={handleReactionChange}
+        isTop3={isTop3}
+      />
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
