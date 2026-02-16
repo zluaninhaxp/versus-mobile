@@ -48,10 +48,7 @@ export function ReactionSelector({
       if (openedId !== myId) setIsOpen(false);
     };
     _listeners.add(listener);
-
-    return () => {
-      _listeners.delete(listener);
-    };
+    return () => _listeners.delete(listener);
   }, [myId]);
 
   useEffect(() => {
@@ -85,10 +82,6 @@ export function ReactionSelector({
 
   const close = useCallback(() => setIsOpen(false), []);
 
-  const handlePress = useCallback(() => {
-    open();
-  }, [open]);
-
   const pick = useCallback(
     (emoji: string) => {
       onReactionSelect?.(emoji);
@@ -109,10 +102,12 @@ export function ReactionSelector({
       <TouchableOpacity
         style={[
           styles.btn,
-          isTop3 && styles.btnTop3,
-          currentReaction && styles.btnActive,
+          // Aplica o cinzinha regular ou o transparente do Top 3
+          isTop3 ? styles.btnTop3 : styles.btnRegular,
+          // Se for Top 3 e estiver ativo, dá um leve destaque extra
+          currentReaction && isTop3 && styles.btnActiveTop3,
         ]}
-        onPress={handlePress}
+        onPress={open}
       >
         {currentReaction ? (
           <Text style={styles.emojiActive}>{currentReaction}</Text>
@@ -173,17 +168,22 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+  },
+  // MANTÉM O CINZINHA MESMO COM EMOJI
+  btnRegular: {
+    backgroundColor: "#F8FAFC",
+    borderColor: "#E2E8F0",
   },
   btnTop3: {
     backgroundColor: "rgba(255,255,255,0.2)",
     borderColor: "transparent",
   },
-  btnActive: { backgroundColor: "#E3F2FD", borderColor: "#2196F3" },
+  btnActiveTop3: {
+    backgroundColor: "rgba(255,255,255,0.3)",
+  },
   emojiActive: { fontSize: 18 },
   overlay: { flex: 1, backgroundColor: "transparent" },
   bubble: { position: "absolute", alignItems: "flex-start" },

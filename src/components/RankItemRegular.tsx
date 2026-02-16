@@ -123,19 +123,19 @@ export function RankItemRegular({
 
 const styles = StyleSheet.create({
   shadowWrapper: {
-    marginBottom: 12,
+    marginBottom: 15,
     borderRadius: 24,
-    elevation: 5,
-    shadowColor: "#000",
+    elevation: 8,
+    shadowColor: "#00000071",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
+    shadowOpacity: 0.6,
+    shadowRadius: 10,
     backgroundColor: "transparent",
   },
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 24,
-    padding: 14,
+    padding: 12,
   },
   mainRow: { flexDirection: "row", alignItems: "center" },
   positionCircle: {
