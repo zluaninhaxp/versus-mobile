@@ -49,121 +49,31 @@ interface Group {
 const ME = { id: 1, nome: "Luana Castro", username: "@luana.c" };
 
 const INITIAL_FRIENDS: Friend[] = [
-  {
-    id: 2,
-    nome: "Carlos Mendes",
-    username: "@carlos.m",
-    foto: "https://i.pravatar.cc/300?img=12",
-    ml: 2600,
-    meta: 2500,
-    status: "amigo",
-  },
-  {
-    id: 3,
-    nome: "Beatriz Costa",
-    username: "@bea.costa",
-    foto: "https://i.pravatar.cc/300?img=45",
-    ml: 2400,
-    meta: 2000,
-    status: "amigo",
-  },
-  {
-    id: 4,
-    nome: "Mariana Lima",
-    username: "@mariana.l",
-    foto: "https://i.pravatar.cc/300?img=28",
-    ml: 2100,
-    meta: 2000,
-    status: "amigo",
-  },
-  {
-    id: 5,
-    nome: "Rafael Sousa",
-    username: "@rafa.s",
-    foto: "https://i.pravatar.cc/300?img=15",
-    ml: 1700,
-    meta: 2500,
-    status: "amigo",
-  },
-  {
-    id: 6,
-    nome: "Fernanda Alves",
-    username: "@fe.alves",
-    foto: "https://i.pravatar.cc/300?img=47",
-    ml: 0,
-    meta: 2000,
-    status: "pendente_recebido",
-  },
-  {
-    id: 7,
-    nome: "Pedro Nunes",
-    username: "@pedro.n",
-    foto: "https://i.pravatar.cc/300?img=11",
-    ml: 0,
-    meta: 2000,
-    status: "pendente_enviado",
-  },
+  { id: 2, nome: "Carlos Mendes", username: "@carlos.m", foto: "https://i.pravatar.cc/300?img=12", ml: 2600, meta: 2500, status: "amigo" },
+  { id: 3, nome: "Beatriz Costa", username: "@bea.costa", foto: "https://i.pravatar.cc/300?img=45", ml: 2400, meta: 2000, status: "amigo" },
+  { id: 4, nome: "Mariana Lima", username: "@mariana.l", foto: "https://i.pravatar.cc/300?img=28", ml: 2100, meta: 2000, status: "amigo" },
+  { id: 5, nome: "Rafael Sousa", username: "@rafa.s", foto: "https://i.pravatar.cc/300?img=15", ml: 1700, meta: 2500, status: "amigo" },
+  { id: 6, nome: "Fernanda Alves", username: "@fe.alves", foto: "https://i.pravatar.cc/300?img=47", ml: 0, meta: 2000, status: "pendente_recebido" },
+  { id: 7, nome: "Pedro Nunes", username: "@pedro.n", foto: "https://i.pravatar.cc/300?img=11", ml: 0, meta: 2000, status: "pendente_enviado" },
 ];
 
 const INITIAL_GROUPS: Group[] = [
   {
-    id: 1,
-    name: "Família Castro",
-    code: "FAM123",
-    isAdmin: true,
+    id: 1, name: "Família Castro", code: "FAM123", isAdmin: true,
     color: ["#6096ba", "#274c77"] as const,
     members: [
-      {
-        id: 1,
-        nome: "Luana Castro",
-        foto: "https://i.pravatar.cc/300?img=32",
-        ml: 2850,
-        meta: 2500,
-      },
-      {
-        id: 2,
-        nome: "Carlos Mendes",
-        foto: "https://i.pravatar.cc/300?img=12",
-        ml: 2600,
-        meta: 2500,
-      },
-      {
-        id: 3,
-        nome: "Beatriz Costa",
-        foto: "https://i.pravatar.cc/300?img=45",
-        ml: 1200,
-        meta: 2000,
-      },
+      { id: 1, nome: "Luana Castro", foto: "https://i.pravatar.cc/300?img=32", ml: 2850, meta: 2500 },
+      { id: 2, nome: "Carlos Mendes", foto: "https://i.pravatar.cc/300?img=12", ml: 2600, meta: 2500 },
+      { id: 3, nome: "Beatriz Costa", foto: "https://i.pravatar.cc/300?img=45", ml: 1200, meta: 2000 },
     ],
   },
   {
-    id: 2,
-    name: "Turma do Trabalho",
-    code: "WRK456",
-    isAdmin: false,
+    id: 2, name: "Turma do Trabalho", code: "WRK456", isAdmin: false,
     color: ["#a3cef1", "#6096ba"] as const,
     members: [
-      {
-        id: 4,
-        nome: "Mariana Lima",
-        foto: "https://i.pravatar.cc/300?img=28",
-        ml: 2100,
-        meta: 2000,
-      },
-      {
-        id: 5,
-        nome: "Rafael Sousa",
-        foto: "https://i.pravatar.cc/300?img=15",
-        ml: 1700,
-        meta: 2500,
-      },
-      {
-        id: 1,
-        nome: "Luana Castro",
-        foto: "https://i.pravatar.cc/300?img=32",
-        ml: 2850,
-        meta: 2500,
-      },
+      { id: 4, nome: "Mariana Lima", foto: "https://i.pravatar.cc/300?img=28", ml: 2100, meta: 2000 },
+      { id: 5, nome: "Rafael Sousa", foto: "https://i.pravatar.cc/300?img=15", ml: 1700, meta: 2500 },
+      { id: 1, nome: "Luana Castro", foto: "https://i.pravatar.cc/300?img=32", ml: 2850, meta: 2500 },
     ],
   },
 ];
@@ -171,18 +81,12 @@ const INITIAL_GROUPS: Group[] = [
 // Amigos que não estão num grupo (para poder convidar)
 function friendsNotInGroup(friends: Friend[], group: Group): Friend[] {
   const memberIds = group.members.map((m) => m.id);
-  return friends.filter(
-    (f) => f.status === "amigo" && !memberIds.includes(f.id),
-  );
+  return friends.filter((f) => f.status === "amigo" && !memberIds.includes(f.id));
 }
 
 // ─── Sub-componentes ──────────────────────────────────────────────────────────
 
-function PendingBanner({
-  friends,
-  onAccept,
-  onReject,
-}: {
+function PendingBanner({ friends, onAccept, onReject }: {
   friends: Friend[];
   onAccept: (id: number) => void;
   onReject: (id: number) => void;
@@ -194,9 +98,7 @@ function PendingBanner({
       <View style={banner.header}>
         <Ionicons name="people" size={16} color="#6096ba" />
         <Text style={banner.title}>Solicitações recebidas</Text>
-        <View style={banner.pill}>
-          <Text style={banner.pillText}>{pending.length}</Text>
-        </View>
+        <View style={banner.pill}><Text style={banner.pillText}>{pending.length}</Text></View>
       </View>
       {pending.map((f) => (
         <View key={f.id} style={banner.row}>
@@ -205,16 +107,10 @@ function PendingBanner({
             <Text style={banner.name}>{f.nome}</Text>
             <Text style={banner.username}>{f.username}</Text>
           </View>
-          <TouchableOpacity
-            style={banner.btnAccept}
-            onPress={() => onAccept(f.id)}
-          >
+          <TouchableOpacity style={banner.btnAccept} onPress={() => onAccept(f.id)}>
             <Ionicons name="checkmark" size={18} color="white" />
           </TouchableOpacity>
-          <TouchableOpacity
-            style={banner.btnReject}
-            onPress={() => onReject(f.id)}
-          >
+          <TouchableOpacity style={banner.btnReject} onPress={() => onReject(f.id)}>
             <Ionicons name="close" size={18} color="#EF4444" />
           </TouchableOpacity>
         </View>
@@ -225,25 +121,14 @@ function PendingBanner({
 
 const banner = StyleSheet.create({
   wrapper: {
-    backgroundColor: "#EBF4FF",
-    borderRadius: 18,
-    padding: 14,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#BFDBFE",
+    backgroundColor: "#EBF4FF", borderRadius: 18, padding: 14,
+    marginBottom: 16, borderWidth: 1, borderColor: "#BFDBFE",
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 10,
-  },
+  header: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 10 },
   title: { fontSize: 13, fontWeight: "800", color: "#274c77", flex: 1 },
   pill: {
-    backgroundColor: "#6096ba",
-    borderRadius: 10,
-    paddingHorizontal: 7,
-    paddingVertical: 2,
+    backgroundColor: "#6096ba", borderRadius: 10,
+    paddingHorizontal: 7, paddingVertical: 2,
   },
   pillText: { fontSize: 11, color: "white", fontWeight: "900" },
   row: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 8 },
@@ -252,32 +137,19 @@ const banner = StyleSheet.create({
   name: { fontSize: 14, fontWeight: "700", color: "#334155" },
   username: { fontSize: 11, color: "#94A3B8" },
   btnAccept: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: "#10B981",
-    justifyContent: "center",
-    alignItems: "center",
+    width: 34, height: 34, borderRadius: 17,
+    backgroundColor: "#10B981", justifyContent: "center", alignItems: "center",
   },
   btnReject: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: "#FEF2F2",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#FECACA",
+    width: 34, height: 34, borderRadius: 17,
+    backgroundColor: "#FEF2F2", justifyContent: "center", alignItems: "center",
+    borderWidth: 1, borderColor: "#FECACA",
   },
 });
 
 // ─── Modal de Convidar para Grupo ─────────────────────────────────────────────
 
-function InviteToGroupModal({
-  group,
-  friends,
-  onClose,
-}: {
+function InviteToGroupModal({ group, friends, onClose }: {
   group: Group;
   friends: Friend[];
   onClose: () => void;
@@ -306,15 +178,10 @@ function InviteToGroupModal({
         {available.length === 0 ? (
           <View style={invite.empty}>
             <Ionicons name="checkmark-circle" size={40} color="#10B981" />
-            <Text style={invite.emptyText}>
-              Todos os seus amigos já estão no grupo!
-            </Text>
+            <Text style={invite.emptyText}>Todos os seus amigos já estão no grupo!</Text>
           </View>
         ) : (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            style={{ maxHeight: 320 }}
-          >
+          <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 320 }}>
             {available.map((friend) => {
               const wasSent = sent.includes(friend.id);
               return (
@@ -334,9 +201,7 @@ function InviteToGroupModal({
                       size={16}
                       color={wasSent ? "#10B981" : "white"}
                     />
-                    <Text
-                      style={[invite.btnText, wasSent && invite.btnTextSent]}
-                    >
+                    <Text style={[invite.btnText, wasSent && invite.btnTextSent]}>
                       {wasSent ? "Enviado" : "Convidar"}
                     </Text>
                   </TouchableOpacity>
@@ -353,9 +218,7 @@ function InviteToGroupModal({
             <Text style={invite.codeValue}>{group.code}</Text>
             <TouchableOpacity
               style={invite.copyBtn}
-              onPress={() =>
-                Alert.alert("Copiado!", `Código ${group.code} copiado.`)
-              }
+              onPress={() => Alert.alert("Copiado!", `Código ${group.code} copiado.`)}
             >
               <Ionicons name="copy-outline" size={18} color="#6096ba" />
             </TouchableOpacity>
@@ -372,114 +235,52 @@ function InviteToGroupModal({
 
 const invite = StyleSheet.create({
   overlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
     backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
-    zIndex: 100,
+    justifyContent: "flex-end", zIndex: 100,
   },
   sheet: {
-    backgroundColor: "#F8FAFC",
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    padding: 20,
-    paddingBottom: 36,
+    backgroundColor: "#F8FAFC", borderTopLeftRadius: 28, borderTopRightRadius: 28,
+    padding: 20, paddingBottom: 36,
   },
   handle: {
-    width: 40,
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: "#CBD5E1",
-    alignSelf: "center",
-    marginBottom: 16,
+    width: 40, height: 5, borderRadius: 3, backgroundColor: "#CBD5E1",
+    alignSelf: "center", marginBottom: 16,
   },
   groupBadge: {
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 20,
+    borderRadius: 16, padding: 14, marginBottom: 20,
   },
   groupBadgeName: { fontSize: 18, fontWeight: "900", color: "white" },
-  groupBadgeCode: {
-    fontSize: 12,
-    color: "rgba(255,255,255,0.75)",
-    marginTop: 2,
-  },
-  sectionTitle: {
-    fontSize: 15,
-    fontWeight: "800",
-    color: "#334155",
-    marginBottom: 12,
-  },
+  groupBadgeCode: { fontSize: 12, color: "rgba(255,255,255,0.75)", marginTop: 2 },
+  sectionTitle: { fontSize: 15, fontWeight: "800", color: "#334155", marginBottom: 12 },
   empty: { alignItems: "center", padding: 32, gap: 8 },
   emptyText: { fontSize: 14, color: "#94A3B8", textAlign: "center" },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 12,
-  },
+  row: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 },
   photo: { width: 44, height: 44, borderRadius: 22 },
   info: { flex: 1 },
   name: { fontSize: 14, fontWeight: "700", color: "#334155" },
   username: { fontSize: 12, color: "#94A3B8" },
   btn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    backgroundColor: "#6096ba",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    flexDirection: "row", alignItems: "center", gap: 5,
+    backgroundColor: "#6096ba", paddingHorizontal: 12, paddingVertical: 8,
     borderRadius: 12,
   },
-  btnSent: {
-    backgroundColor: "#F0FDF4",
-    borderWidth: 1,
-    borderColor: "#BBF7D0",
-  },
+  btnSent: { backgroundColor: "#F0FDF4", borderWidth: 1, borderColor: "#BBF7D0" },
   btnText: { fontSize: 13, fontWeight: "700", color: "white" },
   btnTextSent: { color: "#10B981" },
   codeBox: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 14,
-    marginTop: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
+    backgroundColor: "#FFFFFF", borderRadius: 16, padding: 14,
+    marginTop: 16, marginBottom: 12, borderWidth: 1, borderColor: "#E2E8F0",
   },
-  codeLabel: {
-    fontSize: 12,
-    color: "#94A3B8",
-    fontWeight: "600",
-    marginBottom: 8,
-  },
-  codeRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  codeValue: {
-    fontSize: 22,
-    fontWeight: "900",
-    color: "#274c77",
-    letterSpacing: 4,
-  },
+  codeLabel: { fontSize: 12, color: "#94A3B8", fontWeight: "600", marginBottom: 8 },
+  codeRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  codeValue: { fontSize: 22, fontWeight: "900", color: "#274c77", letterSpacing: 4 },
   copyBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "#EBF4FF",
-    justifyContent: "center",
-    alignItems: "center",
+    width: 36, height: 36, borderRadius: 10, backgroundColor: "#EBF4FF",
+    justifyContent: "center", alignItems: "center",
   },
   closeBtn: {
-    backgroundColor: "#F1F5F9",
-    borderRadius: 14,
-    padding: 14,
-    alignItems: "center",
+    backgroundColor: "#F1F5F9", borderRadius: 14, padding: 14, alignItems: "center",
   },
   closeBtnText: { fontSize: 15, fontWeight: "700", color: "#64748B" },
 });
@@ -500,16 +301,14 @@ export function CommunityScreen() {
   // Grupos
   const [newGroupName, setNewGroupName] = useState("");
   const [joinCode, setJoinCode] = useState("");
-  const [groupSubTab, setGroupSubTab] = useState<"lista" | "criar" | "entrar">(
-    "lista",
-  );
+  const [groupSubTab, setGroupSubTab] = useState<"lista" | "criar" | "entrar">("lista");
   const [inviteModalGroup, setInviteModalGroup] = useState<Group | null>(null);
 
   // ── Handlers de Amigos ─────────────────────────────────────────────────────
 
   const handleAcceptFriend = (id: number) => {
     setFriends((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, status: "amigo" } : f)),
+      prev.map((f) => (f.id === id ? { ...f, status: "amigo" } : f))
     );
   };
 
@@ -518,22 +317,21 @@ export function CommunityScreen() {
   };
 
   const handleRemoveFriend = (id: number) => {
-    Alert.alert("Remover amigo", "Tem certeza que deseja remover este amigo?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Remover",
-        style: "destructive",
-        onPress: () => setFriends((prev) => prev.filter((f) => f.id !== id)),
-      },
-    ]);
+    Alert.alert(
+      "Remover amigo",
+      "Tem certeza que deseja remover este amigo?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Remover", style: "destructive", onPress: () =>
+            setFriends((prev) => prev.filter((f) => f.id !== id))
+        },
+      ]
+    );
   };
 
   const handleAddFriend = () => {
     if (!addUsername.trim()) return;
-    Alert.alert(
-      "Solicitação enviada!",
-      `Enviamos um convite para ${addUsername}.`,
-    );
+    Alert.alert("Solicitação enviada!", `Enviamos um convite para ${addUsername}.`);
     setAddUsername("");
   };
 
@@ -545,20 +343,10 @@ export function CommunityScreen() {
     setGroups((prev) => [
       ...prev,
       {
-        id: Date.now(),
-        name: newGroupName.trim(),
-        code,
+        id: Date.now(), name: newGroupName.trim(), code,
         isAdmin: true,
         color: ["#274c77", "#6096ba"] as const,
-        members: [
-          {
-            id: 1,
-            nome: "Luana Castro",
-            foto: "https://i.pravatar.cc/300?img=32",
-            ml: 2850,
-            meta: 2500,
-          },
-        ],
+        members: [{ id: 1, nome: "Luana Castro", foto: "https://i.pravatar.cc/300?img=32", ml: 2850, meta: 2500 }],
       },
     ]);
     setNewGroupName("");
@@ -567,10 +355,7 @@ export function CommunityScreen() {
 
   const handleJoinGroup = () => {
     if (!joinCode.trim()) return;
-    Alert.alert(
-      "Entrou no grupo!",
-      `Você entrou no grupo com código ${joinCode}.`,
-    );
+    Alert.alert("Entrou no grupo!", `Você entrou no grupo com código ${joinCode}.`);
     setJoinCode("");
     setGroupSubTab("lista");
   };
@@ -578,9 +363,8 @@ export function CommunityScreen() {
   // ── Dados filtrados ────────────────────────────────────────────────────────
 
   const confirmedFriends = friends.filter(
-    (f) =>
-      f.status === "amigo" &&
-      f.nome.toLowerCase().includes(searchQuery.toLowerCase()),
+    (f) => f.status === "amigo" &&
+      f.nome.toLowerCase().includes(searchQuery.toLowerCase())
   );
   const sentFriends = friends.filter((f) => f.status === "pendente_enviado");
 
@@ -597,38 +381,16 @@ export function CommunityScreen() {
       {/* Tabs principais */}
       <View style={styles.mainTabRow}>
         <TouchableOpacity
-          style={[
-            styles.mainTabBtn,
-            subTab === "amigos" && styles.mainTabBtnActive,
-          ]}
+          style={[styles.mainTabBtn, subTab === "amigos" && styles.mainTabBtnActive]}
           onPress={() => setSubTab("amigos")}
         >
-          <Ionicons
-            name="person"
-            size={16}
-            color={subTab === "amigos" ? "#FFFFFF" : "#6096ba"}
-          />
-          <Text
-            style={[
-              styles.mainTabText,
-              subTab === "amigos" && styles.mainTabTextActive,
-            ]}
-          >
+          <Ionicons name="person" size={16} color={subTab === "amigos" ? "#FFFFFF" : "#6096ba"} />
+          <Text style={[styles.mainTabText, subTab === "amigos" && styles.mainTabTextActive]}>
             Amigos
           </Text>
           {friends.filter((f) => f.status === "amigo").length > 0 && (
-            <View
-              style={[
-                styles.tabCount,
-                subTab === "amigos" && styles.tabCountActive,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.tabCountText,
-                  subTab === "amigos" && styles.tabCountTextActive,
-                ]}
-              >
+            <View style={[styles.tabCount, subTab === "amigos" && styles.tabCountActive]}>
+              <Text style={[styles.tabCountText, subTab === "amigos" && styles.tabCountTextActive]}>
                 {friends.filter((f) => f.status === "amigo").length}
               </Text>
             </View>
@@ -636,38 +398,16 @@ export function CommunityScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[
-            styles.mainTabBtn,
-            subTab === "grupos" && styles.mainTabBtnActive,
-          ]}
+          style={[styles.mainTabBtn, subTab === "grupos" && styles.mainTabBtnActive]}
           onPress={() => setSubTab("grupos")}
         >
-          <Ionicons
-            name="people"
-            size={16}
-            color={subTab === "grupos" ? "#FFFFFF" : "#6096ba"}
-          />
-          <Text
-            style={[
-              styles.mainTabText,
-              subTab === "grupos" && styles.mainTabTextActive,
-            ]}
-          >
+          <Ionicons name="people" size={16} color={subTab === "grupos" ? "#FFFFFF" : "#6096ba"} />
+          <Text style={[styles.mainTabText, subTab === "grupos" && styles.mainTabTextActive]}>
             Grupos
           </Text>
           {groups.length > 0 && (
-            <View
-              style={[
-                styles.tabCount,
-                subTab === "grupos" && styles.tabCountActive,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.tabCountText,
-                  subTab === "grupos" && styles.tabCountTextActive,
-                ]}
-              >
+            <View style={[styles.tabCount, subTab === "grupos" && styles.tabCountActive]}>
+              <Text style={[styles.tabCountText, subTab === "grupos" && styles.tabCountTextActive]}>
                 {groups.length}
               </Text>
             </View>
@@ -737,10 +477,7 @@ export function CommunityScreen() {
           <Text style={styles.sectionTitle}>
             Meus amigos
             {confirmedFriends.length > 0 && (
-              <Text style={styles.sectionCount}>
-                {" "}
-                · {confirmedFriends.length}
-              </Text>
+              <Text style={styles.sectionCount}> · {confirmedFriends.length}</Text>
             )}
           </Text>
 
@@ -748,9 +485,7 @@ export function CommunityScreen() {
             <View style={styles.emptyBox}>
               <Ionicons name="people-outline" size={44} color="#CBD5E1" />
               <Text style={styles.emptyText}>
-                {searchQuery
-                  ? "Nenhum amigo encontrado."
-                  : "Você ainda não tem amigos."}
+                {searchQuery ? "Nenhum amigo encontrado." : "Você ainda não tem amigos."}
               </Text>
               <Text style={styles.emptySubText}>Adicione alguém acima!</Text>
             </View>
@@ -761,10 +496,7 @@ export function CommunityScreen() {
               return (
                 <View key={friend.id} style={styles.friendCard}>
                   <View style={styles.friendPhotoWrapper}>
-                    <Image
-                      source={{ uri: friend.foto }}
-                      style={styles.friendPhoto}
-                    />
+                    <Image source={{ uri: friend.foto }} style={styles.friendPhoto} />
                     {metaOk && (
                       <View style={styles.metaDot}>
                         <Ionicons name="checkmark" size={9} color="white" />
@@ -774,9 +506,7 @@ export function CommunityScreen() {
                   <View style={styles.friendInfo}>
                     <View style={styles.friendNameRow}>
                       <Text style={styles.friendName}>{friend.nome}</Text>
-                      <Text style={styles.friendUsername}>
-                        {friend.username}
-                      </Text>
+                      <Text style={styles.friendUsername}>{friend.username}</Text>
                     </View>
                     <View style={styles.friendBarRow}>
                       <View style={styles.friendBarBg}>
@@ -788,12 +518,7 @@ export function CommunityScreen() {
                           ]}
                         />
                       </View>
-                      <Text
-                        style={[
-                          styles.friendMl,
-                          metaOk && styles.friendMlGreen,
-                        ]}
-                      >
+                      <Text style={[styles.friendMl, metaOk && styles.friendMlGreen]}>
                         {friend.ml}ml
                       </Text>
                     </View>
@@ -803,20 +528,12 @@ export function CommunityScreen() {
                     onPress={() =>
                       Alert.alert(friend.nome, "O que deseja fazer?", [
                         { text: "Ver perfil" },
-                        {
-                          text: "Remover amigo",
-                          style: "destructive",
-                          onPress: () => handleRemoveFriend(friend.id),
-                        },
+                        { text: "Remover amigo", style: "destructive", onPress: () => handleRemoveFriend(friend.id) },
                         { text: "Cancelar", style: "cancel" },
                       ])
                     }
                   >
-                    <Ionicons
-                      name="ellipsis-horizontal"
-                      size={20}
-                      color="#CBD5E1"
-                    />
+                    <Ionicons name="ellipsis-horizontal" size={20} color="#CBD5E1" />
                   </TouchableOpacity>
                 </View>
               );
@@ -826,14 +543,9 @@ export function CommunityScreen() {
           {/* Pendentes enviados */}
           {sentFriends.length > 0 && (
             <>
-              <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
-                Aguardando resposta
-              </Text>
+              <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Aguardando resposta</Text>
               {sentFriends.map((f) => (
-                <View
-                  key={f.id}
-                  style={[styles.friendCard, styles.friendCardPending]}
-                >
+                <View key={f.id} style={[styles.friendCard, styles.friendCardPending]}>
                   <Image source={{ uri: f.foto }} style={styles.friendPhoto} />
                   <View style={styles.friendInfo}>
                     <Text style={styles.friendName}>{f.nome}</Text>
@@ -857,23 +569,11 @@ export function CommunityScreen() {
             {(["lista", "criar", "entrar"] as const).map((t) => (
               <TouchableOpacity
                 key={t}
-                style={[
-                  styles.groupSubTabBtn,
-                  groupSubTab === t && styles.groupSubTabBtnActive,
-                ]}
+                style={[styles.groupSubTabBtn, groupSubTab === t && styles.groupSubTabBtnActive]}
                 onPress={() => setGroupSubTab(t)}
               >
-                <Text
-                  style={[
-                    styles.groupSubTabText,
-                    groupSubTab === t && styles.groupSubTabTextActive,
-                  ]}
-                >
-                  {t === "lista"
-                    ? "Meus Grupos"
-                    : t === "criar"
-                      ? "Criar"
-                      : "Entrar"}
+                <Text style={[styles.groupSubTabText, groupSubTab === t && styles.groupSubTabTextActive]}>
+                  {t === "lista" ? "Meus Grupos" : t === "criar" ? "Criar" : "Entrar"}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -881,10 +581,7 @@ export function CommunityScreen() {
 
           {/* Lista de grupos */}
           {groupSubTab === "lista" && (
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.scrollContent}
-            >
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
               {groups.length === 0 ? (
                 <View style={styles.emptyBox}>
                   <Ionicons name="people-outline" size={44} color="#CBD5E1" />
@@ -892,17 +589,12 @@ export function CommunityScreen() {
                 </View>
               ) : (
                 groups.map((group) => {
-                  const sortedMembers = [...group.members].sort(
-                    (a, b) => b.ml - a.ml,
-                  );
+                  const sortedMembers = [...group.members].sort((a, b) => b.ml - a.ml);
                   const canInvite = group.isAdmin;
                   return (
                     <View key={group.id} style={styles.groupCard}>
                       {/* Header do grupo */}
-                      <LinearGradient
-                        colors={group.color}
-                        style={styles.groupHeader}
-                      >
+                      <LinearGradient colors={group.color} style={styles.groupHeader}>
                         <View style={styles.groupHeaderTop}>
                           <View>
                             <Text style={styles.groupName}>{group.name}</Text>
@@ -911,19 +603,13 @@ export function CommunityScreen() {
                           <View style={styles.groupHeaderRight}>
                             {group.isAdmin && (
                               <View style={styles.adminBadge}>
-                                <Ionicons
-                                  name="shield-checkmark"
-                                  size={12}
-                                  color="#FFD700"
-                                />
+                                <Ionicons name="shield-checkmark" size={12} color="#FFD700" />
                                 <Text style={styles.adminBadgeText}>Admin</Text>
                               </View>
                             )}
                             <View style={styles.memberCountBadge}>
                               <Ionicons name="people" size={14} color="white" />
-                              <Text style={styles.memberCountText}>
-                                {group.members.length}
-                              </Text>
+                              <Text style={styles.memberCountText}>{group.members.length}</Text>
                             </View>
                           </View>
                         </View>
@@ -934,25 +620,12 @@ export function CommunityScreen() {
                             <Image
                               key={m.id}
                               source={{ uri: m.foto }}
-                              style={[
-                                styles.memberAvatar,
-                                {
-                                  marginLeft: i === 0 ? 0 : -10,
-                                  zIndex: 5 - i,
-                                },
-                              ]}
+                              style={[styles.memberAvatar, { marginLeft: i === 0 ? 0 : -10, zIndex: 5 - i }]}
                             />
                           ))}
                           {group.members.length > 5 && (
-                            <View
-                              style={[
-                                styles.memberAvatarMore,
-                                { marginLeft: -10 },
-                              ]}
-                            >
-                              <Text style={styles.memberAvatarMoreText}>
-                                +{group.members.length - 5}
-                              </Text>
+                            <View style={[styles.memberAvatarMore, { marginLeft: -10 }]}>
+                              <Text style={styles.memberAvatarMoreText}>+{group.members.length - 5}</Text>
                             </View>
                           )}
                         </View>
@@ -964,47 +637,19 @@ export function CommunityScreen() {
                           const pct = Math.min((m.ml / m.meta) * 100, 100);
                           const isMe = m.id === 1;
                           return (
-                            <View
-                              key={m.id}
-                              style={[styles.rankRow, isMe && styles.rankRowMe]}
-                            >
+                            <View key={m.id} style={[styles.rankRow, isMe && styles.rankRowMe]}>
                               <Text style={styles.rankPos}>{i + 1}</Text>
-                              <Image
-                                source={{ uri: m.foto }}
-                                style={styles.rankPhoto}
-                              />
+                              <Image source={{ uri: m.foto }} style={styles.rankPhoto} />
                               <View style={styles.rankInfo}>
                                 <View style={styles.rankNameRow}>
-                                  <Text
-                                    style={[
-                                      styles.rankName,
-                                      isMe && styles.rankNameMe,
-                                    ]}
-                                  >
-                                    {m.nome}
-                                  </Text>
-                                  {isMe && (
-                                    <Text style={styles.youBadge}>você</Text>
-                                  )}
+                                  <Text style={[styles.rankName, isMe && styles.rankNameMe]}>{m.nome}</Text>
+                                  {isMe && <Text style={styles.youBadge}>você</Text>}
                                 </View>
                                 <View style={styles.rankBarBg}>
-                                  <View
-                                    style={[
-                                      styles.rankBarFill,
-                                      { width: `${pct}%` },
-                                      pct >= 100 && styles.rankBarFillGreen,
-                                    ]}
-                                  />
+                                  <View style={[styles.rankBarFill, { width: `${pct}%` }, pct >= 100 && styles.rankBarFillGreen]} />
                                 </View>
                               </View>
-                              <Text
-                                style={[
-                                  styles.rankMl,
-                                  pct >= 100 && styles.rankMlGreen,
-                                ]}
-                              >
-                                {m.ml}ml
-                              </Text>
+                              <Text style={[styles.rankMl, pct >= 100 && styles.rankMlGreen]}>{m.ml}ml</Text>
                             </View>
                           );
                         })}
@@ -1017,46 +662,24 @@ export function CommunityScreen() {
                             style={styles.groupActionBtn}
                             onPress={() => setInviteModalGroup(group)}
                           >
-                            <Ionicons
-                              name="person-add"
-                              size={16}
-                              color="#6096ba"
-                            />
-                            <Text style={styles.groupActionText}>
-                              Convidar amigos
-                            </Text>
+                            <Ionicons name="person-add" size={16} color="#6096ba" />
+                            <Text style={styles.groupActionText}>Convidar amigos</Text>
                           </TouchableOpacity>
                         )}
                         <TouchableOpacity
-                          style={[
-                            styles.groupActionBtn,
-                            styles.groupActionBtnGhost,
-                          ]}
+                          style={[styles.groupActionBtn, styles.groupActionBtnGhost]}
                           onPress={() =>
                             Alert.alert(group.name, "O que deseja?", [
-                              {
-                                text: "Compartilhar código",
-                                onPress: () =>
-                                  Alert.alert("Código copiado!", group.code),
-                              },
-                              {
-                                text: group.isAdmin
-                                  ? "Excluir grupo"
-                                  : "Sair do grupo",
-                                style: "destructive",
-                              },
+                              { text: "Compartilhar código", onPress: () =>
+                                Alert.alert("Código copiado!", group.code) },
+                              { text: group.isAdmin ? "Excluir grupo" : "Sair do grupo",
+                                style: "destructive" },
                               { text: "Cancelar", style: "cancel" },
                             ])
                           }
                         >
-                          <Ionicons
-                            name="ellipsis-horizontal"
-                            size={16}
-                            color="#94A3B8"
-                          />
-                          <Text style={styles.groupActionTextGhost}>
-                            Mais opções
-                          </Text>
+                          <Ionicons name="ellipsis-horizontal" size={16} color="#94A3B8" />
+                          <Text style={styles.groupActionTextGhost}>Mais opções</Text>
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -1075,8 +698,7 @@ export function CommunityScreen() {
                 </View>
                 <Text style={styles.formTitle}>Novo Grupo</Text>
                 <Text style={styles.formDesc}>
-                  Crie um grupo com seus amigos e compete pela melhor
-                  hidratação!
+                  Crie um grupo com seus amigos e compete pela melhor hidratação!
                 </Text>
                 <View style={styles.formField}>
                   <Text style={styles.formLabel}>Nome do grupo</Text>
@@ -1090,10 +712,7 @@ export function CommunityScreen() {
                   <Text style={styles.charCount}>{newGroupName.length}/30</Text>
                 </View>
                 <TouchableOpacity
-                  style={[
-                    styles.formBtn,
-                    !newGroupName.trim() && { opacity: 0.4 },
-                  ]}
+                  style={[styles.formBtn, !newGroupName.trim() && { opacity: 0.4 }]}
                   onPress={handleCreateGroup}
                   disabled={!newGroupName.trim()}
                 >
@@ -1169,35 +788,20 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   mainTabBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 12,
-    borderRadius: 16,
-    backgroundColor: "#EBF4FF",
-    borderWidth: 1.5,
-    borderColor: "#BFDBFE",
+    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 6, paddingVertical: 12, borderRadius: 16,
+    backgroundColor: "#EBF4FF", borderWidth: 1.5, borderColor: "#BFDBFE",
   },
   mainTabBtnActive: {
-    backgroundColor: "#6096ba",
-    borderColor: "#6096ba",
-    elevation: 4,
-    shadowColor: "#6096ba",
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
+    backgroundColor: "#6096ba", borderColor: "#6096ba",
+    elevation: 4, shadowColor: "#6096ba", shadowOpacity: 0.3,
+    shadowRadius: 8, shadowOffset: { width: 0, height: 4 },
   },
   mainTabText: { fontSize: 15, fontWeight: "800", color: "#6096ba" },
   mainTabTextActive: { color: "white" },
   tabCount: {
-    backgroundColor: "#BFDBFE",
-    borderRadius: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    minWidth: 22,
-    alignItems: "center",
+    backgroundColor: "#BFDBFE", borderRadius: 10,
+    paddingHorizontal: 6, paddingVertical: 1, minWidth: 22, alignItems: "center",
   },
   tabCountActive: { backgroundColor: "rgba(255,255,255,0.3)" },
   tabCountText: { fontSize: 11, fontWeight: "900", color: "#6096ba" },
@@ -1206,12 +810,7 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
 
   // Seção
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#334155",
-    marginBottom: 10,
-  },
+  sectionTitle: { fontSize: 14, fontWeight: "800", color: "#334155", marginBottom: 10 },
   sectionCount: { color: "#94A3B8" },
 
   // Empty
@@ -1221,288 +820,138 @@ const styles = StyleSheet.create({
 
   // Add friend
   addFriendCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 18,
-    padding: 14,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
+    backgroundColor: "#FFFFFF", borderRadius: 18, padding: 14,
+    marginBottom: 16, borderWidth: 1, borderColor: "#E2E8F0",
+    elevation: 2, shadowColor: "#000", shadowOpacity: 0.04,
+    shadowRadius: 6, shadowOffset: { width: 0, height: 2 },
   },
   addRow: { flexDirection: "row", gap: 10, alignItems: "center" },
   addInput: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: "#F8FAFC",
-    borderRadius: 13,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
+    flex: 1, flexDirection: "row", alignItems: "center", gap: 8,
+    backgroundColor: "#F8FAFC", borderRadius: 13, paddingHorizontal: 12,
+    paddingVertical: 10, borderWidth: 1, borderColor: "#E2E8F0",
   },
   addInputText: { flex: 1, fontSize: 14, color: "#334155" },
   addBtn: {
-    width: 46,
-    height: 46,
-    borderRadius: 14,
-    backgroundColor: "#6096ba",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 3,
-    shadowColor: "#6096ba",
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
+    width: 46, height: 46, borderRadius: 14,
+    backgroundColor: "#6096ba", justifyContent: "center", alignItems: "center",
+    elevation: 3, shadowColor: "#6096ba", shadowOpacity: 0.3,
+    shadowRadius: 6, shadowOffset: { width: 0, height: 3 },
   },
 
   // Search
   searchRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 13,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    marginBottom: 14,
+    flexDirection: "row", alignItems: "center", gap: 8,
+    backgroundColor: "#FFFFFF", borderRadius: 13, paddingHorizontal: 12,
+    paddingVertical: 10, borderWidth: 1, borderColor: "#E2E8F0", marginBottom: 14,
   },
   searchInput: { flex: 1, fontSize: 14, color: "#334155" },
 
   // Friend card
   friendCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 18,
-    padding: 12,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
+    flexDirection: "row", alignItems: "center", gap: 12,
+    backgroundColor: "#FFFFFF", borderRadius: 18, padding: 12,
+    marginBottom: 10, borderWidth: 1, borderColor: "#E2E8F0",
+    elevation: 2, shadowColor: "#000", shadowOpacity: 0.04,
+    shadowRadius: 6, shadowOffset: { width: 0, height: 2 },
   },
   friendCardPending: { opacity: 0.7, borderStyle: "dashed" },
   friendPhotoWrapper: { position: "relative" },
   friendPhoto: { width: 48, height: 48, borderRadius: 24 },
   metaDot: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: "#10B981",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "white",
+    position: "absolute", bottom: 0, right: 0,
+    width: 16, height: 16, borderRadius: 8,
+    backgroundColor: "#10B981", justifyContent: "center", alignItems: "center",
+    borderWidth: 2, borderColor: "white",
   },
   friendInfo: { flex: 1, gap: 4 },
   friendNameRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   friendName: { fontSize: 14, fontWeight: "700", color: "#334155" },
   friendUsername: { fontSize: 11, color: "#94A3B8" },
   friendBarRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  friendBarBg: {
-    flex: 1,
-    height: 4,
-    backgroundColor: "#E3F2FD",
-    borderRadius: 2,
-    overflow: "hidden",
-  },
-  friendBarFill: {
-    height: "100%",
-    backgroundColor: "#a3cef1",
-    borderRadius: 2,
-  },
+  friendBarBg: { flex: 1, height: 4, backgroundColor: "#E3F2FD", borderRadius: 2, overflow: "hidden" },
+  friendBarFill: { height: "100%", backgroundColor: "#a3cef1", borderRadius: 2 },
   friendBarFillGreen: { backgroundColor: "#10B981" },
-  friendMl: {
-    fontSize: 12,
-    fontWeight: "900",
-    color: "#6096ba",
-    minWidth: 48,
-    textAlign: "right",
-  },
+  friendMl: { fontSize: 12, fontWeight: "900", color: "#6096ba", minWidth: 48, textAlign: "right" },
   friendMlGreen: { color: "#10B981" },
   friendMenu: { padding: 4 },
   pendingBadge: {
-    backgroundColor: "#FEF9C3",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#FDE68A",
+    backgroundColor: "#FEF9C3", paddingHorizontal: 10, paddingVertical: 4,
+    borderRadius: 10, borderWidth: 1, borderColor: "#FDE68A",
   },
   pendingBadgeText: { fontSize: 11, fontWeight: "700", color: "#92400E" },
 
   // Grupos
   groupsWrapper: { flex: 1 },
   groupSubTabRow: {
-    flexDirection: "row",
-    marginHorizontal: 20,
-    marginBottom: 12,
-    backgroundColor: "#F1F5F9",
-    borderRadius: 14,
-    padding: 4,
+    flexDirection: "row", marginHorizontal: 20, marginBottom: 12,
+    backgroundColor: "#F1F5F9", borderRadius: 14, padding: 4,
   },
-  groupSubTabBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: "center",
-  },
+  groupSubTabBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: "center" },
   groupSubTabBtnActive: {
     backgroundColor: "#FFFFFF",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
+    elevation: 2, shadowColor: "#000", shadowOpacity: 0.06,
+    shadowRadius: 4, shadowOffset: { width: 0, height: 1 },
   },
   groupSubTabText: { fontSize: 13, fontWeight: "600", color: "#94A3B8" },
   groupSubTabTextActive: { color: "#274c77", fontWeight: "800" },
 
   groupCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 22,
-    marginBottom: 16,
-    overflow: "hidden",
-    elevation: 4,
-    shadowColor: "#6096ba",
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
+    backgroundColor: "#FFFFFF", borderRadius: 22, marginBottom: 16,
+    overflow: "hidden", elevation: 4, shadowColor: "#6096ba",
+    shadowOpacity: 0.15, shadowRadius: 10, shadowOffset: { width: 0, height: 4 },
   },
   groupHeader: { padding: 16 },
-  groupHeaderTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 12,
-  },
+  groupHeaderTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 },
   groupName: { fontSize: 18, fontWeight: "900", color: "white" },
   groupCode: { fontSize: 12, color: "rgba(255,255,255,0.7)", marginTop: 2 },
   groupHeaderRight: { flexDirection: "row", alignItems: "center", gap: 6 },
   adminBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    backgroundColor: "rgba(0,0,0,0.25)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
+    flexDirection: "row", alignItems: "center", gap: 3,
+    backgroundColor: "rgba(0,0,0,0.25)", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10,
   },
   adminBadgeText: { fontSize: 11, color: "#FFD700", fontWeight: "700" },
   memberCountBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
+    flexDirection: "row", alignItems: "center", gap: 4,
+    backgroundColor: "rgba(255,255,255,0.2)", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10,
   },
   memberCountText: { fontSize: 13, color: "white", fontWeight: "700" },
   memberAvatarRow: { flexDirection: "row", alignItems: "center" },
-  memberAvatar: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.6)",
-  },
+  memberAvatar: { width: 30, height: 30, borderRadius: 15, borderWidth: 2, borderColor: "rgba(255,255,255,0.6)" },
   memberAvatarMore: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: "rgba(0,0,0,0.3)",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.4)",
+    width: 30, height: 30, borderRadius: 15,
+    backgroundColor: "rgba(0,0,0,0.3)", justifyContent: "center", alignItems: "center",
+    borderWidth: 2, borderColor: "rgba(255,255,255,0.4)",
   },
   memberAvatarMoreText: { fontSize: 10, color: "white", fontWeight: "900" },
 
   groupRanking: { padding: 12, gap: 8 },
   rankRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  rankRowMe: {
-    backgroundColor: "#EBF4FF",
-    borderRadius: 12,
-    padding: 6,
-    marginHorizontal: -4,
-  },
-  rankPos: {
-    fontSize: 13,
-    fontWeight: "900",
-    color: "#94A3B8",
-    width: 16,
-    textAlign: "center",
-  },
+  rankRowMe: { backgroundColor: "#EBF4FF", borderRadius: 12, padding: 6, marginHorizontal: -4 },
+  rankPos: { fontSize: 13, fontWeight: "900", color: "#94A3B8", width: 16, textAlign: "center" },
   rankPhoto: { width: 34, height: 34, borderRadius: 17 },
   rankInfo: { flex: 1 },
-  rankNameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 3,
-  },
+  rankNameRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 3 },
   rankName: { fontSize: 13, fontWeight: "700", color: "#334155" },
   rankNameMe: { color: "#274c77" },
   youBadge: {
-    fontSize: 9,
-    fontWeight: "900",
-    color: "#6096ba",
-    backgroundColor: "#DBEAFE",
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: 6,
+    fontSize: 9, fontWeight: "900", color: "#6096ba",
+    backgroundColor: "#DBEAFE", paddingHorizontal: 6, paddingVertical: 1, borderRadius: 6,
   },
-  rankBarBg: {
-    height: 4,
-    backgroundColor: "#E3F2FD",
-    borderRadius: 2,
-    overflow: "hidden",
-  },
+  rankBarBg: { height: 4, backgroundColor: "#E3F2FD", borderRadius: 2, overflow: "hidden" },
   rankBarFill: { height: "100%", backgroundColor: "#a3cef1", borderRadius: 2 },
   rankBarFillGreen: { backgroundColor: "#10B981" },
-  rankMl: {
-    fontSize: 13,
-    fontWeight: "900",
-    color: "#6096ba",
-    minWidth: 52,
-    textAlign: "right",
-  },
+  rankMl: { fontSize: 13, fontWeight: "900", color: "#6096ba", minWidth: 52, textAlign: "right" },
   rankMlGreen: { color: "#10B981" },
 
   groupActions: {
-    flexDirection: "row",
-    gap: 8,
-    padding: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#F1F5F9",
+    flexDirection: "row", gap: 8, padding: 12,
+    borderTopWidth: 1, borderTopColor: "#F1F5F9",
   },
   groupActionBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    backgroundColor: "#EBF4FF",
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#BFDBFE",
+    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 6, backgroundColor: "#EBF4FF", paddingVertical: 10, borderRadius: 12,
+    borderWidth: 1, borderColor: "#BFDBFE",
   },
   groupActionBtnGhost: { backgroundColor: "#F8FAFC", borderColor: "#E2E8F0" },
   groupActionText: { fontSize: 13, fontWeight: "700", color: "#6096ba" },
@@ -1510,81 +959,30 @@ const styles = StyleSheet.create({
 
   // Formulários
   formCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    padding: 24,
-    alignItems: "center",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
+    backgroundColor: "#FFFFFF", borderRadius: 24, padding: 24,
+    alignItems: "center", elevation: 3, shadowColor: "#000",
+    shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 },
     marginTop: 4,
   },
   formIconWrapper: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: "#EBF4FF",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 12,
+    width: 72, height: 72, borderRadius: 36,
+    backgroundColor: "#EBF4FF", justifyContent: "center", alignItems: "center", marginBottom: 12,
   },
-  formTitle: {
-    fontSize: 20,
-    fontWeight: "900",
-    color: "#274c77",
-    marginBottom: 6,
-  },
-  formDesc: {
-    fontSize: 13,
-    color: "#94A3B8",
-    textAlign: "center",
-    marginBottom: 20,
-    lineHeight: 18,
-  },
+  formTitle: { fontSize: 20, fontWeight: "900", color: "#274c77", marginBottom: 6 },
+  formDesc: { fontSize: 13, color: "#94A3B8", textAlign: "center", marginBottom: 20, lineHeight: 18 },
   formField: { width: "100%", marginBottom: 20 },
-  formLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#94A3B8",
-    marginBottom: 8,
-  },
+  formLabel: { fontSize: 12, fontWeight: "700", color: "#94A3B8", marginBottom: 8 },
   formInput: {
-    backgroundColor: "#F8FAFC",
-    borderRadius: 14,
-    padding: 16,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    color: "#334155",
+    backgroundColor: "#F8FAFC", borderRadius: 14, padding: 16,
+    fontSize: 16, borderWidth: 1, borderColor: "#E2E8F0", color: "#334155",
   },
-  codeInput: {
-    textAlign: "center",
-    letterSpacing: 6,
-    fontSize: 22,
-    fontWeight: "900",
-  },
-  charCount: {
-    fontSize: 11,
-    color: "#CBD5E1",
-    textAlign: "right",
-    marginTop: 4,
-  },
+  codeInput: { textAlign: "center", letterSpacing: 6, fontSize: 22, fontWeight: "900" },
+  charCount: { fontSize: 11, color: "#CBD5E1", textAlign: "right", marginTop: 4 },
   formBtn: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: "#6096ba",
-    padding: 16,
-    borderRadius: 14,
-    elevation: 4,
-    shadowColor: "#6096ba",
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
+    width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 8, backgroundColor: "#6096ba", padding: 16, borderRadius: 14,
+    elevation: 4, shadowColor: "#6096ba", shadowOpacity: 0.3,
+    shadowRadius: 8, shadowOffset: { width: 0, height: 4 },
   },
   formBtnText: { color: "white", fontWeight: "900", fontSize: 16 },
 });

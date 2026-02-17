@@ -38,24 +38,9 @@ export function StatsScreen({ meta = 2500 }: StatsScreenProps) {
   const daysAboveGoal = data.filter((d) => d.ml >= meta).length;
 
   const statCards = [
-    {
-      label: "Média diária",
-      value: `${avgMl}ml`,
-      icon: "water",
-      color: "#6096ba",
-    },
-    {
-      label: "Melhor dia",
-      value: `${bestDay.ml}ml`,
-      icon: "trophy",
-      color: "#FFD700",
-    },
-    {
-      label: "Dias na meta",
-      value: `${daysAboveGoal}`,
-      icon: "checkmark-circle",
-      color: "#10B981",
-    },
+    { label: "Média diária", value: `${avgMl}ml`, icon: "water", color: "#6096ba" },
+    { label: "Melhor dia", value: `${bestDay.ml}ml`, icon: "trophy", color: "#FFD700" },
+    { label: "Dias na meta", value: `${daysAboveGoal}`, icon: "checkmark-circle", color: "#10B981" },
     { label: "Sequência", value: "5 dias", icon: "flame", color: "#EF4444" },
   ];
 
@@ -72,12 +57,7 @@ export function StatsScreen({ meta = 2500 }: StatsScreenProps) {
       <View style={styles.statsGrid}>
         {statCards.map((card) => (
           <View key={card.label} style={styles.statCard}>
-            <View
-              style={[
-                styles.statIconBg,
-                { backgroundColor: card.color + "20" },
-              ]}
-            >
+            <View style={[styles.statIconBg, { backgroundColor: card.color + "20" }]}>
               <Ionicons name={card.icon as any} size={22} color={card.color} />
             </View>
             <Text style={styles.statValue}>{card.value}</Text>
@@ -89,18 +69,10 @@ export function StatsScreen({ meta = 2500 }: StatsScreenProps) {
       {/* Seletor de período */}
       <View style={styles.periodRow}>
         <TouchableOpacity
-          style={[
-            styles.periodBtn,
-            period === "semana" && styles.periodBtnActive,
-          ]}
+          style={[styles.periodBtn, period === "semana" && styles.periodBtnActive]}
           onPress={() => setPeriod("semana")}
         >
-          <Text
-            style={[
-              styles.periodBtnText,
-              period === "semana" && styles.periodBtnTextActive,
-            ]}
-          >
+          <Text style={[styles.periodBtnText, period === "semana" && styles.periodBtnTextActive]}>
             7 dias
           </Text>
         </TouchableOpacity>
@@ -108,12 +80,7 @@ export function StatsScreen({ meta = 2500 }: StatsScreenProps) {
           style={[styles.periodBtn, period === "mes" && styles.periodBtnActive]}
           onPress={() => setPeriod("mes")}
         >
-          <Text
-            style={[
-              styles.periodBtnText,
-              period === "mes" && styles.periodBtnTextActive,
-            ]}
-          >
+          <Text style={[styles.periodBtnText, period === "mes" && styles.periodBtnTextActive]}>
             30 dias
           </Text>
         </TouchableOpacity>
@@ -130,12 +97,7 @@ export function StatsScreen({ meta = 2500 }: StatsScreenProps) {
               const isLast = i === data.length - 1;
               return (
                 <View key={i} style={styles.chartCol}>
-                  <Text
-                    style={[
-                      styles.chartMlLabel,
-                      isLast && styles.chartMlLabelToday,
-                    ]}
-                  >
+                  <Text style={[styles.chartMlLabel, isLast && styles.chartMlLabelToday]}>
                     {d.ml > 0 ? `${d.ml}` : ""}
                   </Text>
                   <View style={styles.chartBarBg}>
@@ -148,12 +110,7 @@ export function StatsScreen({ meta = 2500 }: StatsScreenProps) {
                       ]}
                     />
                   </View>
-                  <Text
-                    style={[
-                      styles.chartDayLabel,
-                      isLast && styles.chartDayLabelToday,
-                    ]}
-                  >
+                  <Text style={[styles.chartDayLabel, isLast && styles.chartDayLabelToday]}>
                     {d.label}
                   </Text>
                 </View>
@@ -184,9 +141,7 @@ export function StatsScreen({ meta = 2500 }: StatsScreenProps) {
         <View style={styles.goalCardLeft}>
           <Text style={styles.goalCardLabel}>Sua meta diária</Text>
           <Text style={styles.goalCardValue}>{meta} ml</Text>
-          <Text style={styles.goalCardSub}>
-            Atingida em {daysAboveGoal} de {data.length} dias
-          </Text>
+          <Text style={styles.goalCardSub}>Atingida em {daysAboveGoal} de {data.length} dias</Text>
         </View>
         <View style={styles.goalCircle}>
           <Text style={styles.goalCirclePct}>
@@ -203,9 +158,7 @@ export function StatsScreen({ meta = 2500 }: StatsScreenProps) {
         </View>
         <View style={styles.streakInfo}>
           <Text style={styles.streakTitle}>🔥 Sequência atual</Text>
-          <Text style={styles.streakDesc}>
-            Você bebeu água por 5 dias seguidos!
-          </Text>
+          <Text style={styles.streakDesc}>Você bebeu água por 5 dias seguidos!</Text>
         </View>
         <Text style={styles.streakDays}>5</Text>
       </View>
@@ -217,12 +170,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F8FAFC" },
   content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 },
   screenTitle: { fontSize: 26, fontWeight: "900", color: "#274c77" },
-  screenSubtitle: {
-    fontSize: 13,
-    color: "#8b8c89",
-    fontWeight: "500",
-    marginBottom: 20,
-  },
+  screenSubtitle: { fontSize: 13, color: "#8b8c89", fontWeight: "500", marginBottom: 20 },
 
   statsGrid: {
     flexDirection: "row",
@@ -244,20 +192,11 @@ const styles = StyleSheet.create({
     borderColor: "#E2E8F0",
   },
   statIconBg: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
+    width: 44, height: 44, borderRadius: 22,
+    justifyContent: "center", alignItems: "center", marginBottom: 10,
   },
   statValue: { fontSize: 22, fontWeight: "900", color: "#334155" },
-  statLabel: {
-    fontSize: 12,
-    color: "#94A3B8",
-    fontWeight: "600",
-    marginTop: 2,
-  },
+  statLabel: { fontSize: 12, color: "#94A3B8", fontWeight: "600", marginTop: 2 },
 
   periodRow: {
     flexDirection: "row",
@@ -266,12 +205,7 @@ const styles = StyleSheet.create({
     padding: 4,
     marginBottom: 16,
   },
-  periodBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: "center",
-  },
+  periodBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: "center" },
   periodBtnActive: {
     backgroundColor: "#FFFFFF",
     elevation: 2,
@@ -296,12 +230,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0",
   },
-  chartTitle: {
-    fontSize: 15,
-    fontWeight: "800",
-    color: "#334155",
-    marginBottom: 16,
-  },
+  chartTitle: { fontSize: 15, fontWeight: "800", color: "#334155", marginBottom: 16 },
   chartBars: {
     flexDirection: "row",
     alignItems: "flex-end",
@@ -315,30 +244,16 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     height: "100%",
   },
-  chartMlLabel: {
-    fontSize: 8,
-    color: "#94A3B8",
-    fontWeight: "700",
-    marginBottom: 2,
-  },
+  chartMlLabel: { fontSize: 8, color: "#94A3B8", fontWeight: "700", marginBottom: 2 },
   chartMlLabelToday: { color: "#6096ba" },
   chartBarBg: {
-    width: 28,
-    flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "#F1F5F9",
-    borderRadius: 6,
-    overflow: "hidden",
+    width: 28, flex: 1, justifyContent: "flex-end",
+    backgroundColor: "#F1F5F9", borderRadius: 6, overflow: "hidden",
   },
   chartBarFill: { width: "100%", backgroundColor: "#90CAF9", borderRadius: 6 },
   chartBarGoal: { backgroundColor: "#10B981" },
   chartBarToday: { backgroundColor: "#6096ba" },
-  chartDayLabel: {
-    fontSize: 10,
-    color: "#94A3B8",
-    fontWeight: "600",
-    marginTop: 6,
-  },
+  chartDayLabel: { fontSize: 10, color: "#94A3B8", fontWeight: "600", marginTop: 6 },
   chartDayLabelToday: { color: "#6096ba", fontWeight: "800" },
 
   legendRow: { flexDirection: "row", gap: 16, marginTop: 12 },
@@ -355,25 +270,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   goalCardLeft: { flex: 1 },
-  goalCardLabel: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.8)",
-    fontWeight: "600",
-  },
-  goalCardValue: {
-    fontSize: 28,
-    fontWeight: "900",
-    color: "white",
-    marginVertical: 4,
-  },
+  goalCardLabel: { fontSize: 13, color: "rgba(255,255,255,0.8)", fontWeight: "600" },
+  goalCardValue: { fontSize: 28, fontWeight: "900", color: "white", marginVertical: 4 },
   goalCardSub: { fontSize: 12, color: "rgba(255,255,255,0.75)" },
   goalCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 72, height: 72, borderRadius: 36,
     backgroundColor: "rgba(255,255,255,0.25)",
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "center", alignItems: "center",
   },
   goalCirclePct: { fontSize: 22, fontWeight: "900", color: "white" },
   goalCircleLabel: { fontSize: 10, color: "rgba(255,255,255,0.8)" },
@@ -394,12 +297,8 @@ const styles = StyleSheet.create({
     borderColor: "#FEE2E2",
   },
   streakIconWrapper: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: "#FEF2F2",
-    justifyContent: "center",
-    alignItems: "center",
+    width: 52, height: 52, borderRadius: 26,
+    backgroundColor: "#FEF2F2", justifyContent: "center", alignItems: "center",
   },
   streakInfo: { flex: 1 },
   streakTitle: { fontSize: 15, fontWeight: "bold", color: "#334155" },
