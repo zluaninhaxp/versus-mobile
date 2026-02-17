@@ -2,16 +2,22 @@ import React, { useState } from "react";
 import { StyleSheet, ScrollView, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
-// Importações dos seus componentes
+// Componentes da Home
 import { Header } from "./src/components/Header";
 import { UserStatus } from "./src/components/UserStatus";
 import { RankItem } from "./src/components/RankItem";
 import { WaterSettingsModal } from "./src/components/WaterSettingsModal";
 import { UserProfileModal } from "./src/components/UserProfile";
 import { MyHistoryModal } from "./src/components/MyHistory";
-import { BottomTabs } from "./src/components/BottomTabs"; // Novo!
 
-// Funções auxiliares para datas
+// Navegação
+import { BottomTabs } from "./src/components/BottomTabs";
+
+// Outras telas
+import { GroupsScreen } from "./src/screens/GroupsScreen";
+import { StatsScreen } from "./src/screens/StatsScreen";
+import { ProfileScreen } from "./src/screens/ProfileScreen";
+
 function todayAt(h, m) {
   const d = new Date();
   d.setHours(h, m, 0, 0);
@@ -19,6 +25,8 @@ function todayAt(h, m) {
 }
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState("home");
+
   const [mlConsumido, setMlConsumido] = useState(200);
   const [nome, setNome] = useState("Luana Castro");
   const [meta, setMeta] = useState(2500);
@@ -96,55 +104,78 @@ export default function App() {
     ? rankingOrdenado.findIndex((u) => u.id === selectedUserId) + 1
     : 1;
 
+  const renderScreen = () => {
+    switch (activeTab) {
+      case "groups":
+        return <GroupsScreen />;
+      case "stats":
+        return <StatsScreen meta={meta} />;
+      case "profile":
+        return (
+          <ProfileScreen
+            userName={nome}
+            userPhoto="https://i.pravatar.cc/300?img=32"
+            ml={mlConsumido}
+            meta={meta}
+          />
+        );
+      default:
+        return (
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
+          >
+            <Header
+              onOpenMenu={() => {}}
+              onOpenHistory={() => setIsMyHistoryOpen(true)}
+              onOpenSettings={() => setIsWaterSettingsOpen(true)}
+            />
+
+            <UserStatus
+              userName={nome}
+              ml={mlConsumido}
+              meta={meta}
+              onAdd={handleAddWater}
+            />
+
+            <View style={styles.rankingHeader}>
+              <Text style={styles.rankingTitle}>Ranking de Hidratação</Text>
+              <Text style={styles.rankingSubtitle}>
+                Reaja e incentive seus amigos!
+              </Text>
+            </View>
+
+            <View style={styles.rankingWrapper}>
+              {rankingOrdenado.map((item, index) => (
+                <RankItem
+                  key={item.id}
+                  position={index + 1}
+                  nome={item.nome}
+                  ml={item.ml}
+                  meta={item.meta}
+                  foto={item.foto}
+                  reactions={item.reactions}
+                  activeReactionId={activeReactionId}
+                  onOpenReaction={setActiveReactionId}
+                  onPress={() => setSelectedUserId(item.id)}
+                />
+              ))}
+            </View>
+          </ScrollView>
+        );
+    }
+  };
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
-          <Header
-            onOpenMenu={() => {}} // Placeholder já que removeu o drawer
-            onOpenHistory={() => setIsMyHistoryOpen(true)}
-            onOpenSettings={() => setIsWaterSettingsOpen(true)}
-          />
+        {/* Conteúdo da tela ativa */}
+        <View style={styles.screenContainer}>{renderScreen()}</View>
 
-          <UserStatus
-            userName={nome}
-            ml={mlConsumido}
-            meta={meta}
-            onAdd={handleAddWater}
-          />
+        {/* Menu inferior fixo */}
+        <BottomTabs activeTab={activeTab} onChangeTab={setActiveTab} />
 
-          <View style={styles.rankingHeader}>
-            <Text style={styles.rankingTitle}>Ranking de Hidratação</Text>
-            <Text style={styles.rankingSubtitle}>
-              Reaja e incentive seus amigos!
-            </Text>
-          </View>
-
-          <View style={styles.rankingWrapper}>
-            {rankingOrdenado.map((item, index) => (
-              <RankItem
-                key={item.id}
-                position={index + 1}
-                nome={item.nome}
-                ml={item.ml}
-                meta={item.meta}
-                foto={item.foto}
-                reactions={item.reactions}
-                activeReactionId={activeReactionId}
-                onOpenReaction={setActiveReactionId}
-                onPress={() => setSelectedUserId(item.id)}
-              />
-            ))}
-          </View>
-        </ScrollView>
-
-        {/* MENU INFERIOR FIXO */}
-        <BottomTabs />
-
-        {/* MODAIS */}
+        {/* Modais da Home */}
         <WaterSettingsModal
           visible={isWaterSettingsOpen}
           onClose={() => setIsWaterSettingsOpen(false)}
@@ -177,6 +208,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8FAFC",
+  },
+  screenContainer: {
+    flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 20,
