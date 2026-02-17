@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { StyleSheet, ScrollView, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
-// Componentes da Home
 import { Header } from "./src/components/Header";
 import { UserStatus } from "./src/components/UserStatus";
 import { RankItem } from "./src/components/RankItem";
@@ -10,11 +9,8 @@ import { WaterSettingsModal } from "./src/components/WaterSettingsModal";
 import { UserProfileModal } from "./src/components/UserProfile";
 import { MyHistoryModal } from "./src/components/MyHistory";
 
-// Navegação
 import { BottomTabs } from "./src/components/BottomTabs";
-
-// Outras telas
-import { GroupsScreen } from "./src/screens/GroupsScreen";
+import { CommunityScreen } from "./src/screens/CommunityScreen";
 import { StatsScreen } from "./src/screens/StatsScreen";
 import { ProfileScreen } from "./src/screens/ProfileScreen";
 
@@ -96,7 +92,7 @@ export default function App() {
   };
 
   const rankingOrdenado = [...usuarios]
-    .map((u) => (u.id === 1 ? { ...u, ml: mlConsumido, meta: meta } : u))
+    .map((u) => (u.id === 1 ? { ...u, ml: mlConsumido, meta } : u))
     .sort((a, b) => b.ml - a.ml);
 
   const selectedUser = usuarios.find((u) => u.id === selectedUserId) || null;
@@ -107,7 +103,7 @@ export default function App() {
   const renderScreen = () => {
     switch (activeTab) {
       case "groups":
-        return <GroupsScreen />;
+        return <CommunityScreen />;
       case "stats":
         return <StatsScreen meta={meta} />;
       case "profile":
@@ -130,21 +126,18 @@ export default function App() {
               onOpenHistory={() => setIsMyHistoryOpen(true)}
               onOpenSettings={() => setIsWaterSettingsOpen(true)}
             />
-
             <UserStatus
               userName={nome}
               ml={mlConsumido}
               meta={meta}
               onAdd={handleAddWater}
             />
-
             <View style={styles.rankingHeader}>
               <Text style={styles.rankingTitle}>Ranking de Hidratação</Text>
               <Text style={styles.rankingSubtitle}>
                 Reaja e incentive seus amigos!
               </Text>
             </View>
-
             <View style={styles.rankingWrapper}>
               {rankingOrdenado.map((item, index) => (
                 <RankItem
@@ -169,20 +162,16 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
-        {/* Conteúdo da tela ativa */}
         <View style={styles.screenContainer}>{renderScreen()}</View>
 
-        {/* Menu inferior fixo */}
         <BottomTabs activeTab={activeTab} onChangeTab={setActiveTab} />
 
-        {/* Modais da Home */}
         <WaterSettingsModal
           visible={isWaterSettingsOpen}
           onClose={() => setIsWaterSettingsOpen(false)}
           currentMeta={meta}
           onSave={(newMeta) => setMeta(newMeta)}
         />
-
         <UserProfileModal
           visible={selectedUserId !== null}
           onClose={() => setSelectedUserId(null)}
@@ -193,7 +182,6 @@ export default function App() {
           position={selectedPosition}
           waterHistory={selectedUser?.waterHistory || []}
         />
-
         <MyHistoryModal
           visible={isMyHistoryOpen}
           onClose={() => setIsMyHistoryOpen(false)}
@@ -205,33 +193,11 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F8FAFC",
-  },
-  screenContainer: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  rankingHeader: {
-    marginTop: 30,
-    marginBottom: 20,
-    paddingHorizontal: 4,
-  },
-  rankingTitle: {
-    fontSize: 20,
-    fontWeight: "900",
-    color: "#274c77",
-  },
-  rankingSubtitle: {
-    fontSize: 13,
-    color: "#8b8c89",
-    fontWeight: "500",
-  },
-  rankingWrapper: {
-    width: "100%",
-  },
+  container: { flex: 1, backgroundColor: "#F8FAFC" },
+  screenContainer: { flex: 1 },
+  scrollContent: { paddingHorizontal: 20, paddingBottom: 20 },
+  rankingHeader: { marginTop: 30, marginBottom: 20, paddingHorizontal: 4 },
+  rankingTitle: { fontSize: 20, fontWeight: "900", color: "#274c77" },
+  rankingSubtitle: { fontSize: 13, color: "#8b8c89", fontWeight: "500" },
+  rankingWrapper: { width: "100%" },
 });
