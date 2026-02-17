@@ -9,7 +9,7 @@ import {
   Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { BottomSheetModal } from "./BottomSheetModal";
+import { BottomSheetModal } from "../components/BottomSheetModal";
 
 interface EditProfileModalProps {
   visible: boolean;
