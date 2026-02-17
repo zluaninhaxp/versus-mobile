@@ -1,23 +1,28 @@
 import React from "react";
-import { View, TouchableOpacity, StyleSheet, Text } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 export function BottomTabs() {
   return (
     <View style={styles.tabContainer}>
+      {/* Home: Gota de água */}
       <TouchableOpacity style={styles.tabItem}>
-        <Ionicons name="trophy" size={24} color="#2196F3" />
-        <Text style={[styles.tabText, { color: "#2196F3" }]}>Ranking</Text>
+        <MaterialCommunityIcons name="water" size={30} color="#2196F3" />
       </TouchableOpacity>
 
+      {/* Grupos */}
       <TouchableOpacity style={styles.tabItem}>
-        <Ionicons name="stats-chart-outline" size={24} color="#64748B" />
-        <Text style={styles.tabText}>Metas</Text>
+        <Ionicons name="people-outline" size={28} color="#64748B" />
       </TouchableOpacity>
 
+      {/* Estatísticas */}
       <TouchableOpacity style={styles.tabItem}>
-        <Ionicons name="person-outline" size={24} color="#64748B" />
-        <Text style={styles.tabText}>Perfil</Text>
+        <Ionicons name="stats-chart-outline" size={26} color="#64748B" />
+      </TouchableOpacity>
+
+      {/* Perfil */}
+      <TouchableOpacity style={styles.tabItem}>
+        <Ionicons name="person-outline" size={26} color="#64748B" />
       </TouchableOpacity>
     </View>
   );
@@ -27,22 +32,27 @@ const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: "row",
     backgroundColor: "#F8FAFC",
-    height: 70, // Altura original mantida conforme solicitado
-    borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
+    height: 70,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
     justifyContent: "space-around",
     alignItems: "center",
-    paddingBottom: 10,
-    // REMOVIDO: elevation e propriedades de shadow que causavam o erro visual
+    position: "relative",
+  },
+  topShadow: {
+    position: "absolute",
+    top: -10,
+    left: 0,
+    right: 0,
+    height: 10,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    backgroundColor: "#000",
+    opacity: 0.05,
   },
   tabItem: {
     alignItems: "center",
     justifyContent: "center",
-  },
-  tabText: {
-    fontSize: 11,
-    fontWeight: "700",
-    marginTop: 4,
-    color: "#64748B",
+    flex: 1,
   },
 });
