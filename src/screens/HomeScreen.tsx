@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   ScrollView,
   View,
@@ -99,18 +99,34 @@ export function HomeScreen({
   onMetaChange,
 }: HomeScreenProps) {
   const nome = "Luana Castro";
-
   const [usuarios] = useState(INITIAL_USUARIOS);
   const [isWaterSettingsOpen, setIsWaterSettingsOpen] = useState(false);
   const [isMyHistoryOpen, setIsMyHistoryOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [activeReactionId, setActiveReactionId] = useState<string | null>(null);
   const [filtroAtivo, setFiltroAtivo] = useState("todos");
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, right: 20 });
+  const chipRef = useRef<View>(null);
+
+  // Encontra o objeto do filtro atual para pegar o label
+  const filtroAtual = FILTROS.find((f) => f.id === filtroAtivo)!;
+
+  const openDropdown = () => {
+    chipRef.current?.measure((x, y, width, height, pageX, pageY) => {
+      setDropdownPos({
+        top: pageY + height, // Removido o espaço para colar no botão
+        right: 20,
+      });
+      setDropdownOpen(true);
+    });
+  };
 
   const rankingBase = usuarios.map((u) =>
     u.id === 1 ? { ...u, ml: mlConsumido, meta } : u,
   );
+
   const rankingFiltrado = (
     filtroAtivo === "todos"
       ? rankingBase
@@ -121,8 +137,6 @@ export function HomeScreen({
   const selectedPosition = selectedUser
     ? rankingFiltrado.findIndex((u) => u.id === selectedUserId) + 1
     : 1;
-
-  const filtroAtual = FILTROS.find((f) => f.id === filtroAtivo)!;
 
   return (
     <>
@@ -143,7 +157,6 @@ export function HomeScreen({
           onAdd={onAddWater}
         />
 
-        {/* Cabeçalho do ranking + dropdown de grupo */}
         <View style={st.rankingHeader}>
           <View style={st.rankingLeft}>
             <Text style={st.rankingTitle}>Ranking de Hidratação</Text>
@@ -152,18 +165,19 @@ export function HomeScreen({
             </Text>
           </View>
 
-          {/* Chip-dropdown compacto */}
-          <TouchableOpacity
-            style={st.filterChip}
-            onPress={() => setDropdownOpen(true)}
-            activeOpacity={0.75}
-          >
-            <Ionicons name="people-outline" size={14} color="#6096ba" />
-            <Text style={st.filterChipText} numberOfLines={1}>
-              {filtroAtual.label}
-            </Text>
-            <Ionicons name="chevron-down" size={13} color="#6096ba" />
-          </TouchableOpacity>
+          {/* O Texto do botão é dinâmico baseado no filtroAtual */}
+          <View ref={chipRef} collapsable={false}>
+            <TouchableOpacity
+              style={st.filterChip}
+              onPress={openDropdown}
+              activeOpacity={0.75}
+            >
+              <Text style={st.filterChipText} numberOfLines={1}>
+                {filtroAtual.label}
+              </Text>
+              <Ionicons name="chevron-down" size={13} color="#6096ba" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={st.rankingWrapper}>
@@ -184,48 +198,47 @@ export function HomeScreen({
         </View>
       </ScrollView>
 
-      {/* ── Dropdown de grupo ── */}
+      {/* Dropdown dinâmico sem ícones */}
       <Modal
         visible={dropdownOpen}
         transparent
-        animationType="fade"
+        animationType="none"
         onRequestClose={() => setDropdownOpen(false)}
       >
         <TouchableWithoutFeedback onPress={() => setDropdownOpen(false)}>
-          <View style={st.dropOverlay} />
+          <View style={st.dropOverlay}>
+            <View
+              style={[
+                st.dropCard,
+                { top: dropdownPos.top, right: dropdownPos.right },
+              ]}
+            >
+              <Text style={st.dropTitle}>FILTRAR GRUPO</Text>
+              {FILTROS.map((f) => {
+                const ativo = filtroAtivo === f.id;
+                return (
+                  <TouchableOpacity
+                    key={f.id}
+                    style={[st.dropItem, ativo && st.dropItemAtivo]}
+                    onPress={() => {
+                      setFiltroAtivo(f.id); // Altera o estado, que muda o texto do botão
+                      setDropdownOpen(false);
+                    }}
+                  >
+                    <Text
+                      style={[st.dropItemText, ativo && st.dropItemTextAtivo]}
+                    >
+                      {f.label}
+                    </Text>
+                    {ativo && (
+                      <Ionicons name="checkmark" size={16} color="#6096ba" />
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
         </TouchableWithoutFeedback>
-
-        <View style={st.dropCard}>
-          <Text style={st.dropTitle}>Visualizar ranking de</Text>
-          {FILTROS.map((f) => {
-            const ativo = filtroAtivo === f.id;
-            return (
-              <TouchableOpacity
-                key={f.id}
-                style={[st.dropItem, ativo && st.dropItemAtivo]}
-                onPress={() => {
-                  setFiltroAtivo(f.id);
-                  setDropdownOpen(false);
-                }}
-                activeOpacity={0.75}
-              >
-                <View style={[st.dropItemIcon, ativo && st.dropItemIconAtivo]}>
-                  <Ionicons
-                    name={f.icon as any}
-                    size={16}
-                    color={ativo ? "#6096ba" : "#94A3B8"}
-                  />
-                </View>
-                <Text style={[st.dropItemText, ativo && st.dropItemTextAtivo]}>
-                  {f.label}
-                </Text>
-                {ativo && (
-                  <Ionicons name="checkmark" size={16} color="#6096ba" />
-                )}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
       </Modal>
 
       {/* ── Modais ── */}
@@ -266,7 +279,6 @@ const st = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
-    gap: 12,
   },
   rankingLeft: { flex: 1 },
   rankingTitle: { fontSize: 20, fontWeight: "900", color: "#274c77" },
@@ -277,70 +289,56 @@ const st = StyleSheet.create({
     marginTop: 2,
   },
 
-  // Chip compacto com texto truncado
   filterChip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
+    gap: 6,
     backgroundColor: "#EBF4FF",
     borderRadius: 20,
     paddingVertical: 7,
-    paddingHorizontal: 11,
+    paddingHorizontal: 12,
     borderWidth: 1.5,
     borderColor: "#BFDBFE",
-    maxWidth: 140,
+    minWidth: 120, // Garante que o texto apareça bem
+    maxWidth: 180,
     marginTop: 2,
   },
-  filterChipText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#6096ba",
-    flex: 1,
-  },
-
+  filterChipText: { fontSize: 12, fontWeight: "700", color: "#6096ba" },
   rankingWrapper: { width: "100%" },
 
-  // Dropdown modal
-  dropOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.3)" },
+  dropOverlay: { flex: 1, backgroundColor: "transparent" },
   dropCard: {
     position: "absolute",
-    top: "35%",
-    left: 20,
-    right: 20,
+    width: 190,
     backgroundColor: "white",
-    borderRadius: 20,
-    padding: 16,
-    elevation: 16,
+    borderRadius: 12,
+    padding: 6,
+    elevation: 10,
     shadowColor: "#000",
-    shadowOpacity: 0.18,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
   },
   dropTitle: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: "800",
-    color: "#94A3B8",
+    color: "#CBD5E1",
     letterSpacing: 1,
-    marginBottom: 12,
+    marginBottom: 4,
+    paddingHorizontal: 8,
+    marginTop: 4,
   },
   dropItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    paddingVertical: 11,
-    paddingHorizontal: 8,
-    borderRadius: 12,
+    justifyContent: "space-between",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
   },
-  dropItemAtivo: { backgroundColor: "#EBF4FF" },
-  dropItemIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: "#F1F5F9",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  dropItemIconAtivo: { backgroundColor: "#DBEAFE" },
-  dropItemText: { flex: 1, fontSize: 15, fontWeight: "600", color: "#475569" },
+  dropItemAtivo: { backgroundColor: "#F1F5F9" },
+  dropItemText: { fontSize: 14, fontWeight: "600", color: "#475569" },
   dropItemTextAtivo: { color: "#274c77", fontWeight: "800" },
 });
