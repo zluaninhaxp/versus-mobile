@@ -15,75 +15,76 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { BottomSheetModal } from "../components/BottomSheetModal";
 import { RankItem, RankTheme } from "../components/RankItem";
+import { RankingActions } from "../components/RankingActions";
+import { UserProfileModal } from "../modals/UserProfileModal";
 
 // ─── Paletas dos grupos ───────────────────────────────────────────────────────
-// Tom muted/dessaturado — mesma lógica do azul #6096ba do app (não vibrante)
-// Cada paleta: [escuro, médio, fundo-suave, label]
+// Pastel/dessaturado — mesma filosofia do #6096ba do app: cinzento, não vibrante
 
 export const GROUP_PALETTES = [
   {
-    id: "coral",
-    label: "Terracota",
-    dark: "#A0522D",
-    mid: "#C47A53",
-    soft: "#F5EDE6",
+    id: "sage",
+    label: "Sage",
+    dark: "#7A9E8E",
+    mid: "#A8C5B8",
+    soft: "#EDF5F2",
     theme: {
-      primary: "#C47A53",
-      secondary: "#DBA98A",
-      cardFrom: "#C47A53",
-      cardTo: "#A0522D",
+      primary: "#7A9E8E",
+      secondary: "#A8C5B8",
+      cardFrom: "#A8C5B8",
+      cardTo: "#7A9E8E",
     } as RankTheme,
   },
   {
-    id: "teal",
-    label: "Petróleo",
-    dark: "#2E7D7A",
-    mid: "#4A9E9B",
-    soft: "#E4F4F3",
+    id: "slate",
+    label: "Ardósia",
+    dark: "#7A8FA6",
+    mid: "#A3B8CC",
+    soft: "#EEF3F8",
     theme: {
-      primary: "#4A9E9B",
-      secondary: "#88CCCB",
-      cardFrom: "#4A9E9B",
-      cardTo: "#2E7D7A",
+      primary: "#7A8FA6",
+      secondary: "#A3B8CC",
+      cardFrom: "#A3B8CC",
+      cardTo: "#7A8FA6",
     } as RankTheme,
   },
   {
-    id: "violet",
-    label: "Violeta",
-    dark: "#5B3A8A",
-    mid: "#7B5BA8",
-    soft: "#EDE8F5",
+    id: "mauve",
+    label: "Malva",
+    dark: "#9B8EA8",
+    mid: "#BDB0C8",
+    soft: "#F2EFF6",
     theme: {
-      primary: "#7B5BA8",
-      secondary: "#A98FCA",
-      cardFrom: "#7B5BA8",
-      cardTo: "#5B3A8A",
+      primary: "#9B8EA8",
+      secondary: "#BDB0C8",
+      cardFrom: "#BDB0C8",
+      cardTo: "#9B8EA8",
     } as RankTheme,
   },
   {
-    id: "olive",
-    label: "Musgo",
-    dark: "#4A5E2E",
-    mid: "#6B8A42",
-    soft: "#EBF0E2",
+    id: "sand",
+    label: "Areia",
+    dark: "#A89880",
+    mid: "#C4B49E",
+    soft: "#F5F0EA",
     theme: {
-      primary: "#6B8A42",
-      secondary: "#9AB472",
-      cardFrom: "#6B8A42",
-      cardTo: "#4A5E2E",
+      primary: "#A89880",
+      secondary: "#C4B49E",
+      cardFrom: "#C4B49E",
+      cardTo: "#A89880",
     } as RankTheme,
   },
   {
-    id: "rose",
-    label: "Rosê",
-    dark: "#8A4A5E",
-    mid: "#AA6B80",
-    soft: "#F5E8ED",
+    id: "blush",
+    label: "Blush",
+    dark: "#A88E95",
+    mid: "#C4AAB2",
+    soft: "#F6F0F2",
     theme: {
-      primary: "#AA6B80",
-      secondary: "#CA9BAE",
-      cardFrom: "#AA6B80",
-      cardTo: "#8A4A5E",
+      primary: "#A88E95",
+      secondary: "#C4AAB2",
+      cardFrom: "#C4AAB2",
+      cardTo: "#A88E95",
     } as RankTheme,
   },
 ] as const;
@@ -93,6 +94,8 @@ type PaletteId = (typeof GROUP_PALETTES)[number]["id"];
 function getPalette(id: PaletteId) {
   return GROUP_PALETTES.find((p) => p.id === id) ?? GROUP_PALETTES[0];
 }
+
+// ─── Tipos ────────────────────────────────────────────────────────────────────
 
 type FriendStatus = "amigo" | "pendente_enviado" | "pendente_recebido";
 
@@ -207,7 +210,7 @@ const INITIAL_FRIENDS: Friend[] = [
   },
 ];
 
-const FEED: Activity[] = [
+const INITIAL_FEED: Activity[] = [
   { id: 1, friendId: 2, type: "meta", time: "há 12min" },
   { id: 2, friendId: 3, type: "top1", time: "há 45min" },
   {
@@ -246,7 +249,7 @@ const INITIAL_GROUPS: Group[] = [
     name: "Família Castro",
     code: "FAM123",
     isAdmin: true,
-    paletteId: "coral",
+    paletteId: "sage",
     members: [
       {
         id: 1,
@@ -279,7 +282,7 @@ const INITIAL_GROUPS: Group[] = [
     name: "Turma do Trabalho",
     code: "WRK456",
     isAdmin: false,
-    paletteId: "teal",
+    paletteId: "slate",
     members: [
       {
         id: 4,
@@ -314,27 +317,27 @@ const ACTIVITY_CONFIG: Record<
   { bg: readonly [string, string]; label: (e?: string) => string; icon: string }
 > = {
   meta: {
-    bg: ["#0EA5E9", "#0369A1"] as const,
+    bg: ["#6096ba", "#274c77"] as const,
     label: () => "Bateu a meta de hoje! 🎯",
     icon: "trophy",
   },
   conquista: {
-    bg: ["#F59E0B", "#D97706"] as const,
+    bg: ["#C4B49E", "#A89880"] as const,
     label: (e) => `Desbloqueou: ${e}`,
     icon: "ribbon",
   },
   badge: {
-    bg: ["#8B5CF6", "#6D28D9"] as const,
+    bg: ["#BDB0C8", "#9B8EA8"] as const,
     label: (e) => `Ganhou o badge: ${e}`,
     icon: "medal",
   },
   top1: {
-    bg: ["#F59E0B", "#B45309"] as const,
+    bg: ["#C4B49E", "#8A7560"] as const,
     label: () => "Assumiu o 1º lugar! 🥇",
     icon: "podium",
   },
   streak: {
-    bg: ["#EF4444", "#B91C1C"] as const,
+    bg: ["#C4AAB2", "#A88E95"] as const,
     label: (e) => `Sequência incrível: ${e} 🔥`,
     icon: "flame",
   },
@@ -680,7 +683,11 @@ function ShareSheet({
         <Text style={sg.codeHint}>código de entrada</Text>
       </LinearGradient>
       <TouchableOpacity
-        style={[sg.copyBtn, copied && sg.copyBtnDone]}
+        style={[
+          sg.copyBtn,
+          { backgroundColor: pal.dark },
+          copied && sg.copyBtnDone,
+        ]}
         onPress={handleCopy}
       >
         <Ionicons
@@ -709,7 +716,7 @@ function ShareSheet({
         ].map((item) => (
           <TouchableOpacity key={item.label} style={sg.shareItem}>
             <View
-              style={[sg.shareIcon, { backgroundColor: item.color + "1A" }]}
+              style={[sg.shareIcon, { backgroundColor: item.color + "18" }]}
             >
               <Ionicons name={item.icon as any} size={24} color={item.color} />
             </View>
@@ -743,7 +750,7 @@ const sg = StyleSheet.create({
   },
   codeHint: {
     fontSize: 11,
-    color: "rgba(255,255,255,0.55)",
+    color: "rgba(255,255,255,0.6)",
     marginTop: 6,
     fontWeight: "600",
   },
@@ -752,13 +759,12 @@ const sg = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: "#274c77",
     borderRadius: 14,
     padding: 14,
     marginBottom: 16,
   },
   copyBtnDone: {
-    backgroundColor: "#F0FDF4",
+    backgroundColor: "#F0FDF4 !important",
     borderWidth: 1,
     borderColor: "#BBF7D0",
   },
@@ -1013,18 +1019,19 @@ function NewGroupSheet({
   const [mode, setMode] = useState<"choose" | "criar" | "entrar">("choose");
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
-  const [selectedPal, setSelectedPal] = useState<PaletteId>("coral");
+  const [selectedPal, setSelectedPal] = useState<PaletteId>("sage");
   const handleClose = () => {
     setMode("choose");
     setName("");
     setCode("");
     onClose();
   };
+
   return (
     <BottomSheetModal
       visible={visible}
       onClose={handleClose}
-      height={0.58}
+      height={0.6}
       backgroundColor="#F8FAFC"
     >
       {mode === "choose" && (
@@ -1048,6 +1055,7 @@ function NewGroupSheet({
           </View>
         </>
       )}
+
       {mode === "criar" && (
         <>
           <TouchableOpacity onPress={() => setMode("choose")} style={ng.back}>
@@ -1064,8 +1072,7 @@ function NewGroupSheet({
             autoFocus
           />
 
-          {/* Seletor de cor */}
-          <Text style={ng.colorLabel}>Cor do grupo</Text>
+          <Text style={ng.colorLabel}>COR DO GRUPO</Text>
           <View style={ng.colorRow}>
             {GROUP_PALETTES.map((p) => {
               const sel = selectedPal === p.id;
@@ -1087,7 +1094,7 @@ function NewGroupSheet({
                   <Text
                     style={[
                       ng.colorName,
-                      sel && { color: p.mid, fontWeight: "800" },
+                      sel && { color: p.dark, fontWeight: "800" },
                     ]}
                   >
                     {p.label}
@@ -1101,7 +1108,7 @@ function NewGroupSheet({
             style={[
               ng.actionBtn,
               !name.trim() && { opacity: 0.4 },
-              { backgroundColor: getPalette(selectedPal).mid },
+              { backgroundColor: getPalette(selectedPal).dark },
             ]}
             disabled={!name.trim()}
             onPress={() => {
@@ -1113,6 +1120,7 @@ function NewGroupSheet({
           </TouchableOpacity>
         </>
       )}
+
       {mode === "entrar" && (
         <>
           <TouchableOpacity onPress={() => setMode("choose")} style={ng.back}>
@@ -1208,7 +1216,7 @@ const ng = StyleSheet.create({
     marginBottom: 10,
   },
   colorRow: { flexDirection: "row", gap: 12, marginBottom: 16 },
-  colorOption: { alignItems: "center", gap: 5, position: "relative" },
+  colorOption: { alignItems: "center", gap: 5 },
   colorSwatch: {
     width: 40,
     height: 40,
@@ -1229,16 +1237,11 @@ const ng = StyleSheet.create({
     alignItems: "center",
   },
   colorName: { fontSize: 10, color: "#94A3B8", fontWeight: "600" },
-  actionBtn: {
-    backgroundColor: "#6096ba",
-    borderRadius: 14,
-    padding: 16,
-    alignItems: "center",
-  },
+  actionBtn: { borderRadius: 14, padding: 16, alignItems: "center" },
   actionBtnText: { color: "white", fontWeight: "900", fontSize: 16 },
 });
 
-// ─── Grupo accordion — expande inline na ScrollView ──────────────────────────
+// ─── Accordion de Grupo ───────────────────────────────────────────────────────
 
 function GroupAccordion({
   group,
@@ -1248,6 +1251,7 @@ function GroupAccordion({
   onShare,
   onInvite,
   onDanger,
+  onMemberPress,
 }: {
   group: Group;
   friends: Friend[];
@@ -1256,6 +1260,7 @@ function GroupAccordion({
   onShare: () => void;
   onInvite: () => void;
   onDanger: () => void;
+  onMemberPress: (member: GroupMember) => void;
 }) {
   const anim = useRef(new Animated.Value(isExpanded ? 1 : 0)).current;
   const pal = getPalette(group.paletteId);
@@ -1275,7 +1280,6 @@ function GroupAccordion({
   const available = friends.filter(
     (f) => f.status === "amigo" && !group.members.find((m) => m.id === f.id),
   );
-
   const chevronRotate = anim.interpolate({
     inputRange: [0, 1],
     outputRange: ["0deg", "180deg"],
@@ -1284,91 +1288,84 @@ function GroupAccordion({
   return (
     <View
       style={[
-        ga.wrapper,
+        ac.wrapper,
         isExpanded && {
           shadowColor: pal.dark,
-          shadowOpacity: 0.22,
+          shadowOpacity: 0.18,
           shadowRadius: 16,
           elevation: 8,
         },
       ]}
     >
-      {/* ── Cabeçalho — sempre visível ── */}
       <TouchableOpacity onPress={onToggle} activeOpacity={0.85}>
-        <LinearGradient colors={[pal.dark, pal.mid]} style={ga.header}>
-          <View style={ga.headerLeft}>
-            <Text style={ga.groupName}>{group.name}</Text>
-            <View style={ga.metaRow}>
-              <View style={ga.avatarStrip}>
+        <LinearGradient colors={[pal.dark, pal.mid]} style={ac.header}>
+          <View style={ac.headerLeft}>
+            <Text style={ac.groupName}>{group.name}</Text>
+            <View style={ac.metaRow}>
+              <View style={ac.avatarStrip}>
                 {group.members.slice(0, 4).map((m, i) => (
                   <Image
                     key={m.id}
                     source={{ uri: m.foto }}
                     style={[
-                      ga.miniAvatar,
+                      ac.miniAvatar,
                       { marginLeft: i === 0 ? 0 : -8, zIndex: 4 - i },
                     ]}
                   />
                 ))}
               </View>
-              <Text style={ga.memberCount}>{group.members.length} membros</Text>
+              <Text style={ac.memberCount}>{group.members.length} membros</Text>
               {group.isAdmin && (
-                <View style={ga.adminPill}>
-                  <Ionicons name="shield-checkmark" size={9} color="#FFD700" />
-                  <Text style={ga.adminText}>Admin</Text>
+                <View style={ac.adminPill}>
+                  <Ionicons
+                    name="shield-checkmark"
+                    size={9}
+                    color="rgba(255,255,255,0.9)"
+                  />
+                  <Text style={ac.adminText}>Admin</Text>
                 </View>
               )}
             </View>
           </View>
-
-          <View style={ga.headerRight}>
-            <View style={ga.leaderBubble}>
-              <Text style={ga.leaderEmoji}>🥇</Text>
-              <Text style={ga.leaderName}>{firstName(leader.nome)}</Text>
+          <View style={ac.headerRight}>
+            <View style={ac.leaderBubble}>
+              <Text style={ac.leaderEmoji}>🥇</Text>
+              <Text style={ac.leaderName}>{firstName(leader.nome)}</Text>
             </View>
             <Animated.View style={{ transform: [{ rotate: chevronRotate }] }}>
               <Ionicons
                 name="chevron-down"
                 size={20}
-                color="rgba(255,255,255,0.8)"
+                color="rgba(255,255,255,0.75)"
               />
             </Animated.View>
           </View>
         </LinearGradient>
       </TouchableOpacity>
 
-      {/* ── Área expandida inline ── */}
       {isExpanded && (
-        <View style={[ga.expanded, { backgroundColor: pal.soft }]}>
-          {/* Botões de ação com a cor do grupo */}
-          <View style={ga.actionBar}>
+        <View style={[ac.expanded, { backgroundColor: pal.soft }]}>
+          {/* Botões de ação */}
+          <View style={ac.actionBar}>
             <TouchableOpacity
-              style={[
-                ga.actionChip,
-                {
-                  borderColor: pal.mid + "60",
-                  backgroundColor: "rgba(255,255,255,0.85)",
-                },
-              ]}
+              style={[ac.actionChip, { borderColor: pal.mid + "80" }]}
               onPress={onShare}
             >
               <Ionicons
                 name="share-social-outline"
-                size={15}
+                size={14}
                 color={pal.dark}
               />
-              <Text style={[ga.actionChipText, { color: pal.dark }]}>
+              <Text style={[ac.actionChipText, { color: pal.dark }]}>
                 Compartilhar
               </Text>
             </TouchableOpacity>
-
             {group.isAdmin && (
               <TouchableOpacity
                 style={[
-                  ga.actionChip,
+                  ac.actionChip,
                   {
-                    borderColor: pal.mid + "60",
-                    backgroundColor: "rgba(255,255,255,0.85)",
+                    borderColor: pal.mid + "80",
                     opacity: available.length === 0 ? 0.4 : 1,
                   },
                 ]}
@@ -1377,33 +1374,32 @@ function GroupAccordion({
               >
                 <Ionicons
                   name="person-add-outline"
-                  size={15}
+                  size={14}
                   color={pal.dark}
                 />
-                <Text style={[ga.actionChipText, { color: pal.dark }]}>
+                <Text style={[ac.actionChipText, { color: pal.dark }]}>
                   Convidar
                 </Text>
               </TouchableOpacity>
             )}
-
-            <TouchableOpacity style={ga.actionChipDanger} onPress={onDanger}>
+            <TouchableOpacity style={ac.actionChipDanger} onPress={onDanger}>
               <Ionicons
                 name={group.isAdmin ? "trash-outline" : "exit-outline"}
-                size={15}
+                size={14}
                 color="#EF4444"
               />
-              <Text style={ga.actionChipDangerText}>
+              <Text style={ac.actionChipDangerText}>
                 {group.isAdmin ? "Excluir" : "Sair"}
               </Text>
             </TouchableOpacity>
           </View>
 
-          <View style={[ga.divider, { backgroundColor: pal.mid + "30" }]} />
-
-          {/* Ranking com o tema da cor do grupo */}
-          <Text style={[ga.rankLabel, { color: pal.dark }]}>
+          <View style={[ac.divider, { backgroundColor: pal.mid + "40" }]} />
+          <Text style={[ac.rankLabel, { color: pal.dark }]}>
             RANKING DE HOJE
           </Text>
+
+          {/* Ranking com onPress na foto para abrir perfil */}
           {sorted.map((m, index) => (
             <RankItem
               key={m.id}
@@ -1416,6 +1412,7 @@ function GroupAccordion({
               activeReactionId={activeReactionId}
               onOpenReaction={setActiveReactionId}
               theme={pal.theme}
+              onPress={() => onMemberPress(m)}
             />
           ))}
         </View>
@@ -1423,16 +1420,15 @@ function GroupAccordion({
     </View>
   );
 }
-
-const ga = StyleSheet.create({
+const ac = StyleSheet.create({
   wrapper: {
     borderRadius: 20,
     marginBottom: 14,
     overflow: "hidden",
     backgroundColor: "white",
-    elevation: 4,
+    elevation: 3,
     shadowColor: "#000",
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 3 },
   },
@@ -1443,20 +1439,15 @@ const ga = StyleSheet.create({
     justifyContent: "space-between",
   },
   headerLeft: { flex: 1, gap: 8 },
-  groupName: { fontSize: 18, fontWeight: "900", color: "white" },
-  metaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    flexWrap: "wrap",
-  },
+  groupName: { fontSize: 17, fontWeight: "900", color: "white" },
+  metaRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   avatarStrip: { flexDirection: "row" },
   miniAvatar: {
     width: 22,
     height: 22,
     borderRadius: 11,
     borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.6)",
+    borderColor: "rgba(255,255,255,0.5)",
   },
   memberCount: {
     fontSize: 12,
@@ -1467,18 +1458,22 @@ const ga = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
-    backgroundColor: "rgba(0,0,0,0.2)",
+    backgroundColor: "rgba(255,255,255,0.2)",
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
   },
-  adminText: { fontSize: 10, color: "#FFD700", fontWeight: "700" },
+  adminText: {
+    fontSize: 10,
+    color: "rgba(255,255,255,0.95)",
+    fontWeight: "700",
+  },
   headerRight: { alignItems: "flex-end", gap: 8 },
   leaderBubble: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: "rgba(255,255,255,0.22)",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 10,
@@ -1496,7 +1491,7 @@ const ga = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    backgroundColor: "rgba(255,255,255,0.8)",
+    backgroundColor: "rgba(255,255,255,0.9)",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 12,
@@ -1507,7 +1502,7 @@ const ga = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    backgroundColor: "#FEF2F2",
+    backgroundColor: "#FFF5F5",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 12,
@@ -1524,34 +1519,66 @@ const ga = StyleSheet.create({
   },
 });
 
-// ─── Card de Atividade ────────────────────────────────────────────────────────
+// ─── Card de Atividade (com reação) ──────────────────────────────────────────
 
 function ActivityCard({
   activity,
   friends,
+  onPhotoPress,
 }: {
   activity: Activity;
   friends: Friend[];
+  onPhotoPress: (friend: Friend) => void;
 }) {
   const friend = friends.find((f) => f.id === activity.friendId);
   if (!friend) return null;
   const cfg = ACTIVITY_CONFIG[activity.type];
+
+  const [reactions, setReactions] = useState<
+    { emoji: string; count: number }[]
+  >([]);
+
   return (
     <View style={fc.wrapper}>
+      {/* Linha de timeline */}
       <View style={fc.timelineCol}>
         <LinearGradient colors={cfg.bg} style={fc.iconBubble}>
           <Ionicons name={cfg.icon as any} size={16} color="white" />
         </LinearGradient>
         <View style={fc.timelineLine} />
       </View>
+
       <View style={fc.card}>
-        <View style={fc.row}>
-          <Image source={{ uri: friend.foto }} style={fc.photo} />
-          <View style={fc.info}>
-            <Text style={fc.name}>{firstName(friend.nome)}</Text>
-            <Text style={fc.text}>{cfg.label(activity.extra)}</Text>
+        {/* Cabeçalho: foto clicável + texto + hora */}
+        <View style={fc.cardHeader}>
+          <TouchableOpacity
+            onPress={() => onPhotoPress(friend)}
+            activeOpacity={0.8}
+          >
+            <Image source={{ uri: friend.foto }} style={fc.photo} />
+          </TouchableOpacity>
+          <View style={fc.cardInfo}>
+            <Text style={fc.friendName}>{firstName(friend.nome)}</Text>
+            <Text style={fc.activityText}>{cfg.label(activity.extra)}</Text>
           </View>
           <Text style={fc.time}>{activity.time}</Text>
+        </View>
+
+        {/* Reações — exatamente como no ranking */}
+        <View style={fc.reactionsRow}>
+          {reactions.map((r) => (
+            <View key={r.emoji} style={fc.reactionBubble}>
+              <Text style={fc.reactionEmoji}>{r.emoji}</Text>
+              <Text style={fc.reactionCount}>{r.count}</Text>
+            </View>
+          ))}
+          <RankingActions
+            initialReactions={reactions}
+            isTop3={false}
+            metaAlcancada={friend.ml >= friend.meta}
+            isMe={false}
+            onReactionUpdate={setReactions}
+          />
         </View>
       </View>
     </View>
@@ -1568,7 +1595,7 @@ const fc = StyleSheet.create({
     alignItems: "center",
     elevation: 3,
     shadowColor: "#000",
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.12,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
   },
@@ -1593,12 +1620,34 @@ const fc = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 1 },
   },
-  row: { flexDirection: "row", alignItems: "center", gap: 10 },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 8,
+  },
   photo: { width: 38, height: 38, borderRadius: 19 },
-  info: { flex: 1 },
-  name: { fontSize: 13, fontWeight: "800", color: "#274c77" },
-  text: { fontSize: 13, color: "#334155", marginTop: 1 },
+  cardInfo: { flex: 1 },
+  friendName: { fontSize: 13, fontWeight: "800", color: "#274c77" },
+  activityText: { fontSize: 13, color: "#334155", marginTop: 1 },
   time: { fontSize: 11, color: "#94A3B8", fontWeight: "600" },
+  reactionsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    flexWrap: "wrap",
+  },
+  reactionBubble: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    backgroundColor: "#F1F5F9",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  reactionEmoji: { fontSize: 14 },
+  reactionCount: { fontSize: 12, fontWeight: "700", color: "#64748B" },
 });
 
 // ─── Tela Principal ───────────────────────────────────────────────────────────
@@ -1617,18 +1666,32 @@ export function CommunityScreen() {
   const [subTab, setSubTab] = useState<SubTab>("feed");
   const [friends, setFriends] = useState<Friend[]>(INITIAL_FRIENDS);
   const [groups, setGroups] = useState<Group[]>(INITIAL_GROUPS);
-
-  // Grupo expandido inline (accordion)
   const [expandedGroupId, setExpandedGroupId] = useState<number | null>(null);
-
-  // Sheet simples — apenas um por vez, sem contexto de grupo aninhado
   const [sheet, setSheet] = useState<SheetType>("none");
   const [sheetGroup, setSheetGroup] = useState<Group | null>(null);
 
-  const closeSheet = () => {
-    setSheet("none");
+  // UserProfileModal — abre ao clicar em foto no feed e nos grupos
+  const [profileVisible, setProfileVisible] = useState(false);
+  const [profileData, setProfileData] = useState<{
+    nome: string;
+    foto: string;
+    ml: number;
+    meta: number;
+    position: number;
+  } | null>(null);
+
+  const openProfile = (
+    nome: string,
+    foto: string,
+    ml: number,
+    meta: number,
+    position = 1,
+  ) => {
+    setProfileData({ nome, foto, ml, meta, position });
+    setProfileVisible(true);
   };
 
+  const closeSheet = () => setSheet("none");
   const openSheet = (type: SheetType, group: Group) => {
     setSheetGroup(group);
     setSheet(type);
@@ -1681,7 +1744,7 @@ export function CommunityScreen() {
 
   return (
     <View style={s.root}>
-      {/* ── Header ─────────────────────────────────────────────────── */}
+      {/* Header */}
       <View style={s.header}>
         <View>
           <Text style={s.title}>Comunidade</Text>
@@ -1710,7 +1773,7 @@ export function CommunityScreen() {
         </View>
       </View>
 
-      {/* ── Tabs ───────────────────────────────────────────────────── */}
+      {/* Tabs */}
       <View style={s.tabRow}>
         {(["feed", "grupos"] as SubTab[]).map((tab) => {
           const active = subTab === tab;
@@ -1742,7 +1805,7 @@ export function CommunityScreen() {
         })}
       </View>
 
-      {/* ── Feed ───────────────────────────────────────────────────── */}
+      {/* ── Feed ── */}
       {subTab === "feed" && (
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -1758,13 +1821,19 @@ export function CommunityScreen() {
             </View>
           ) : (
             <>
+              {/* Strip de avatares — foto clicável abre perfil */}
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={s.stripContent}
               >
                 {confirmedFriends.map((f) => (
-                  <View key={f.id} style={s.stripItem}>
+                  <TouchableOpacity
+                    key={f.id}
+                    style={s.stripItem}
+                    onPress={() => openProfile(f.nome, f.foto, f.ml, f.meta)}
+                    activeOpacity={0.8}
+                  >
                     <View style={s.stripWrap}>
                       <Image source={{ uri: f.foto }} style={s.stripAvatar} />
                       {f.ml >= f.meta && <View style={s.stripDot} />}
@@ -1772,17 +1841,21 @@ export function CommunityScreen() {
                     <Text style={s.stripName} numberOfLines={1}>
                       {firstName(f.nome)}
                     </Text>
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </ScrollView>
+
               <Text style={s.feedLabel}>ATIVIDADES RECENTES</Text>
-              {FEED.filter((a) =>
+              {INITIAL_FEED.filter((a) =>
                 confirmedFriends.find((f) => f.id === a.friendId),
               ).map((a) => (
                 <ActivityCard
                   key={a.id}
                   activity={a}
                   friends={confirmedFriends}
+                  onPhotoPress={(f) =>
+                    openProfile(f.nome, f.foto, f.ml, f.meta)
+                  }
                 />
               ))}
               <View style={s.timelineEnd}>
@@ -1797,7 +1870,7 @@ export function CommunityScreen() {
         </ScrollView>
       )}
 
-      {/* ── Grupos — accordion inline, sem Modal ───────────────────── */}
+      {/* ── Grupos — accordion inline ── */}
       {subTab === "grupos" && (
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -1820,14 +1893,14 @@ export function CommunityScreen() {
                 onShare={() => openSheet("share", group)}
                 onInvite={() => openSheet("invite", group)}
                 onDanger={() => openSheet("danger", group)}
+                onMemberPress={(m) => openProfile(m.nome, m.foto, m.ml, m.meta)}
               />
             ))
           )}
         </ScrollView>
       )}
 
-      {/* ── Bottom Sheets — todos no nível raiz ────────────────────── */}
-
+      {/* ── Sheets ── */}
       <RequestsSheet
         visible={sheet === "requests"}
         onClose={closeSheet}
@@ -1857,6 +1930,18 @@ export function CommunityScreen() {
         onClose={closeSheet}
         group={sheetGroup}
         onConfirm={() => sheetGroup && handleGroupDelete(sheetGroup.id)}
+      />
+
+      {/* UserProfileModal — compartilhado entre feed e grupos */}
+      <UserProfileModal
+        visible={profileVisible}
+        onClose={() => setProfileVisible(false)}
+        nome={profileData?.nome || ""}
+        foto={profileData?.foto}
+        ml={profileData?.ml || 0}
+        meta={profileData?.meta || 0}
+        position={profileData?.position || 1}
+        waterHistory={[]}
       />
     </View>
   );

@@ -5,7 +5,10 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  Modal,
+  TouchableWithoutFeedback,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 import { Header } from "../components/Header";
 import { UserStatus } from "../components/UserStatus";
@@ -20,7 +23,6 @@ function todayAt(h: number, m: number) {
   return d.toISOString();
 }
 
-// Todos os usuários do "universo" (amigos + grupos)
 const INITIAL_USUARIOS = [
   {
     id: 1,
@@ -77,11 +79,10 @@ const INITIAL_USUARIOS = [
   },
 ];
 
-// Filtros disponíveis
 const FILTROS = [
-  { id: "todos", label: "Todos" },
-  { id: "familia", label: "Família Castro" },
-  { id: "trabalho", label: "Turma do Trabalho" },
+  { id: "todos", label: "Todos os amigos", icon: "people" },
+  { id: "familia", label: "Família Castro", icon: "home" },
+  { id: "trabalho", label: "Turma do Trabalho", icon: "briefcase" },
 ];
 
 interface HomeScreenProps {
@@ -99,33 +100,35 @@ export function HomeScreen({
 }: HomeScreenProps) {
   const nome = "Luana Castro";
 
-  const [usuarios, setUsuarios] = useState(INITIAL_USUARIOS);
+  const [usuarios] = useState(INITIAL_USUARIOS);
   const [isWaterSettingsOpen, setIsWaterSettingsOpen] = useState(false);
   const [isMyHistoryOpen, setIsMyHistoryOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [activeReactionId, setActiveReactionId] = useState<string | null>(null);
   const [filtroAtivo, setFiltroAtivo] = useState("todos");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const rankingBase = [...usuarios].map((u) =>
+  const rankingBase = usuarios.map((u) =>
     u.id === 1 ? { ...u, ml: mlConsumido, meta } : u,
   );
-
   const rankingFiltrado = (
     filtroAtivo === "todos"
       ? rankingBase
       : rankingBase.filter((u) => u.grupos.includes(filtroAtivo))
   ).sort((a, b) => b.ml - a.ml);
 
-  const selectedUser = usuarios.find((u) => u.id === selectedUserId) || null;
+  const selectedUser = usuarios.find((u) => u.id === selectedUserId) ?? null;
   const selectedPosition = selectedUser
     ? rankingFiltrado.findIndex((u) => u.id === selectedUserId) + 1
     : 1;
+
+  const filtroAtual = FILTROS.find((f) => f.id === filtroAtivo)!;
 
   return (
     <>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={st.scroll}
       >
         <Header
           onOpenMenu={() => {}}
@@ -140,42 +143,30 @@ export function HomeScreen({
           onAdd={onAddWater}
         />
 
-        <View style={styles.rankingHeader}>
-          <Text style={styles.rankingTitle}>Ranking de Hidratação</Text>
-          <Text style={styles.rankingSubtitle}>
-            Reaja e incentive seus amigos!
-          </Text>
+        {/* Cabeçalho do ranking + dropdown de grupo */}
+        <View style={st.rankingHeader}>
+          <View style={st.rankingLeft}>
+            <Text style={st.rankingTitle}>Ranking de Hidratação</Text>
+            <Text style={st.rankingSubtitle}>
+              Reaja e incentive seus amigos!
+            </Text>
+          </View>
+
+          {/* Chip-dropdown compacto */}
+          <TouchableOpacity
+            style={st.filterChip}
+            onPress={() => setDropdownOpen(true)}
+            activeOpacity={0.75}
+          >
+            <Ionicons name="people-outline" size={14} color="#6096ba" />
+            <Text style={st.filterChipText} numberOfLines={1}>
+              {filtroAtual.label}
+            </Text>
+            <Ionicons name="chevron-down" size={13} color="#6096ba" />
+          </TouchableOpacity>
         </View>
 
-        {/* Filtro de grupo — pills horizontais */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filtroRow}
-        >
-          {FILTROS.map((f) => {
-            const ativo = filtroAtivo === f.id;
-            return (
-              <TouchableOpacity
-                key={f.id}
-                style={[styles.filtroPill, ativo && styles.filtroPillAtivo]}
-                onPress={() => setFiltroAtivo(f.id)}
-                activeOpacity={0.75}
-              >
-                <Text
-                  style={[
-                    styles.filtroPillText,
-                    ativo && styles.filtroPillTextAtivo,
-                  ]}
-                >
-                  {f.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-
-        <View style={styles.rankingWrapper}>
+        <View style={st.rankingWrapper}>
           {rankingFiltrado.map((item, index) => (
             <RankItem
               key={item.id}
@@ -193,6 +184,51 @@ export function HomeScreen({
         </View>
       </ScrollView>
 
+      {/* ── Dropdown de grupo ── */}
+      <Modal
+        visible={dropdownOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setDropdownOpen(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setDropdownOpen(false)}>
+          <View style={st.dropOverlay} />
+        </TouchableWithoutFeedback>
+
+        <View style={st.dropCard}>
+          <Text style={st.dropTitle}>Visualizar ranking de</Text>
+          {FILTROS.map((f) => {
+            const ativo = filtroAtivo === f.id;
+            return (
+              <TouchableOpacity
+                key={f.id}
+                style={[st.dropItem, ativo && st.dropItemAtivo]}
+                onPress={() => {
+                  setFiltroAtivo(f.id);
+                  setDropdownOpen(false);
+                }}
+                activeOpacity={0.75}
+              >
+                <View style={[st.dropItemIcon, ativo && st.dropItemIconAtivo]}>
+                  <Ionicons
+                    name={f.icon as any}
+                    size={16}
+                    color={ativo ? "#6096ba" : "#94A3B8"}
+                  />
+                </View>
+                <Text style={[st.dropItemText, ativo && st.dropItemTextAtivo]}>
+                  {f.label}
+                </Text>
+                {ativo && (
+                  <Ionicons name="checkmark" size={16} color="#6096ba" />
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </Modal>
+
+      {/* ── Modais ── */}
       <WaterSettingsModal
         visible={isWaterSettingsOpen}
         onClose={() => setIsWaterSettingsOpen(false)}
@@ -202,7 +238,6 @@ export function HomeScreen({
           setIsWaterSettingsOpen(false);
         }}
       />
-
       <UserProfileModal
         visible={selectedUserId !== null}
         onClose={() => setSelectedUserId(null)}
@@ -213,7 +248,6 @@ export function HomeScreen({
         position={selectedPosition}
         waterHistory={selectedUser?.waterHistory || []}
       />
-
       <MyHistoryModal
         visible={isMyHistoryOpen}
         onClose={() => setIsMyHistoryOpen(false)}
@@ -223,54 +257,90 @@ export function HomeScreen({
   );
 }
 
-const styles = StyleSheet.create({
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
+const st = StyleSheet.create({
+  scroll: { paddingHorizontal: 20, paddingBottom: 20 },
   rankingHeader: {
     marginTop: 30,
-    marginBottom: 12,
+    marginBottom: 16,
     paddingHorizontal: 4,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 12,
   },
-  rankingTitle: {
-    fontSize: 20,
-    fontWeight: "900",
-    color: "#274c77",
-  },
+  rankingLeft: { flex: 1 },
+  rankingTitle: { fontSize: 20, fontWeight: "900", color: "#274c77" },
   rankingSubtitle: {
     fontSize: 13,
     color: "#8b8c89",
     fontWeight: "500",
+    marginTop: 2,
   },
-  // Pills de filtro de grupo
-  filtroRow: {
-    gap: 8,
-    paddingBottom: 16,
-    paddingTop: 2,
-    paddingRight: 4,
-  },
-  filtroPill: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
+
+  // Chip compacto com texto truncado
+  filterChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
     backgroundColor: "#EBF4FF",
+    borderRadius: 20,
+    paddingVertical: 7,
+    paddingHorizontal: 11,
     borderWidth: 1.5,
     borderColor: "#BFDBFE",
+    maxWidth: 140,
+    marginTop: 2,
   },
-  filtroPillAtivo: {
-    backgroundColor: "#6096ba",
-    borderColor: "#6096ba",
-  },
-  filtroPillText: {
-    fontSize: 13,
+  filterChipText: {
+    fontSize: 12,
     fontWeight: "700",
     color: "#6096ba",
+    flex: 1,
   },
-  filtroPillTextAtivo: {
-    color: "white",
+
+  rankingWrapper: { width: "100%" },
+
+  // Dropdown modal
+  dropOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.3)" },
+  dropCard: {
+    position: "absolute",
+    top: "35%",
+    left: 20,
+    right: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 16,
+    elevation: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.18,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 8 },
   },
-  rankingWrapper: {
-    width: "100%",
+  dropTitle: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#94A3B8",
+    letterSpacing: 1,
+    marginBottom: 12,
   },
+  dropItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 11,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+  },
+  dropItemAtivo: { backgroundColor: "#EBF4FF" },
+  dropItemIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: "#F1F5F9",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  dropItemIconAtivo: { backgroundColor: "#DBEAFE" },
+  dropItemText: { flex: 1, fontSize: 15, fontWeight: "600", color: "#475569" },
+  dropItemTextAtivo: { color: "#274c77", fontWeight: "800" },
 });
