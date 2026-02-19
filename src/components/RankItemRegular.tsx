@@ -23,6 +23,7 @@ export function RankItemRegular({
   isMe,
   metaAlcancada,
   onReactionUpdate,
+  theme,
 }: any) {
   // Valor para a animação do gradiente verde
   const gradientAnim = useRef(new Animated.Value(0)).current;
@@ -69,7 +70,14 @@ export function RankItemRegular({
             <View style={styles.infoContainer}>
               <Text style={styles.userName}>{name}</Text>
               <View style={styles.statsRow}>
-                <Text style={styles.mlValue}>{ml} ml</Text>
+                <Text
+                  style={[
+                    styles.mlValue,
+                    { color: theme?.primary ?? "#2196F3" },
+                  ]}
+                >
+                  {ml} ml
+                </Text>
                 <Text style={styles.mlGoal}> / {goal}ml</Text>
               </View>
             </View>
