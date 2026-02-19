@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { ScrollView, View, Text, StyleSheet } from "react-native";
+import {
+  ScrollView,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 
 import { Header } from "../components/Header";
 import { UserStatus } from "../components/UserStatus";
@@ -14,6 +20,7 @@ function todayAt(h: number, m: number) {
   return d.toISOString();
 }
 
+// Todos os usuários do "universo" (amigos + grupos)
 const INITIAL_USUARIOS = [
   {
     id: 1,
@@ -26,6 +33,7 @@ const INITIAL_USUARIOS = [
       { ml: 500, time: todayAt(7, 0) },
       { ml: 1000, time: todayAt(12, 10) },
     ],
+    grupos: ["familia", "trabalho"],
   },
   {
     id: 2,
@@ -35,6 +43,7 @@ const INITIAL_USUARIOS = [
     foto: "https://i.pravatar.cc/300?img=12",
     reactions: [],
     waterHistory: [],
+    grupos: ["familia"],
   },
   {
     id: 3,
@@ -44,6 +53,7 @@ const INITIAL_USUARIOS = [
     foto: "https://i.pravatar.cc/300?img=45",
     reactions: [],
     waterHistory: [],
+    grupos: ["familia"],
   },
   {
     id: 5,
@@ -53,6 +63,7 @@ const INITIAL_USUARIOS = [
     foto: "https://i.pravatar.cc/300?img=28",
     reactions: [],
     waterHistory: [],
+    grupos: ["trabalho"],
   },
   {
     id: 6,
@@ -62,11 +73,18 @@ const INITIAL_USUARIOS = [
     foto: "https://i.pravatar.cc/300?img=15",
     reactions: [],
     waterHistory: [],
+    grupos: ["trabalho"],
   },
 ];
 
+// Filtros disponíveis
+const FILTROS = [
+  { id: "todos", label: "Todos" },
+  { id: "familia", label: "Família Castro" },
+  { id: "trabalho", label: "Turma do Trabalho" },
+];
+
 interface HomeScreenProps {
-  /** ml consumido pelo usuário logado — controlado pelo App para manter sincronia */
   mlConsumido: number;
   meta: number;
   onAddWater: (quantidade: number) => void;
@@ -86,14 +104,21 @@ export function HomeScreen({
   const [isMyHistoryOpen, setIsMyHistoryOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [activeReactionId, setActiveReactionId] = useState<string | null>(null);
+  const [filtroAtivo, setFiltroAtivo] = useState("todos");
 
-  const rankingOrdenado = [...usuarios]
-    .map((u) => (u.id === 1 ? { ...u, ml: mlConsumido, meta } : u))
-    .sort((a, b) => b.ml - a.ml);
+  const rankingBase = [...usuarios].map((u) =>
+    u.id === 1 ? { ...u, ml: mlConsumido, meta } : u,
+  );
+
+  const rankingFiltrado = (
+    filtroAtivo === "todos"
+      ? rankingBase
+      : rankingBase.filter((u) => u.grupos.includes(filtroAtivo))
+  ).sort((a, b) => b.ml - a.ml);
 
   const selectedUser = usuarios.find((u) => u.id === selectedUserId) || null;
   const selectedPosition = selectedUser
-    ? rankingOrdenado.findIndex((u) => u.id === selectedUserId) + 1
+    ? rankingFiltrado.findIndex((u) => u.id === selectedUserId) + 1
     : 1;
 
   return (
@@ -122,8 +147,36 @@ export function HomeScreen({
           </Text>
         </View>
 
+        {/* Filtro de grupo — pills horizontais */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filtroRow}
+        >
+          {FILTROS.map((f) => {
+            const ativo = filtroAtivo === f.id;
+            return (
+              <TouchableOpacity
+                key={f.id}
+                style={[styles.filtroPill, ativo && styles.filtroPillAtivo]}
+                onPress={() => setFiltroAtivo(f.id)}
+                activeOpacity={0.75}
+              >
+                <Text
+                  style={[
+                    styles.filtroPillText,
+                    ativo && styles.filtroPillTextAtivo,
+                  ]}
+                >
+                  {f.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+
         <View style={styles.rankingWrapper}>
-          {rankingOrdenado.map((item, index) => (
+          {rankingFiltrado.map((item, index) => (
             <RankItem
               key={item.id}
               position={index + 1}
@@ -140,7 +193,6 @@ export function HomeScreen({
         </View>
       </ScrollView>
 
-      {/* Modais da home */}
       <WaterSettingsModal
         visible={isWaterSettingsOpen}
         onClose={() => setIsWaterSettingsOpen(false)}
@@ -178,7 +230,7 @@ const styles = StyleSheet.create({
   },
   rankingHeader: {
     marginTop: 30,
-    marginBottom: 20,
+    marginBottom: 12,
     paddingHorizontal: 4,
   },
   rankingTitle: {
@@ -190,6 +242,33 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#8b8c89",
     fontWeight: "500",
+  },
+  // Pills de filtro de grupo
+  filtroRow: {
+    gap: 8,
+    paddingBottom: 16,
+    paddingTop: 2,
+    paddingRight: 4,
+  },
+  filtroPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
+    backgroundColor: "#EBF4FF",
+    borderWidth: 1.5,
+    borderColor: "#BFDBFE",
+  },
+  filtroPillAtivo: {
+    backgroundColor: "#6096ba",
+    borderColor: "#6096ba",
+  },
+  filtroPillText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#6096ba",
+  },
+  filtroPillTextAtivo: {
+    color: "white",
   },
   rankingWrapper: {
     width: "100%",

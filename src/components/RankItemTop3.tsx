@@ -23,6 +23,7 @@ export function RankItemTop3({
   isMe,
   metaAlcancada,
   onReactionUpdate,
+  theme,
 }: any) {
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const gradientAnim = useRef(new Animated.Value(0)).current;
@@ -70,10 +71,15 @@ export function RankItemTop3({
   const medalEmoji = position === 1 ? "🥇" : position === 2 ? "🥈" : "🥉";
 
   // A correção está no 'as const' para garantir o tipo Tuple para o TS
+  const cardFrom = theme?.cardFrom ?? "#6096ba";
+  const cardTo = theme?.cardTo ?? "#3f6ea5";
+  const cardFromLight = theme ? theme.secondary : "#a3cef1";
+  const cardToLight = theme ? theme.primary : "#80b8dd";
+
   const config =
     position === 1
-      ? { colors: ["#6096ba", "#3f6ea5"] as const }
-      : { colors: ["#a3cef1", "#80b8dd"] as const };
+      ? { colors: [cardFrom, cardTo] as const }
+      : { colors: [cardFromLight, cardToLight] as const };
 
   const PHOTO_SIZE = 56;
   const RING_SIZE = 64;
