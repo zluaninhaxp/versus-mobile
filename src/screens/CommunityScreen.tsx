@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -7,26 +7,92 @@ import {
   TouchableOpacity,
   Image,
   TextInput,
-  Alert,
+  Animated,
+  Easing,
   Clipboard,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { BottomSheetModal } from "../components/BottomSheetModal";
-import { RankItem } from "../components/RankItem";
+import { RankItem, RankTheme } from "../components/RankItem";
 
-// ─── Paleta ───────────────────────────────────────────────────────────────────
-// Azul app:    #274c77 / #6096ba / #a3cef1   → ranking (home)
-// Header grupo: tons quentes/neutros escuros → contraste intencional com o ranking
-const GROUP_PALETTES: readonly (readonly [string, string])[] = [
-  ["#1B2A3B", "#2E4A6A"] as const, // slate profundo
-  ["#2D1B4E", "#4A2E7A"] as const, // roxo escuro
-  ["#1E3A2F", "#2E6B4A"] as const, // verde floresta
-  ["#3B1A1A", "#6B2E2E"] as const, // vinho
-  ["#1A2E3B", "#1B4F6B"] as const, // petróleo
-];
+// ─── Paletas dos grupos ───────────────────────────────────────────────────────
+// Tom muted/dessaturado — mesma lógica do azul #6096ba do app (não vibrante)
+// Cada paleta: [escuro, médio, fundo-suave, label]
 
-// ─── Tipos ────────────────────────────────────────────────────────────────────
+export const GROUP_PALETTES = [
+  {
+    id: "coral",
+    label: "Terracota",
+    dark: "#A0522D",
+    mid: "#C47A53",
+    soft: "#F5EDE6",
+    theme: {
+      primary: "#C47A53",
+      secondary: "#DBA98A",
+      cardFrom: "#C47A53",
+      cardTo: "#A0522D",
+    } as RankTheme,
+  },
+  {
+    id: "teal",
+    label: "Petróleo",
+    dark: "#2E7D7A",
+    mid: "#4A9E9B",
+    soft: "#E4F4F3",
+    theme: {
+      primary: "#4A9E9B",
+      secondary: "#88CCCB",
+      cardFrom: "#4A9E9B",
+      cardTo: "#2E7D7A",
+    } as RankTheme,
+  },
+  {
+    id: "violet",
+    label: "Violeta",
+    dark: "#5B3A8A",
+    mid: "#7B5BA8",
+    soft: "#EDE8F5",
+    theme: {
+      primary: "#7B5BA8",
+      secondary: "#A98FCA",
+      cardFrom: "#7B5BA8",
+      cardTo: "#5B3A8A",
+    } as RankTheme,
+  },
+  {
+    id: "olive",
+    label: "Musgo",
+    dark: "#4A5E2E",
+    mid: "#6B8A42",
+    soft: "#EBF0E2",
+    theme: {
+      primary: "#6B8A42",
+      secondary: "#9AB472",
+      cardFrom: "#6B8A42",
+      cardTo: "#4A5E2E",
+    } as RankTheme,
+  },
+  {
+    id: "rose",
+    label: "Rosê",
+    dark: "#8A4A5E",
+    mid: "#AA6B80",
+    soft: "#F5E8ED",
+    theme: {
+      primary: "#AA6B80",
+      secondary: "#CA9BAE",
+      cardFrom: "#AA6B80",
+      cardTo: "#8A4A5E",
+    } as RankTheme,
+  },
+] as const;
+
+type PaletteId = (typeof GROUP_PALETTES)[number]["id"];
+
+function getPalette(id: PaletteId) {
+  return GROUP_PALETTES.find((p) => p.id === id) ?? GROUP_PALETTES[0];
+}
 
 type FriendStatus = "amigo" | "pendente_enviado" | "pendente_recebido";
 
@@ -53,7 +119,7 @@ interface Group {
   code: string;
   isAdmin: boolean;
   members: GroupMember[];
-  color: readonly [string, string];
+  paletteId: PaletteId;
 }
 type ActivityType = "meta" | "conquista" | "badge" | "top1" | "streak";
 interface Activity {
@@ -180,7 +246,7 @@ const INITIAL_GROUPS: Group[] = [
     name: "Família Castro",
     code: "FAM123",
     isAdmin: true,
-    color: GROUP_PALETTES[0],
+    paletteId: "coral",
     members: [
       {
         id: 1,
@@ -213,7 +279,7 @@ const INITIAL_GROUPS: Group[] = [
     name: "Turma do Trabalho",
     code: "WRK456",
     isAdmin: false,
-    color: GROUP_PALETTES[1],
+    paletteId: "teal",
     members: [
       {
         id: 4,
@@ -364,7 +430,6 @@ function RequestsSheet({
     </BottomSheetModal>
   );
 }
-
 const sh = StyleSheet.create({
   title: {
     fontSize: 20,
@@ -451,7 +516,6 @@ function AddFriendSheet({
     setSent([]);
     onClose();
   };
-
   return (
     <BottomSheetModal
       visible={visible}
@@ -525,7 +589,6 @@ function AddFriendSheet({
     </BottomSheetModal>
   );
 }
-
 const af = StyleSheet.create({
   title: {
     fontSize: 20,
@@ -583,9 +646,9 @@ const af = StyleSheet.create({
   addBtnText: { fontSize: 13, fontWeight: "700", color: "white" },
 });
 
-// ─── Sheet: Compartilhar código do grupo ─────────────────────────────────────
+// ─── Sheet: Compartilhar código ───────────────────────────────────────────────
 
-function ShareGroupSheet({
+function ShareSheet({
   visible,
   onClose,
   group,
@@ -596,33 +659,26 @@ function ShareGroupSheet({
 }) {
   const [copied, setCopied] = useState(false);
   if (!group) return null;
-
+  const pal = getPalette(group.paletteId);
   const handleCopy = () => {
     Clipboard.setString(group.code);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
-
   return (
     <BottomSheetModal
       visible={visible}
       onClose={onClose}
-      height={0.42}
+      height={0.52}
       backgroundColor="#F8FAFC"
     >
       <Text style={sg.title}>Compartilhar grupo</Text>
-      <Text style={sg.subtitle}>
-        Envie o código abaixo para quem quiser entrar
-      </Text>
-
-      {/* Código visual em destaque */}
-      <LinearGradient colors={group.color} style={sg.codeCard}>
-        <Text style={sg.groupNameLabel}>{group.name}</Text>
+      <Text style={sg.subtitle}>Envie o código para quem quiser entrar</Text>
+      <LinearGradient colors={[pal.dark, pal.mid]} style={sg.codeCard}>
+        <Text style={sg.groupLabel}>{group.name}</Text>
         <Text style={sg.codeText}>{group.code}</Text>
         <Text style={sg.codeHint}>código de entrada</Text>
       </LinearGradient>
-
-      {/* Botão copiar */}
       <TouchableOpacity
         style={[sg.copyBtn, copied && sg.copyBtnDone]}
         onPress={handleCopy}
@@ -636,40 +692,34 @@ function ShareGroupSheet({
           {copied ? "Copiado!" : "Copiar código"}
         </Text>
       </TouchableOpacity>
-
       <Text style={sg.or}>— ou compartilhe via —</Text>
-
       <View style={sg.shareRow}>
         {[
           { icon: "logo-whatsapp", label: "WhatsApp", color: "#25D366" },
-          { icon: "chatbubble-ellipses", label: "Mensagem", color: "#6096ba" },
+          {
+            icon: "chatbubble-ellipses-outline",
+            label: "Mensagem",
+            color: "#6096ba",
+          },
           {
             icon: "ellipsis-horizontal-circle",
             label: "Outros",
             color: "#94A3B8",
           },
-        ].map((s) => (
-          <TouchableOpacity
-            key={s.label}
-            style={sg.shareItem}
-            onPress={() =>
-              Alert.alert(
-                s.label,
-                `Compartilhar código ${group.code} via ${s.label}`,
-              )
-            }
-          >
-            <View style={[sg.shareIcon, { backgroundColor: s.color + "1A" }]}>
-              <Ionicons name={s.icon as any} size={24} color={s.color} />
+        ].map((item) => (
+          <TouchableOpacity key={item.label} style={sg.shareItem}>
+            <View
+              style={[sg.shareIcon, { backgroundColor: item.color + "1A" }]}
+            >
+              <Ionicons name={item.icon as any} size={24} color={item.color} />
             </View>
-            <Text style={sg.shareLabel}>{s.label}</Text>
+            <Text style={sg.shareLabel}>{item.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
     </BottomSheetModal>
   );
 }
-
 const sg = StyleSheet.create({
   title: { fontSize: 20, fontWeight: "900", color: "#274c77", marginBottom: 4 },
   subtitle: { fontSize: 13, color: "#94A3B8", marginBottom: 16 },
@@ -679,9 +729,9 @@ const sg = StyleSheet.create({
     alignItems: "center",
     marginBottom: 14,
   },
-  groupNameLabel: {
+  groupLabel: {
     fontSize: 13,
-    color: "rgba(255,255,255,0.7)",
+    color: "rgba(255,255,255,0.75)",
     fontWeight: "600",
     marginBottom: 8,
   },
@@ -726,9 +776,9 @@ const sg = StyleSheet.create({
   shareLabel: { fontSize: 11, color: "#64748B", fontWeight: "600" },
 });
 
-// ─── Sheet: Convidar amigos para grupo ───────────────────────────────────────
+// ─── Sheet: Convidar amigos ───────────────────────────────────────────────────
 
-function InviteToGroupSheet({
+function InviteSheet({
   visible,
   onClose,
   group,
@@ -739,18 +789,15 @@ function InviteToGroupSheet({
   group: Group | null;
   friends: Friend[];
 }) {
-  const [inviteSent, setInviteSent] = useState<number[]>([]);
+  const [sent, setSent] = useState<number[]>([]);
   if (!group) return null;
-
   const available = friends.filter(
     (f) => f.status === "amigo" && !group.members.find((m) => m.id === f.id),
   );
-
   const handleClose = () => {
-    setInviteSent([]);
+    setSent([]);
     onClose();
   };
-
   return (
     <BottomSheetModal
       visible={visible}
@@ -758,9 +805,11 @@ function InviteToGroupSheet({
       height={0.6}
       backgroundColor="#F8FAFC"
     >
-      <Text style={iv.title}>Convidar para {group.name}</Text>
-      <Text style={iv.subtitle}>{available.length} amigos disponíveis</Text>
-
+      <Text style={iv.title}>Convidar para o grupo</Text>
+      <Text style={iv.subtitle}>
+        {group.name} · {available.length} disponível
+        {available.length !== 1 ? "is" : ""}
+      </Text>
       {available.length === 0 ? (
         <View style={iv.empty}>
           <Ionicons name="people-circle-outline" size={44} color="#CBD5E1" />
@@ -774,7 +823,7 @@ function InviteToGroupSheet({
           contentContainerStyle={{ paddingBottom: 40 }}
         >
           {available.map((f) => {
-            const isSent = inviteSent.includes(f.id);
+            const isSent = sent.includes(f.id);
             return (
               <View key={f.id} style={iv.row}>
                 <Image source={{ uri: f.foto }} style={iv.photo} />
@@ -783,8 +832,8 @@ function InviteToGroupSheet({
                   <Text style={iv.username}>{f.username}</Text>
                 </View>
                 <TouchableOpacity
-                  style={[iv.inviteBtn, isSent && iv.inviteBtnSent]}
-                  onPress={() => setInviteSent((p) => [...p, f.id])}
+                  style={[iv.btn, isSent && iv.btnSent]}
+                  onPress={() => setSent((p) => [...p, f.id])}
                   disabled={isSent}
                 >
                   <Ionicons
@@ -792,9 +841,7 @@ function InviteToGroupSheet({
                     size={15}
                     color={isSent ? "#10B981" : "white"}
                   />
-                  <Text
-                    style={[iv.inviteBtnText, isSent && { color: "#10B981" }]}
-                  >
+                  <Text style={[iv.btnText, isSent && { color: "#10B981" }]}>
                     {isSent ? "Enviado" : "Convidar"}
                   </Text>
                 </TouchableOpacity>
@@ -806,7 +853,6 @@ function InviteToGroupSheet({
     </BottomSheetModal>
   );
 }
-
 const iv = StyleSheet.create({
   title: { fontSize: 20, fontWeight: "900", color: "#274c77", marginBottom: 2 },
   subtitle: { fontSize: 13, color: "#94A3B8", marginBottom: 16 },
@@ -827,7 +873,7 @@ const iv = StyleSheet.create({
   info: { flex: 1 },
   name: { fontSize: 14, fontWeight: "700", color: "#334155" },
   username: { fontSize: 12, color: "#94A3B8" },
-  inviteBtn: {
+  btn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
@@ -836,15 +882,15 @@ const iv = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 12,
   },
-  inviteBtnSent: {
+  btnSent: {
     backgroundColor: "#F0FDF4",
     borderWidth: 1,
     borderColor: "#BBF7D0",
   },
-  inviteBtnText: { fontSize: 13, fontWeight: "700", color: "white" },
+  btnText: { fontSize: 13, fontWeight: "700", color: "white" },
 });
 
-// ─── Sheet: Confirmar saída / exclusão ───────────────────────────────────────
+// ─── Sheet: Confirmar saída/exclusão ─────────────────────────────────────────
 
 function DangerSheet({
   visible,
@@ -857,30 +903,26 @@ function DangerSheet({
   group: Group | null;
   onConfirm: () => void;
 }) {
-  const [confirm, setConfirm] = useState("");
+  const [input, setInput] = useState("");
   if (!group) return null;
-
   const isDelete = group.isAdmin;
   const keyword = isDelete ? "EXCLUIR" : "SAIR";
-  const isReady = confirm.trim().toUpperCase() === keyword;
-
+  const isReady = input.trim().toUpperCase() === keyword;
   const handleClose = () => {
-    setConfirm("");
+    setInput("");
     onClose();
   };
   const handleConfirm = () => {
     onConfirm();
     handleClose();
   };
-
   return (
     <BottomSheetModal
       visible={visible}
       onClose={handleClose}
-      height={0.48}
+      height={0.5}
       backgroundColor="#FFF5F5"
     >
-      {/* Ícone de aviso */}
       <View style={dg.iconWrap}>
         <Ionicons
           name={isDelete ? "trash" : "exit"}
@@ -888,16 +930,14 @@ function DangerSheet({
           color="#EF4444"
         />
       </View>
-
       <Text style={dg.title}>
         {isDelete ? "Excluir grupo?" : "Sair do grupo?"}
       </Text>
       <Text style={dg.desc}>
         {isDelete
-          ? `"${group.name}" será excluído permanentemente para todos os membros. Esta ação não pode ser desfeita.`
-          : `Você vai sair de "${group.name}". Poderá entrar novamente com o código.`}
+          ? `"${group.name}" será excluído permanentemente para todos os membros.`
+          : `Você vai sair de "${group.name}". Pode entrar novamente com o código.`}
       </Text>
-
       <Text style={dg.confirmLabel}>
         Digite <Text style={dg.keyword}>{keyword}</Text> para confirmar
       </Text>
@@ -905,12 +945,11 @@ function DangerSheet({
         style={[dg.input, isReady && dg.inputReady]}
         placeholder={keyword}
         placeholderTextColor="#FECACA"
-        value={confirm}
-        onChangeText={setConfirm}
+        value={input}
+        onChangeText={setInput}
         autoCapitalize="characters"
         autoFocus
       />
-
       <TouchableOpacity
         style={[dg.btn, !isReady && { opacity: 0.35 }]}
         disabled={!isReady}
@@ -923,7 +962,6 @@ function DangerSheet({
     </BottomSheetModal>
   );
 }
-
 const dg = StyleSheet.create({
   iconWrap: {
     width: 60,
@@ -961,332 +999,129 @@ const dg = StyleSheet.create({
   btnText: { color: "white", fontWeight: "900", fontSize: 15 },
 });
 
-// ─── Sheet: Detalhe do grupo ──────────────────────────────────────────────────
+// ─── Sheet: Novo grupo ────────────────────────────────────────────────────────
 
-function GroupDetailSheet({
-  visible,
-  onClose,
-  group,
-  friends,
-  onGroupAction,
-}: {
-  visible: boolean;
-  onClose: () => void;
-  group: Group | null;
-  friends: Friend[];
-  onGroupAction: (action: "delete" | "leave", groupId: number) => void;
-}) {
-  const [activeReactionId, setActiveReactionId] = useState<string | null>(null);
-
-  // Sub-sheets
-  const [showShare, setShowShare] = useState(false);
-  const [showInvite, setShowInvite] = useState(false);
-  const [showDanger, setShowDanger] = useState(false);
-
-  if (!group) return null;
-
-  const sorted = [...group.members].sort((a, b) => b.ml - a.ml);
-  const available = friends.filter(
-    (f) => f.status === "amigo" && !group.members.find((m) => m.id === f.id),
-  );
-
-  return (
-    <>
-      <BottomSheetModal
-        visible={visible}
-        onClose={onClose}
-        height={0.88}
-        backgroundColor="#F8FAFC"
-      >
-        {/* ── Header com paleta escura, distinta do ranking azul ── */}
-        <LinearGradient colors={group.color} style={gd.headerGrad}>
-          <View style={gd.headerTop}>
-            <View style={{ flex: 1 }}>
-              <Text style={gd.groupName}>{group.name}</Text>
-              <View style={gd.avatarRow}>
-                {group.members.slice(0, 5).map((m, i) => (
-                  <Image
-                    key={m.id}
-                    source={{ uri: m.foto }}
-                    style={[
-                      gd.memberAvatar,
-                      { marginLeft: i === 0 ? 0 : -8, zIndex: 5 - i },
-                    ]}
-                  />
-                ))}
-                <Text style={gd.memberCount}>
-                  {" "}
-                  {group.members.length} membros
-                </Text>
-              </View>
-            </View>
-
-            {/* Ações do header — cada botão tem função própria */}
-            <View style={gd.actions}>
-              {/* Compartilhar código */}
-              <TouchableOpacity
-                style={gd.actionBtn}
-                onPress={() => setShowShare(true)}
-              >
-                <Ionicons name="share-social-outline" size={17} color="white" />
-              </TouchableOpacity>
-
-              {/* Convidar amigos — só admin */}
-              {group.isAdmin && (
-                <TouchableOpacity
-                  style={[
-                    gd.actionBtn,
-                    available.length === 0 && { opacity: 0.4 },
-                  ]}
-                  disabled={available.length === 0}
-                  onPress={() => setShowInvite(true)}
-                >
-                  <Ionicons name="person-add-outline" size={17} color="white" />
-                </TouchableOpacity>
-              )}
-
-              {/* Sair / excluir */}
-              <TouchableOpacity
-                style={[gd.actionBtn, gd.actionBtnDanger]}
-                onPress={() => setShowDanger(true)}
-              >
-                <Ionicons
-                  name={group.isAdmin ? "trash-outline" : "exit-outline"}
-                  size={17}
-                  color="#FCA5A5"
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Pílulas de info */}
-          <View style={gd.pillsRow}>
-            {group.isAdmin && (
-              <View style={gd.adminPill}>
-                <Ionicons name="shield-checkmark" size={11} color="#FFD700" />
-                <Text style={gd.adminPillText}>Admin</Text>
-              </View>
-            )}
-            <View style={gd.codePill}>
-              <Ionicons
-                name="key-outline"
-                size={11}
-                color="rgba(255,255,255,0.7)"
-              />
-              <Text style={gd.codePillText}>{group.code}</Text>
-            </View>
-          </View>
-        </LinearGradient>
-
-        {/* ── Ranking — exatamente igual à Home ── */}
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={gd.scroll}
-        >
-          <Text style={gd.sectionLabel}>RANKING DE HOJE</Text>
-          {sorted.map((m, index) => (
-            <RankItem
-              key={m.id}
-              position={index + 1}
-              nome={m.nome}
-              ml={m.ml}
-              meta={m.meta}
-              foto={m.foto}
-              reactions={m.reactions || []}
-              activeReactionId={activeReactionId}
-              onOpenReaction={setActiveReactionId}
-            />
-          ))}
-        </ScrollView>
-      </BottomSheetModal>
-
-      {/* Sub-sheets — renderizados fora do BottomSheetModal pai */}
-      <ShareGroupSheet
-        visible={showShare}
-        onClose={() => setShowShare(false)}
-        group={group}
-      />
-      <InviteToGroupSheet
-        visible={showInvite}
-        onClose={() => setShowInvite(false)}
-        group={group}
-        friends={friends}
-      />
-      <DangerSheet
-        visible={showDanger}
-        onClose={() => setShowDanger(false)}
-        group={group}
-        onConfirm={() =>
-          onGroupAction(group.isAdmin ? "delete" : "leave", group.id)
-        }
-      />
-    </>
-  );
-}
-
-const gd = StyleSheet.create({
-  headerGrad: { borderRadius: 20, padding: 16, marginBottom: 16 },
-  headerTop: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 10,
-    marginBottom: 12,
-  },
-  groupName: {
-    fontSize: 22,
-    fontWeight: "900",
-    color: "white",
-    marginBottom: 8,
-  },
-  avatarRow: { flexDirection: "row", alignItems: "center" },
-  memberAvatar: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.4)",
-  },
-  memberCount: {
-    fontSize: 12,
-    color: "rgba(255,255,255,0.7)",
-    fontWeight: "600",
-  },
-  actions: { flexDirection: "row", gap: 7, marginTop: 2 },
-  actionBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: "rgba(255,255,255,0.15)",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
-  },
-  actionBtnDanger: {
-    backgroundColor: "rgba(239,68,68,0.2)",
-    borderColor: "rgba(239,68,68,0.4)",
-  },
-  pillsRow: { flexDirection: "row", gap: 8 },
-  adminPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(0,0,0,0.3)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  adminPillText: { fontSize: 11, color: "#FFD700", fontWeight: "700" },
-  codePill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(255,255,255,0.12)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  codePillText: {
-    fontSize: 11,
-    color: "rgba(255,255,255,0.7)",
-    fontWeight: "700",
-    letterSpacing: 1,
-  },
-  scroll: { paddingBottom: 40 },
-  sectionLabel: {
-    fontSize: 11,
-    fontWeight: "800",
-    color: "#94A3B8",
-    letterSpacing: 1.2,
-    marginBottom: 12,
-  },
-});
-
-// ─── Sheet: Criar / Entrar em grupo ──────────────────────────────────────────
-
-function GroupActionSheet({
+function NewGroupSheet({
   visible,
   onClose,
   onCreate,
 }: {
   visible: boolean;
   onClose: () => void;
-  onCreate: (name: string) => void;
+  onCreate: (name: string, paletteId: PaletteId) => void;
 }) {
   const [mode, setMode] = useState<"choose" | "criar" | "entrar">("choose");
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
+  const [selectedPal, setSelectedPal] = useState<PaletteId>("coral");
   const handleClose = () => {
     setMode("choose");
     setName("");
     setCode("");
     onClose();
   };
-
   return (
     <BottomSheetModal
       visible={visible}
       onClose={handleClose}
-      height={0.48}
+      height={0.58}
       backgroundColor="#F8FAFC"
     >
       {mode === "choose" && (
         <>
-          <Text style={ga.title}>O que deseja fazer?</Text>
-          <View style={ga.optionRow}>
-            <TouchableOpacity style={ga.card} onPress={() => setMode("criar")}>
-              <View style={[ga.iconWrap, { backgroundColor: "#EBF4FF" }]}>
+          <Text style={ng.title}>O que deseja fazer?</Text>
+          <View style={ng.row}>
+            <TouchableOpacity style={ng.card} onPress={() => setMode("criar")}>
+              <View style={[ng.iconWrap, { backgroundColor: "#EBF4FF" }]}>
                 <Ionicons name="add-circle" size={32} color="#6096ba" />
               </View>
-              <Text style={ga.cardLabel}>Criar grupo</Text>
-              <Text style={ga.cardSub}>Seja o admin</Text>
+              <Text style={ng.cardLabel}>Criar grupo</Text>
+              <Text style={ng.cardSub}>Seja o admin</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={ga.card} onPress={() => setMode("entrar")}>
-              <View style={[ga.iconWrap, { backgroundColor: "#F0FDF4" }]}>
+            <TouchableOpacity style={ng.card} onPress={() => setMode("entrar")}>
+              <View style={[ng.iconWrap, { backgroundColor: "#F0FDF4" }]}>
                 <Ionicons name="enter" size={32} color="#10B981" />
               </View>
-              <Text style={ga.cardLabel}>Entrar</Text>
-              <Text style={ga.cardSub}>Tenho um código</Text>
+              <Text style={ng.cardLabel}>Entrar</Text>
+              <Text style={ng.cardSub}>Tenho um código</Text>
             </TouchableOpacity>
           </View>
         </>
       )}
       {mode === "criar" && (
         <>
-          <TouchableOpacity onPress={() => setMode("choose")} style={ga.back}>
+          <TouchableOpacity onPress={() => setMode("choose")} style={ng.back}>
             <Ionicons name="arrow-back" size={18} color="#6096ba" />
-            <Text style={ga.backText}>Voltar</Text>
+            <Text style={ng.backText}>Voltar</Text>
           </TouchableOpacity>
-          <Text style={ga.title}>Criar grupo</Text>
+          <Text style={ng.title}>Criar grupo</Text>
           <TextInput
-            style={ga.input}
+            style={ng.input}
             placeholder="Nome do grupo..."
             value={name}
             onChangeText={setName}
             maxLength={30}
             autoFocus
           />
+
+          {/* Seletor de cor */}
+          <Text style={ng.colorLabel}>Cor do grupo</Text>
+          <View style={ng.colorRow}>
+            {GROUP_PALETTES.map((p) => {
+              const sel = selectedPal === p.id;
+              return (
+                <TouchableOpacity
+                  key={p.id}
+                  style={ng.colorOption}
+                  onPress={() => setSelectedPal(p.id as PaletteId)}
+                >
+                  <LinearGradient
+                    colors={[p.dark, p.mid]}
+                    style={[ng.colorSwatch, sel && ng.colorSwatchSel]}
+                  />
+                  {sel && (
+                    <View style={ng.colorCheck}>
+                      <Ionicons name="checkmark" size={11} color="white" />
+                    </View>
+                  )}
+                  <Text
+                    style={[
+                      ng.colorName,
+                      sel && { color: p.mid, fontWeight: "800" },
+                    ]}
+                  >
+                    {p.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
           <TouchableOpacity
-            style={[ga.actionBtn, !name.trim() && { opacity: 0.4 }]}
+            style={[
+              ng.actionBtn,
+              !name.trim() && { opacity: 0.4 },
+              { backgroundColor: getPalette(selectedPal).mid },
+            ]}
             disabled={!name.trim()}
             onPress={() => {
-              onCreate(name.trim());
+              onCreate(name.trim(), selectedPal);
               handleClose();
             }}
           >
-            <Text style={ga.actionBtnText}>CRIAR</Text>
+            <Text style={ng.actionBtnText}>CRIAR GRUPO</Text>
           </TouchableOpacity>
         </>
       )}
       {mode === "entrar" && (
         <>
-          <TouchableOpacity onPress={() => setMode("choose")} style={ga.back}>
+          <TouchableOpacity onPress={() => setMode("choose")} style={ng.back}>
             <Ionicons name="arrow-back" size={18} color="#6096ba" />
-            <Text style={ga.backText}>Voltar</Text>
+            <Text style={ng.backText}>Voltar</Text>
           </TouchableOpacity>
-          <Text style={ga.title}>Entrar com código</Text>
+          <Text style={ng.title}>Entrar com código</Text>
           <TextInput
-            style={[ga.input, ga.codeInput]}
+            style={[ng.input, ng.codeInput]}
             placeholder="XXXXXX"
             value={code}
             onChangeText={(t) => setCode(t.toUpperCase())}
@@ -1296,32 +1131,28 @@ function GroupActionSheet({
           />
           <TouchableOpacity
             style={[
-              ga.actionBtn,
+              ng.actionBtn,
               code.length < 6 && { opacity: 0.4 },
               { backgroundColor: "#10B981" },
             ]}
             disabled={code.length < 6}
-            onPress={() => {
-              Alert.alert("Entrou!", `Você entrou no grupo ${code}`);
-              handleClose();
-            }}
+            onPress={handleClose}
           >
-            <Text style={ga.actionBtnText}>ENTRAR</Text>
+            <Text style={ng.actionBtnText}>ENTRAR</Text>
           </TouchableOpacity>
         </>
       )}
     </BottomSheetModal>
   );
 }
-
-const ga = StyleSheet.create({
+const ng = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "900",
     color: "#274c77",
     marginBottom: 20,
   },
-  optionRow: { flexDirection: "row", gap: 12 },
+  row: { flexDirection: "row", gap: 12 },
   card: {
     flex: 1,
     backgroundColor: "#FFFFFF",
@@ -1330,11 +1161,6 @@ const ga = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
   },
   iconWrap: {
     width: 60,
@@ -1374,6 +1200,35 @@ const ga = StyleSheet.create({
     fontSize: 22,
     fontWeight: "900",
   },
+  colorLabel: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: "#94A3B8",
+    letterSpacing: 1,
+    marginBottom: 10,
+  },
+  colorRow: { flexDirection: "row", gap: 12, marginBottom: 16 },
+  colorOption: { alignItems: "center", gap: 5, position: "relative" },
+  colorSwatch: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  colorSwatchSel: { borderColor: "#334155", borderWidth: 2.5 },
+  colorCheck: {
+    position: "absolute",
+    top: -5,
+    right: -5,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: "#334155",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  colorName: { fontSize: 10, color: "#94A3B8", fontWeight: "600" },
   actionBtn: {
     backgroundColor: "#6096ba",
     borderRadius: 14,
@@ -1381,6 +1236,292 @@ const ga = StyleSheet.create({
     alignItems: "center",
   },
   actionBtnText: { color: "white", fontWeight: "900", fontSize: 16 },
+});
+
+// ─── Grupo accordion — expande inline na ScrollView ──────────────────────────
+
+function GroupAccordion({
+  group,
+  friends,
+  isExpanded,
+  onToggle,
+  onShare,
+  onInvite,
+  onDanger,
+}: {
+  group: Group;
+  friends: Friend[];
+  isExpanded: boolean;
+  onToggle: () => void;
+  onShare: () => void;
+  onInvite: () => void;
+  onDanger: () => void;
+}) {
+  const anim = useRef(new Animated.Value(isExpanded ? 1 : 0)).current;
+  const pal = getPalette(group.paletteId);
+
+  React.useEffect(() => {
+    Animated.timing(anim, {
+      toValue: isExpanded ? 1 : 0,
+      duration: 280,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start();
+  }, [isExpanded]);
+
+  const [activeReactionId, setActiveReactionId] = useState<string | null>(null);
+  const sorted = [...group.members].sort((a, b) => b.ml - a.ml);
+  const leader = sorted[0];
+  const available = friends.filter(
+    (f) => f.status === "amigo" && !group.members.find((m) => m.id === f.id),
+  );
+
+  const chevronRotate = anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "180deg"],
+  });
+
+  return (
+    <View
+      style={[
+        ga.wrapper,
+        isExpanded && {
+          shadowColor: pal.dark,
+          shadowOpacity: 0.22,
+          shadowRadius: 16,
+          elevation: 8,
+        },
+      ]}
+    >
+      {/* ── Cabeçalho — sempre visível ── */}
+      <TouchableOpacity onPress={onToggle} activeOpacity={0.85}>
+        <LinearGradient colors={[pal.dark, pal.mid]} style={ga.header}>
+          <View style={ga.headerLeft}>
+            <Text style={ga.groupName}>{group.name}</Text>
+            <View style={ga.metaRow}>
+              <View style={ga.avatarStrip}>
+                {group.members.slice(0, 4).map((m, i) => (
+                  <Image
+                    key={m.id}
+                    source={{ uri: m.foto }}
+                    style={[
+                      ga.miniAvatar,
+                      { marginLeft: i === 0 ? 0 : -8, zIndex: 4 - i },
+                    ]}
+                  />
+                ))}
+              </View>
+              <Text style={ga.memberCount}>{group.members.length} membros</Text>
+              {group.isAdmin && (
+                <View style={ga.adminPill}>
+                  <Ionicons name="shield-checkmark" size={9} color="#FFD700" />
+                  <Text style={ga.adminText}>Admin</Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          <View style={ga.headerRight}>
+            <View style={ga.leaderBubble}>
+              <Text style={ga.leaderEmoji}>🥇</Text>
+              <Text style={ga.leaderName}>{firstName(leader.nome)}</Text>
+            </View>
+            <Animated.View style={{ transform: [{ rotate: chevronRotate }] }}>
+              <Ionicons
+                name="chevron-down"
+                size={20}
+                color="rgba(255,255,255,0.8)"
+              />
+            </Animated.View>
+          </View>
+        </LinearGradient>
+      </TouchableOpacity>
+
+      {/* ── Área expandida inline ── */}
+      {isExpanded && (
+        <View style={[ga.expanded, { backgroundColor: pal.soft }]}>
+          {/* Botões de ação com a cor do grupo */}
+          <View style={ga.actionBar}>
+            <TouchableOpacity
+              style={[
+                ga.actionChip,
+                {
+                  borderColor: pal.mid + "60",
+                  backgroundColor: "rgba(255,255,255,0.85)",
+                },
+              ]}
+              onPress={onShare}
+            >
+              <Ionicons
+                name="share-social-outline"
+                size={15}
+                color={pal.dark}
+              />
+              <Text style={[ga.actionChipText, { color: pal.dark }]}>
+                Compartilhar
+              </Text>
+            </TouchableOpacity>
+
+            {group.isAdmin && (
+              <TouchableOpacity
+                style={[
+                  ga.actionChip,
+                  {
+                    borderColor: pal.mid + "60",
+                    backgroundColor: "rgba(255,255,255,0.85)",
+                    opacity: available.length === 0 ? 0.4 : 1,
+                  },
+                ]}
+                onPress={onInvite}
+                disabled={available.length === 0}
+              >
+                <Ionicons
+                  name="person-add-outline"
+                  size={15}
+                  color={pal.dark}
+                />
+                <Text style={[ga.actionChipText, { color: pal.dark }]}>
+                  Convidar
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            <TouchableOpacity style={ga.actionChipDanger} onPress={onDanger}>
+              <Ionicons
+                name={group.isAdmin ? "trash-outline" : "exit-outline"}
+                size={15}
+                color="#EF4444"
+              />
+              <Text style={ga.actionChipDangerText}>
+                {group.isAdmin ? "Excluir" : "Sair"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={[ga.divider, { backgroundColor: pal.mid + "30" }]} />
+
+          {/* Ranking com o tema da cor do grupo */}
+          <Text style={[ga.rankLabel, { color: pal.dark }]}>
+            RANKING DE HOJE
+          </Text>
+          {sorted.map((m, index) => (
+            <RankItem
+              key={m.id}
+              position={index + 1}
+              nome={m.nome}
+              ml={m.ml}
+              meta={m.meta}
+              foto={m.foto}
+              reactions={m.reactions || []}
+              activeReactionId={activeReactionId}
+              onOpenReaction={setActiveReactionId}
+              theme={pal.theme}
+            />
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
+const ga = StyleSheet.create({
+  wrapper: {
+    borderRadius: 20,
+    marginBottom: 14,
+    overflow: "hidden",
+    backgroundColor: "white",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+  },
+  header: {
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  headerLeft: { flex: 1, gap: 8 },
+  groupName: { fontSize: 18, fontWeight: "900", color: "white" },
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flexWrap: "wrap",
+  },
+  avatarStrip: { flexDirection: "row" },
+  miniAvatar: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.6)",
+  },
+  memberCount: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.8)",
+    fontWeight: "600",
+  },
+  adminPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    backgroundColor: "rgba(0,0,0,0.2)",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  adminText: { fontSize: 10, color: "#FFD700", fontWeight: "700" },
+  headerRight: { alignItems: "flex-end", gap: 8 },
+  leaderBubble: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  leaderEmoji: { fontSize: 12 },
+  leaderName: { fontSize: 12, fontWeight: "800", color: "white" },
+  expanded: { paddingHorizontal: 14, paddingTop: 14, paddingBottom: 18 },
+  actionBar: {
+    flexDirection: "row",
+    gap: 8,
+    flexWrap: "wrap",
+    marginBottom: 14,
+  },
+  actionChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "rgba(255,255,255,0.8)",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  actionChipText: { fontSize: 13, fontWeight: "700" },
+  actionChipDanger: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "#FEF2F2",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#FECACA",
+  },
+  actionChipDangerText: { fontSize: 13, fontWeight: "700", color: "#EF4444" },
+  divider: { height: 1, marginBottom: 14 },
+  rankLabel: {
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1.2,
+    marginBottom: 12,
+  },
 });
 
 // ─── Card de Atividade ────────────────────────────────────────────────────────
@@ -1404,11 +1545,11 @@ function ActivityCard({
         <View style={fc.timelineLine} />
       </View>
       <View style={fc.card}>
-        <View style={fc.cardHeader}>
+        <View style={fc.row}>
           <Image source={{ uri: friend.foto }} style={fc.photo} />
-          <View style={fc.cardInfo}>
-            <Text style={fc.friendName}>{firstName(friend.nome)}</Text>
-            <Text style={fc.activityText}>{cfg.label(activity.extra)}</Text>
+          <View style={fc.info}>
+            <Text style={fc.name}>{firstName(friend.nome)}</Text>
+            <Text style={fc.text}>{cfg.label(activity.extra)}</Text>
           </View>
           <Text style={fc.time}>{activity.time}</Text>
         </View>
@@ -1416,7 +1557,6 @@ function ActivityCard({
     </View>
   );
 }
-
 const fc = StyleSheet.create({
   wrapper: { flexDirection: "row", gap: 12, marginBottom: 4 },
   timelineCol: { alignItems: "center", width: 32 },
@@ -1453,26 +1593,46 @@ const fc = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 1 },
   },
-  cardHeader: { flexDirection: "row", alignItems: "center", gap: 10 },
+  row: { flexDirection: "row", alignItems: "center", gap: 10 },
   photo: { width: 38, height: 38, borderRadius: 19 },
-  cardInfo: { flex: 1 },
-  friendName: { fontSize: 13, fontWeight: "800", color: "#274c77" },
-  activityText: { fontSize: 13, color: "#334155", marginTop: 1 },
+  info: { flex: 1 },
+  name: { fontSize: 13, fontWeight: "800", color: "#274c77" },
+  text: { fontSize: 13, color: "#334155", marginTop: 1 },
   time: { fontSize: 11, color: "#94A3B8", fontWeight: "600" },
 });
 
 // ─── Tela Principal ───────────────────────────────────────────────────────────
 
 type SubTab = "feed" | "grupos";
+type SheetType =
+  | "none"
+  | "requests"
+  | "addFriend"
+  | "newGroup"
+  | "share"
+  | "invite"
+  | "danger";
 
 export function CommunityScreen() {
   const [subTab, setSubTab] = useState<SubTab>("feed");
   const [friends, setFriends] = useState<Friend[]>(INITIAL_FRIENDS);
   const [groups, setGroups] = useState<Group[]>(INITIAL_GROUPS);
-  const [showRequests, setShowRequests] = useState(false);
-  const [showAddFriend, setShowAddFriend] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
-  const [showGroupAction, setShowGroupAction] = useState(false);
+
+  // Grupo expandido inline (accordion)
+  const [expandedGroupId, setExpandedGroupId] = useState<number | null>(null);
+
+  // Sheet simples — apenas um por vez, sem contexto de grupo aninhado
+  const [sheet, setSheet] = useState<SheetType>("none");
+  const [sheetGroup, setSheetGroup] = useState<Group | null>(null);
+
+  const closeSheet = () => {
+    setSheet("none");
+  };
+
+  const openSheet = (type: SheetType, group: Group) => {
+    setSheetGroup(group);
+    setSheet(type);
+  };
 
   const pendingCount = friends.filter(
     (f) => f.status === "pendente_recebido",
@@ -1485,13 +1645,15 @@ export function CommunityScreen() {
     );
   const handleReject = (id: number) =>
     setFriends((p) => p.filter((f) => f.id !== id));
-  const handleGroupAction = (_: "delete" | "leave", groupId: number) => {
+
+  const handleGroupDelete = (groupId: number) => {
     setGroups((p) => p.filter((g) => g.id !== groupId));
-    setSelectedGroup(null);
+    setExpandedGroupId(null);
+    closeSheet();
   };
-  const handleCreateGroup = (name: string) => {
+
+  const handleCreateGroup = (name: string, paletteId: PaletteId) => {
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const palette = GROUP_PALETTES[groups.length % GROUP_PALETTES.length];
     setGroups((p) => [
       ...p,
       {
@@ -1499,7 +1661,7 @@ export function CommunityScreen() {
         name,
         code,
         isAdmin: true,
-        color: palette,
+        paletteId,
         members: [
           {
             id: 1,
@@ -1514,9 +1676,12 @@ export function CommunityScreen() {
     ]);
   };
 
+  const toggleGroup = (id: number) =>
+    setExpandedGroupId((prev) => (prev === id ? null : id));
+
   return (
     <View style={s.root}>
-      {/* ── Header ─────────────────────────────────────────────────────── */}
+      {/* ── Header ─────────────────────────────────────────────────── */}
       <View style={s.header}>
         <View>
           <Text style={s.title}>Comunidade</Text>
@@ -1525,7 +1690,7 @@ export function CommunityScreen() {
         <View style={s.headerActions}>
           <TouchableOpacity
             style={s.iconBtn}
-            onPress={() => setShowRequests(true)}
+            onPress={() => setSheet("requests")}
           >
             <Ionicons name="notifications-outline" size={22} color="#334155" />
             {pendingCount > 0 && (
@@ -1537,9 +1702,7 @@ export function CommunityScreen() {
           <TouchableOpacity
             style={s.addBtn}
             onPress={() =>
-              subTab === "feed"
-                ? setShowAddFriend(true)
-                : setShowGroupAction(true)
+              setSheet(subTab === "feed" ? "addFriend" : "newGroup")
             }
           >
             <Ionicons name="add" size={22} color="white" />
@@ -1547,7 +1710,7 @@ export function CommunityScreen() {
         </View>
       </View>
 
-      {/* ── Tabs ───────────────────────────────────────────────────────── */}
+      {/* ── Tabs ───────────────────────────────────────────────────── */}
       <View style={s.tabRow}>
         {(["feed", "grupos"] as SubTab[]).map((tab) => {
           const active = subTab === tab;
@@ -1579,7 +1742,7 @@ export function CommunityScreen() {
         })}
       </View>
 
-      {/* ── Feed ───────────────────────────────────────────────────────── */}
+      {/* ── Feed ───────────────────────────────────────────────────── */}
       {subTab === "feed" && (
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -1615,10 +1778,10 @@ export function CommunityScreen() {
               <Text style={s.feedLabel}>ATIVIDADES RECENTES</Text>
               {FEED.filter((a) =>
                 confirmedFriends.find((f) => f.id === a.friendId),
-              ).map((activity) => (
+              ).map((a) => (
                 <ActivityCard
-                  key={activity.id}
-                  activity={activity}
+                  key={a.id}
+                  activity={a}
                   friends={confirmedFriends}
                 />
               ))}
@@ -1634,7 +1797,7 @@ export function CommunityScreen() {
         </ScrollView>
       )}
 
-      {/* ── Grupos ─────────────────────────────────────────────────────── */}
+      {/* ── Grupos — accordion inline, sem Modal ───────────────────── */}
       {subTab === "grupos" && (
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -1647,88 +1810,53 @@ export function CommunityScreen() {
               <Text style={s.emptyDesc}>Toque em + para criar ou entrar</Text>
             </View>
           ) : (
-            groups.map((group) => {
-              const leader = [...group.members].sort((a, b) => b.ml - a.ml)[0];
-              return (
-                <TouchableOpacity
-                  key={group.id}
-                  style={s.groupCard}
-                  onPress={() => setSelectedGroup(group)}
-                  activeOpacity={0.88}
-                >
-                  <LinearGradient colors={group.color} style={s.groupGrad}>
-                    <View style={s.groupTop}>
-                      <View style={{ flex: 1 }}>
-                        <Text style={s.groupName}>{group.name}</Text>
-                        <View style={s.groupAvatars}>
-                          {group.members.slice(0, 5).map((m, i) => (
-                            <Image
-                              key={m.id}
-                              source={{ uri: m.foto }}
-                              style={[
-                                s.groupAvatar,
-                                { marginLeft: i === 0 ? 0 : -7, zIndex: 5 - i },
-                              ]}
-                            />
-                          ))}
-                          <Text style={s.groupCount}>
-                            {" "}
-                            {group.members.length} membros
-                          </Text>
-                        </View>
-                      </View>
-                      <View style={s.groupRight}>
-                        {group.isAdmin && (
-                          <View style={s.adminPill}>
-                            <Ionicons
-                              name="shield-checkmark"
-                              size={10}
-                              color="#FFD700"
-                            />
-                            <Text style={s.adminText}>Admin</Text>
-                          </View>
-                        )}
-                        <Ionicons
-                          name="chevron-forward"
-                          size={18}
-                          color="rgba(255,255,255,0.5)"
-                        />
-                      </View>
-                    </View>
-                    <Text style={s.groupLeader}>
-                      🥇 {firstName(leader.nome)} · {leader.ml}ml
-                    </Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              );
-            })
+            groups.map((group) => (
+              <GroupAccordion
+                key={group.id}
+                group={group}
+                friends={confirmedFriends}
+                isExpanded={expandedGroupId === group.id}
+                onToggle={() => toggleGroup(group.id)}
+                onShare={() => openSheet("share", group)}
+                onInvite={() => openSheet("invite", group)}
+                onDanger={() => openSheet("danger", group)}
+              />
+            ))
           )}
         </ScrollView>
       )}
 
-      {/* ── Sheets ─────────────────────────────────────────────────────── */}
+      {/* ── Bottom Sheets — todos no nível raiz ────────────────────── */}
+
       <RequestsSheet
-        visible={showRequests}
-        onClose={() => setShowRequests(false)}
+        visible={sheet === "requests"}
+        onClose={closeSheet}
         friends={friends}
         onAccept={handleAccept}
         onReject={handleReject}
       />
-      <AddFriendSheet
-        visible={showAddFriend}
-        onClose={() => setShowAddFriend(false)}
-      />
-      <GroupDetailSheet
-        visible={selectedGroup !== null}
-        onClose={() => setSelectedGroup(null)}
-        group={selectedGroup}
-        friends={friends}
-        onGroupAction={handleGroupAction}
-      />
-      <GroupActionSheet
-        visible={showGroupAction}
-        onClose={() => setShowGroupAction(false)}
+      <AddFriendSheet visible={sheet === "addFriend"} onClose={closeSheet} />
+      <NewGroupSheet
+        visible={sheet === "newGroup"}
+        onClose={closeSheet}
         onCreate={handleCreateGroup}
+      />
+      <ShareSheet
+        visible={sheet === "share"}
+        onClose={closeSheet}
+        group={sheetGroup}
+      />
+      <InviteSheet
+        visible={sheet === "invite"}
+        onClose={closeSheet}
+        group={sheetGroup}
+        friends={confirmedFriends}
+      />
+      <DangerSheet
+        visible={sheet === "danger"}
+        onClose={closeSheet}
+        group={sheetGroup}
+        onConfirm={() => sheetGroup && handleGroupDelete(sheetGroup.id)}
       />
     </View>
   );
@@ -1877,55 +2005,4 @@ const s = StyleSheet.create({
     marginBottom: 16,
   },
   timelineEnd: { alignItems: "center", paddingVertical: 8, marginLeft: 15 },
-  groupCard: {
-    borderRadius: 20,
-    marginBottom: 12,
-    overflow: "hidden",
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-  },
-  groupGrad: { padding: 16 },
-  groupTop: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 10,
-  },
-  groupName: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: "white",
-    marginBottom: 6,
-  },
-  groupAvatars: { flexDirection: "row", alignItems: "center" },
-  groupAvatar: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.5)",
-  },
-  groupCount: {
-    fontSize: 11,
-    color: "rgba(255,255,255,0.7)",
-    fontWeight: "600",
-  },
-  groupRight: { flexDirection: "row", alignItems: "center", gap: 6 },
-  adminPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    backgroundColor: "rgba(0,0,0,0.3)",
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-    borderRadius: 8,
-  },
-  adminText: { fontSize: 10, color: "#FFD700", fontWeight: "700" },
-  groupLeader: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.85)",
-    fontWeight: "600",
-  },
 });

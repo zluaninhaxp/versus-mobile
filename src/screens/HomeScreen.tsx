@@ -165,9 +165,7 @@ export function HomeScreen({
       <MyHistoryModal
         visible={isMyHistoryOpen}
         onClose={() => setIsMyHistoryOpen(false)}
-        waterHistory={
-          usuarios.find((u) => u.id === 1)?.waterHistory || []
-        }
+        waterHistory={usuarios.find((u) => u.id === 1)?.waterHistory || []}
       />
     </>
   );
